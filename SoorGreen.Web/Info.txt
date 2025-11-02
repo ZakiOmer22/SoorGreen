@@ -1,0 +1,647 @@
+﻿SoorGreen.Web/ ( ASP.NET MVC ) https://localhost:44305/ ( & "C:\Program Files\IIS Express\iisexpress.exe" /path:"Z:\ZAKI\Sem 1\Asp.net\MAIN\SoorGreen.Web" /port:44305 )
+├── Controllers/
+│   ├── HomeController.cs
+│   ├── AccountController.cs
+│   ├── WasteController.cs
+│   ├── RewardsController.cs
+│   ├── PickupController.cs
+│   └── FeedbackController.cs
+│
+├── Models/
+│   ├── ViewModels/
+│   │   ├── WasteReportVM.cs
+│   │   ├── PickupVM.cs
+│   │   ├── RewardVM.cs
+│   │   └── ProfileVM.cs
+│   └── DTOs/
+│       └── ApiResponse.cs
+│
+├── Views/
+│   ├── Home/
+│   │   ├── Index.cshtml
+│   │   ├── About.cshtml
+│   │   └── Contact.cshtml
+│   ├── Account/
+│   ├── Waste/
+│   ├── Rewards/
+│   ├── Pickup/
+│   └── Shared/
+│       ├── _Layout.cshtml
+│       └── _Navbar.cshtml
+│
+├── wwwroot/
+│   ├── css/
+│   ├── js/
+│   ├── images/
+│   └── libs/
+│
+├── appsettings.json
+├── Program.cs
+└── Startup.cs
+
+
+SoorGreen.Admin/ ( ASP.NET Web Forms ) https://localhost:44381/  ( & "C:\Program Files\IIS Express\iisexpress.exe" /path:"Z:\ZAKI\Sem 1\Asp.net\MAIN\SoorGreen.Admin" /port:44381 )
+├── Pages/
+│   ├── Dashboard.aspx
+│   ├── Users.aspx
+│   ├── Pickups.aspx
+│   ├── WasteReports.aspx
+│   ├── Rewards.aspx
+│   ├── Reports.aspx
+│   ├── Settings.aspx
+│   └── Login.aspx
+│
+├── Controls/
+│   ├── NavBar.ascx
+│   ├── Sidebar.ascx
+│   └── NotificationPanel.ascx
+│
+├── Scripts/
+│   ├── charts.js
+│   ├── datatables.js
+│   └── notifications.js
+│
+├── Styles/
+│   └── admin.css
+│
+├── Web.config
+└── Global.asax
+
+
+-- ========================================
+-- SoorGreenDB Setup Script
+-- Project Codename: DIBUCELIN
+-- Description: Smart sustainability app rewarding citizens 
+-- for recycling and helping cities manage waste efficiently.
+-- ========================================
+
+-- 1. Create Database
+CREATE DATABASE SoorGreenDB;
+GO
+
+USE SoorGreenDB;
+GO
+
+-- ========================================
+-- 2. TABLES
+-- ========================================
+
+-- ROLES: Defines system access roles
+CREATE TABLE Roles (
+    RoleId CHAR(4) PRIMARY KEY,
+    RoleName NVARCHAR(50) NOT NULL
+);
+
+-- USERS: Registered accounts (citizens, collectors, admins, companies)
+CREATE TABLE Users (
+    UserId CHAR(4) PRIMARY KEY,
+    FullName NVARCHAR(150) NOT NULL,
+    Phone NVARCHAR(20) UNIQUE NOT NULL,
+    Email NVARCHAR(256),
+    RoleId CHAR(4) NOT NULL,
+    XP_Credits DECIMAL(10,2) DEFAULT 0,
+    CreatedAt DATETIME DEFAULT GETDATE(),
+    LastLogin DATETIME NULL,
+    IsVerified BIT DEFAULT 0,
+    CONSTRAINT FK_Users_Roles FOREIGN KEY(RoleId) REFERENCES Roles(RoleId)
+);
+
+-- MUNICIPALITIES: Defines city or zone
+CREATE TABLE Municipalities (
+    MunicipalityId CHAR(4) PRIMARY KEY,
+    Name NVARCHAR(100) NOT NULL
+);
+
+-- WASTE TYPES: Categories of waste
+CREATE TABLE WasteTypes (
+    WasteTypeId CHAR(4) PRIMARY KEY,
+    Name NVARCHAR(50) NOT NULL,
+    CreditPerKg DECIMAL(5,2) NOT NULL
+);
+
+-- WASTE REPORTS: Citizen submits report of waste to collect
+CREATE TABLE WasteReports (
+    ReportId CHAR(4) PRIMARY KEY,
+    UserId CHAR(4) NOT NULL,
+    WasteTypeId CHAR(4) NOT NULL,
+    EstimatedKg DECIMAL(6,2) NOT NULL,
+    Address NVARCHAR(300) NOT NULL,
+    Lat DECIMAL(10,6),
+    Lng DECIMAL(10,6),
+    PhotoUrl NVARCHAR(512),
+    CreatedAt DATETIME DEFAULT GETDATE(),
+    CONSTRAINT FK_WasteReports_Users FOREIGN KEY(UserId) REFERENCES Users(UserId),
+    CONSTRAINT FK_WasteReports_WasteTypes FOREIGN KEY(WasteTypeId) REFERENCES WasteTypes(WasteTypeId)
+);
+
+-- PICKUP REQUESTS: Links collectors to reports
+CREATE TABLE PickupRequests (
+    PickupId CHAR(4) PRIMARY KEY,
+    ReportId CHAR(4) NOT NULL,
+    CollectorId CHAR(4) NULL,
+    Status NVARCHAR(20) DEFAULT 'Requested',
+    ScheduledAt DATETIME NULL,
+    CompletedAt DATETIME NULL,
+    CONSTRAINT FK_PickupRequests_Reports FOREIGN KEY(ReportId) REFERENCES WasteReports(ReportId),
+    CONSTRAINT FK_PickupRequests_Collector FOREIGN KEY(CollectorId) REFERENCES Users(UserId)
+);
+
+-- REWARD POINTS: XP/credit transactions for users
+CREATE TABLE RewardPoints (
+    RewardId CHAR(4) PRIMARY KEY,
+    UserId CHAR(4) NOT NULL,
+    Amount DECIMAL(10,2) NOT NULL,
+    Type NVARCHAR(50),
+    Reference NVARCHAR(100),
+    CreatedAt DATETIME DEFAULT GETDATE(),
+    CONSTRAINT FK_RewardPoints_User FOREIGN KEY(UserId) REFERENCES Users(UserId)
+);
+
+-- REDEMPTION REQUESTS: Users cash out credits
+CREATE TABLE RedemptionRequests (
+    RedemptionId CHAR(4) PRIMARY KEY,
+    UserId CHAR(4) NOT NULL,
+    Amount DECIMAL(10,2) NOT NULL,
+    Method NVARCHAR(50),
+    Status NVARCHAR(20) DEFAULT 'Pending',
+    RequestedAt DATETIME DEFAULT GETDATE(),
+    ProcessedAt DATETIME NULL,
+    CONSTRAINT FK_RedemptionRequests_User FOREIGN KEY(UserId) REFERENCES Users(UserId)
+);
+
+-- NOTIFICATIONS: User alerts
+CREATE TABLE Notifications (
+    NotificationId CHAR(4) PRIMARY KEY,
+    UserId CHAR(4) NOT NULL,
+    Title NVARCHAR(200),
+    Message NVARCHAR(1000),
+    IsRead BIT DEFAULT 0,
+    CreatedAt DATETIME DEFAULT GETDATE(),
+    CONSTRAINT FK_Notifications_User FOREIGN KEY(UserId) REFERENCES Users(UserId)
+);
+
+-- AUDIT LOGS: Logs key system actions
+CREATE TABLE AuditLogs (
+    AuditId CHAR(4) PRIMARY KEY,
+    UserId CHAR(4) NULL,
+    Action NVARCHAR(100),
+    Details NVARCHAR(MAX),
+    Timestamp DATETIME DEFAULT GETDATE(),
+    CONSTRAINT FK_AuditLogs_User FOREIGN KEY(UserId) REFERENCES Users(UserId)
+);
+
+-- FEEDBACKS: Citizen suggestions
+CREATE TABLE Feedbacks (
+    FeedbackId CHAR(4) PRIMARY KEY,
+    UserId CHAR(4) NOT NULL,
+    Message NVARCHAR(1000),
+    CreatedAt DATETIME DEFAULT GETDATE(),
+    CONSTRAINT FK_Feedbacks_User FOREIGN KEY(UserId) REFERENCES Users(UserId)
+);
+
+
+-- ========================================
+-- 3. INDEXES
+-- ========================================
+CREATE INDEX IX_Users_Email ON Users(Email);
+CREATE INDEX IX_WasteReports_Date ON WasteReports(CreatedAt);
+CREATE INDEX IX_PickupRequests_Status ON PickupRequests(Status);
+CREATE INDEX IX_RewardPoints_UserId ON RewardPoints(UserId);
+CREATE INDEX IX_Notifications_IsRead ON Notifications(IsRead);
+
+-- ========================================
+-- 4. VIEWS
+-- ========================================
+
+-- vw_ActivePickups: Displays all pickups that are pending or assigned
+CREATE VIEW vw_ActivePickups AS
+SELECT p.PickupId, w.Address, w.PhotoUrl, u.FullName AS CitizenName,
+       c.FullName AS CollectorName, p.Status
+FROM PickupRequests p
+JOIN WasteReports w ON p.ReportId = w.ReportId
+JOIN Users u ON w.UserId = u.UserId
+LEFT JOIN Users c ON p.CollectorId = c.UserId
+WHERE p.Status IN ('Requested','Assigned');
+
+-- vw_UserRewardSummary: Summarizes total reward points per user
+CREATE VIEW vw_UserRewardSummary AS
+SELECT u.FullName, u.Phone, SUM(r.Amount) AS TotalCredits
+FROM Users u
+LEFT JOIN RewardPoints r ON u.UserId = r.UserId
+GROUP BY u.FullName, u.Phone;
+
+-- ========================================
+-- 5. STORED PROCEDURES
+-- ========================================
+
+-- sp_AddWasteReport: Inserts a new citizen waste report
+CREATE PROCEDURE sp_AddWasteReport
+    @UserId UNIQUEIDENTIFIER,
+    @WasteTypeId INT,
+    @EstimatedKg DECIMAL(6,2),
+    @Address NVARCHAR(300),
+    @Lat DECIMAL(10,6) = NULL,
+    @Lng DECIMAL(10,6) = NULL,
+    @PhotoUrl NVARCHAR(512) = NULL
+AS
+BEGIN
+    INSERT INTO WasteReports(UserId, WasteTypeId, EstimatedKg, Address, Lat, Lng, PhotoUrl)
+    VALUES(@UserId, @WasteTypeId, @EstimatedKg, @Address, @Lat, @Lng, @PhotoUrl);
+END
+GO
+
+-- sp_AssignPickup: Assigns a collector to a pending pickup request
+CREATE PROCEDURE sp_AssignPickup
+    @PickupId UNIQUEIDENTIFIER,
+    @CollectorId UNIQUEIDENTIFIER
+AS
+BEGIN
+    UPDATE PickupRequests
+    SET CollectorId = @CollectorId,
+        Status = 'Assigned'
+    WHERE PickupId = @PickupId;
+END
+GO
+
+-- sp_CompletePickup: Verifies a pickup, adds reward points and logs completion
+CREATE PROCEDURE sp_CompletePickup
+    @PickupId UNIQUEIDENTIFIER,
+    @VerifiedKg DECIMAL(6,2),
+    @MaterialType NVARCHAR(50)
+AS
+BEGIN
+    INSERT INTO PickupVerifications(PickupId, VerifiedKg, MaterialType, VerificationMethod)
+    VALUES(@PickupId, @VerifiedKg, @MaterialType, 'Manual');
+
+    DECLARE @UserId UNIQUEIDENTIFIER = (SELECT w.UserId FROM WasteReports w
+                                        JOIN PickupRequests p ON w.ReportId = p.ReportId
+                                        WHERE p.PickupId = @PickupId);
+
+    DECLARE @CreditRate DECIMAL(5,2) = (SELECT CreditPerKg FROM WasteTypes WHERE Name = @MaterialType);
+
+    INSERT INTO RewardPoints(UserId, Amount, Type, Reference)
+    VALUES(@UserId, @VerifiedKg * @CreditRate, 'Credit', 'Pickup ' + CAST(@PickupId AS NVARCHAR(36)));
+
+    UPDATE PickupRequests
+    SET Status = 'Collected',
+        CompletedAt = GETDATE()
+    WHERE PickupId = @PickupId;
+END
+GO
+
+-- ========================================
+-- 6. TRIGGERS
+-- ========================================
+
+-- trg_LogWasteReport: Logs every new waste report for auditing
+CREATE TRIGGER trg_LogWasteReport
+ON WasteReports
+AFTER INSERT
+AS
+BEGIN
+    INSERT INTO AuditLogs(UserId, Action, Details)
+    SELECT UserId, 'New Waste Report', 'ReportId: ' + CAST(ReportId AS NVARCHAR(36))
+    FROM inserted;
+END
+GO
+
+
+-- ========================================
+-- 7. SEED DATA (FIXED)
+-- ========================================
+
+-- ROLES
+INSERT INTO Roles (RoleId, RoleName)
+VALUES 
+('R001', 'Citizen'),
+('R002', 'Collector'),
+('R003', 'Company'),
+('R004', 'Admin');
+
+-- WASTE TYPES
+INSERT INTO WasteTypes (WasteTypeId, Name, CreditPerKg)
+VALUES 
+('W001', 'Plastic', 0.2),
+('W002', 'Metal', 0.5),
+('W003', 'Paper', 0.1),
+('W004', 'E-Waste', 1.0);
+
+-- MUNICIPALITIES
+INSERT INTO Municipalities (MunicipalityId, Name)
+VALUES 
+('M001', 'Hargeisa'),
+('M002', 'Burco'),
+('M003', 'Berbera');
+
+-- USERS
+INSERT INTO Users (UserId, FullName, Phone, Email, RoleId, XP_Credits, IsVerified)
+VALUES 
+('U001', 'Ahmed Ali', '252600000001', 'ahmed@example.com', 'R001', 0, 1),
+('U002', 'Hodan Yusuf', '252600000002', 'hodan@example.com', 'R002', 0, 1),
+('U003', 'Somali Recycling Ltd', '252600000003', 'info@somalirecycling.com', 'R003', 0, 1),
+('U004', 'Municipality Admin', '252600000004', 'admin@hargeisa.gov', 'R004', 0, 1);
+
+-- FEEDBACKS (optional demo)
+INSERT INTO Feedbacks (FeedbackId, UserId, Message)
+VALUES 
+('F001', 'U001', N'More bins needed near Badda Cas area.'),
+('F002', 'U002', N'Collection routes should be better scheduled.');
+
+-- WASTE REPORTS (demo data)
+INSERT INTO WasteReports (ReportId, UserId, WasteTypeId, EstimatedKg, Address, Lat, Lng, PhotoUrl)
+VALUES
+('WR01', 'U001', 'W001', 3.5, N'Near Hargeisa University', 9.5634, 44.0653, 'https://soorgreen.example.com/uploads/w1.jpg'),
+('WR02', 'U001', 'W003', 1.2, N'Badda Cas neighborhood', 9.5671, 44.0720, 'https://soorgreen.example.com/uploads/w2.jpg');
+
+-- PICKUP REQUESTS
+INSERT INTO PickupRequests (PickupId, ReportId, CollectorId, Status)
+VALUES
+('P001', 'WR01', 'U002', 'Requested'),
+('P002', 'WR02', NULL, 'Requested');
+
+-- REWARD POINTS
+INSERT INTO RewardPoints (RewardId, UserId, Amount, Type, Reference)
+VALUES
+('RP01', 'U001', 10.0, 'Credit', 'Initial bonus'),
+('RP02', 'U002', 5.0, 'Credit', 'Collector bonus');
+
+-- REDEMPTION REQUESTS
+INSERT INTO RedemptionRequests (RedemptionId, UserId, Amount, Method, Status)
+VALUES
+('RR01', 'U001', 20.0, 'MobileMoney', 'Pending'),
+('RR02', 'U003', 100.0, 'BankTransfer', 'Pending');
+
+-- NOTIFICATIONS
+INSERT INTO Notifications (NotificationId, UserId, Title, Message)
+VALUES
+('N001', 'U001', 'Welcome to SoorGreen', 'Earn credits by reporting waste nearby!'),
+('N002', 'U002', 'New Pickup Request', 'Waste report WR01 is assigned to you.');
+
+-- AUDIT LOGS
+INSERT INTO AuditLogs (AuditId, UserId, Action, Details)
+VALUES
+('A001', 'U001', 'Login', 'Citizen logged into system'),
+('A002', 'U002', 'PickupAccepted', 'Collector accepted pickup WR01');
+
+
+🔥 Perfect — you’ve reached the **“insane detail” stage** of your **SoorGreen (codename: DIBUCELIN)** project.
+Below is a **full professional breakdown** — not just files or tables, but the *entire architecture*, *recommended technologies*, *naming conventions*, *deployment plan*, and *integration flow* between MVC and WebForms — as if you’re pitching this for a real smart-city startup.
+
+---
+
+## 🌍 PROJECT OVERVIEW
+
+**Project Name:** SoorGreen (Somali for “Recycle / Grow Green”)
+**Codename:** **DIBUCELIN** (“Rebirth” — symbolic of turning waste into value)
+**Goal:** Build a smart eco-recycling and waste incentive system that connects citizens, collectors, and municipalities. Users earn digital credits for responsible disposal, redeemable for real rewards.
+
+**Solution Layout:**
+You will use **ONE Visual Studio solution** with **three major projects** to show diversity and skill.
+
+---
+
+## 🧩 PROJECT STRUCTURE (Solution View)
+
+```
+SoorGreen.sln
+│
+├── SoorGreen.Web/          → ASP.NET Core MVC (Public User Portal)
+├── SoorGreen.Admin/        → ASP.NET WebForms (Admin & Municipality Panel)
+├── SoorGreen.API/          → ASP.NET Web API (Mobile + Web shared logic)
+└── SoorGreen.Data/         → Class Library (Database models, EF, helpers)
+```
+
+---
+
+## ⚙️ TECHNOLOGY STACK
+
+| Layer    | Framework / Tool                      | Purpose                                       |
+| -------- | ------------------------------------- | --------------------------------------------- |
+| Frontend | ASP.NET Core MVC, Razor, Tailwind CSS | Modern responsive UI                          |
+| Admin    | ASP.NET WebForms                      | Classic data management & reports             |
+| API      | ASP.NET Web API 2                     | Handles AJAX & mobile app integration         |
+| Database | SQL Server 2019+                      | Central relational database                   |
+| ORM      | Entity Framework Core                 | Model-DB mapping                              |
+| Auth     | ASP.NET Identity + JWT                | User authentication                           |
+| Extra    | SignalR                               | Real-time notifications for collectors/admins |
+| Reports  | Crystal Reports (optional)            | Export waste reports, pickup stats            |
+| Logging  | NLog                                  | Log files for system monitoring               |
+
+---
+
+## 🧱 DATABASE (SoorGreenDB)
+
+Already defined in your script ✅
+Add two small refinements:
+
+### 1. **PickupVerifications**
+
+Handles post-collection verification.
+
+```sql
+CREATE TABLE PickupVerifications (
+    VerificationId CHAR(4) PRIMARY KEY,
+    PickupId CHAR(4) NOT NULL,
+    VerifiedKg DECIMAL(6,2) NOT NULL,
+    MaterialType NVARCHAR(50),
+    VerificationMethod NVARCHAR(50),
+    VerifiedAt DATETIME DEFAULT GETDATE(),
+    CONSTRAINT FK_Verifications_Pickup FOREIGN KEY(PickupId) REFERENCES PickupRequests(PickupId)
+);
+```
+
+### 2. **SystemSettings**
+
+Controls app configuration dynamically.
+
+```sql
+CREATE TABLE SystemSettings (
+    SettingKey NVARCHAR(50) PRIMARY KEY,
+    SettingValue NVARCHAR(200),
+    UpdatedAt DATETIME DEFAULT GETDATE()
+);
+```
+
+---
+
+## 📦 ENTITY STRUCTURE (Data Project)
+
+**Namespace:** `SoorGreen.Data.Entities`
+
+```plaintext
+Entities/
+├── User.cs
+├── Role.cs
+├── Municipality.cs
+├── WasteType.cs
+├── WasteReport.cs
+├── PickupRequest.cs
+├── RewardPoint.cs
+├── RedemptionRequest.cs
+├── Notification.cs
+├── AuditLog.cs
+├── Feedback.cs
+├── PickupVerification.cs
+└── SystemSetting.cs
+```
+
+Each entity maps directly to your SQL schema with `DataAnnotations` attributes for validation.
+
+---
+
+## 🧩 API PROJECT (SoorGreen.API)
+
+**Namespace:** `SoorGreen.API`
+Used by both the Web MVC and mobile app later.
+
+### Controllers
+
+```plaintext
+Controllers/
+├── AuthController.cs
+├── WasteController.cs
+├── PickupController.cs
+├── RewardsController.cs
+├── FeedbackController.cs
+└── NotificationsController.cs
+```
+
+### Routes Example
+
+| Endpoint              | Method | Description         |
+| --------------------- | ------ | ------------------- |
+| `/api/auth/login`     | POST   | Authenticate user   |
+| `/api/waste/report`   | POST   | Submit waste report |
+| `/api/pickup/assign`  | PUT    | Assign collector    |
+| `/api/reward/history` | GET    | User reward history |
+| `/api/notifications`  | GET    | Fetch notifications |
+
+---
+
+## 🎨 MVC PROJECT (SoorGreen.Web)
+
+**Namespace:** `SoorGreen.Web`
+Used for citizens and public-facing features.
+
+**Key Pages:**
+
+| Controller           | View                     | Description                 |
+| -------------------- | ------------------------ | --------------------------- |
+| `HomeController`     | Index, About, Contact    | Public landing pages        |
+| `AccountController`  | Login, Register, Profile | User authentication         |
+| `WasteController`    | Report, History          | Submit & view waste reports |
+| `PickupController`   | Track, Schedule          | Citizen pickup management   |
+| `RewardsController`  | Dashboard, Redeem        | Reward points & redeem      |
+| `FeedbackController` | Submit                   | Citizen suggestions         |
+
+---
+
+### 🧭 Folder Breakdown
+
+```
+wwwroot/
+│── css/ (Tailwind build)
+│── js/
+│   ├── waste.js (AJAX forms)
+│   ├── pickup.js (map tracking)
+│   ├── rewards.js (animations)
+│── libs/ (bootstrap, leaflet, toastr)
+│── images/ (icons, banners)
+```
+
+**_Layout.cshtml** includes navbar, dark mode toggle, notification bell with SignalR real-time feed.
+
+---
+
+## 🖥️ ADMIN PROJECT (SoorGreen.Admin)
+
+**Namespace:** `SoorGreen.Admin`
+Tech: WebForms (.aspx)
+
+### Pages:
+
+| Page                | Description                             |
+| ------------------- | --------------------------------------- |
+| `Dashboard.aspx`    | Summary of reports, credits, collectors |
+| `Users.aspx`        | Manage citizens, collectors             |
+| `Pickups.aspx`      | Assign collectors, track progress       |
+| `WasteReports.aspx` | View pending & verified reports         |
+| `Rewards.aspx`      | Manage reward point logs                |
+| `Reports.aspx`      | Generate monthly performance reports    |
+| `Settings.aspx`     | Change credit rates, XP system          |
+| `Login.aspx`        | Admin login                             |
+
+### Admin Controls
+
+| File                     | Purpose                     |
+| ------------------------ | --------------------------- |
+| `NavBar.ascx`            | Top menu                    |
+| `Sidebar.ascx`           | Collapsible side navigation |
+| `NotificationPanel.ascx` | Real-time activity panel    |
+
+---
+
+## 📡 SYSTEM INTERACTION FLOW
+
+**Data Path Example:**
+Citizen (MVC) → API → SoorGreenDB → Admin Dashboard → Reward Points Sync
+
+1. User submits waste report via `WasteController` → API → `sp_AddWasteReport`.
+2. Collector gets notification via SignalR.
+3. Collector completes pickup → triggers `sp_CompletePickup`.
+4. Credits added → Notification → User Reward Dashboard updates in real-time.
+
+---
+
+## 💰 REVENUE MODEL
+
+| Source                 | Description                                       |
+| ---------------------- | ------------------------------------------------- |
+| **Corporate Sponsors** | Companies fund recycling drives for branding.     |
+| **Waste Partnerships** | Recycling companies pay per verified pickup data. |
+| **Ad Spots**           | Optional green ads in app or printed receipts.    |
+| **Premium Redemption** | 3–5% commission from cash-out vendors.            |
+
+---
+
+## 🌱 SPECIAL FEATURES TO IMPRESS THE TEACHER
+
+1. **Gamified Recycling Dashboard** — XP bar, level badges (Citizen → Eco Hero).
+2. **AI Suggestion Engine (Optional)** — Simple ML model recommending nearest recycling points.
+3. **Map Visualization** — Leaflet.js map of reported waste.
+4. **Real-time Stats** — SignalR dashboard showing live pickups.
+5. **Offline Mode (Later)** — Queue reports if user offline, sync when online.
+
+---
+
+## 🗂️ DEPLOYMENT NAMING
+
+| Component | Suggested Name    |
+| --------- | ----------------- |
+| Solution  | `SoorGreen`       |
+| MVC App   | `SoorGreen.Web`   |
+| Admin     | `SoorGreen.Admin` |
+| API       | `SoorGreen.API`   |
+| Data      | `SoorGreen.Data`  |
+| Database  | `SoorGreenDB`     |
+| Codename  | `DIBUCELIN`       |
+
+---
+
+## 🧠 PRESENTATION IDEA (FOR TEACHER WOW FACTOR)
+
+🎥 **Pitch as a Somali Smart Green Startup Initiative**
+When presenting:
+
+* Start by saying: *“Our mission is to turn waste into opportunity — every bottle recycled is a point earned and a cleaner city.”*
+* Show real-time pickup dashboard (SignalR).
+* End with: *“This is DIBUCELIN — rebirth through recycling.”*
+
+---
+
+If you want, I can now generate:
+
+1. ✅ Full **Entity Framework models (C#)** for your tables
+2. ✅ Or the **Visual Studio project template folder tree** with pre-named `.cs`, `.aspx`, `.cshtml`, and `.js` files ready for setup
+
+Which one should we do next — **EF models** or **project template folders**?

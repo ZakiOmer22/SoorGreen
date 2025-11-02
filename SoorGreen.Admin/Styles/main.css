@@ -1,0 +1,120 @@
+﻿<style >
+body {
+    font-family: 'Inter', sans-serif;
+    background-color: #f5f7fa;
+    color: #222;
+    transition: background-color 0.4s, color 0.4s;
+}
+
+/* ===== NAVBAR ===== */
+#mainNavbar {
+    background: linear-gradient(135deg, #198754, #0f5132);
+    padding: 0.75rem 1.25rem;
+    transition: all 0.4s ease-in-out;
+}
+
+    #mainNavbar .nav-link {
+        color: #f8f9fa !important;
+        font-weight: 500;
+        margin: 0 8px;
+        transition: all 0.3s ease;
+    }
+
+        #mainNavbar .nav-link:hover,
+        #mainNavbar .nav-link.active {
+            color: #fff !important;
+            text-shadow: 0 0 10px rgba(255, 255, 255, 0.4);
+        }
+
+.navbar-brand {
+    font-size: 1.4rem;
+    color: white !important;
+    text-shadow: 0 0 6px rgba(255, 255, 255, 0.3);
+}
+
+.navbar .btn {
+    border-radius: 25px;
+    padding: 6px 18px;
+}
+
+/* ===== CONTENT AREA ===== */
+.content-wrapper {
+    min-height: 80vh;
+    background: rgba(255, 255, 255, 0.7);
+    backdrop-filter: blur(12px);
+    margin: 20px auto;
+    border-radius: 16px;
+    box-shadow: 0 4px 25px rgba(0, 0, 0, 0.05);
+    padding: 2rem;
+}
+
+/* ===== FOOTER ===== */
+.footer {
+    background: #0f172a;
+    color: #ddd;
+}
+
+    .footer h6, .footer h5 {
+        color: #00c46a;
+    }
+
+    .footer a {
+        color: #ccc;
+        text-decoration: none;
+        transition: all 0.3s ease;
+    }
+
+        .footer a:hover {
+            color: #00ff91;
+            text-shadow: 0 0 6px rgba(0, 255, 145, 0.6);
+        }
+
+.social-link {
+    color: #fff;
+    font-size: 1.1rem;
+    transition: all 0.3s ease;
+}
+
+    .social-link:hover {
+        color: #00ff91;
+        transform: translateY(-3px);
+    }
+
+/* ===== DARK MODE ===== */
+.dark-mode {
+    background-color: #0b0f1a !important;
+    color: #f1f1f1;
+}
+
+    .dark-mode .content-wrapper {
+        background: rgba(30, 30, 40, 0.8);
+    }
+
+    .dark-mode #mainNavbar {
+        background: linear-gradient(135deg, #009f63, #006d3a);
+    }
+
+    .dark-mode .footer {
+        background: #020617;
+        color: #999;
+    }
+
+        .dark-mode .footer a:hover {
+            color: #00ffb3;
+        }
+
+/* ===== SCROLLBAR ===== */
+::-webkit-scrollbar {
+    width: 10px;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #198754;
+    border-radius: 10px;
+}
+
+    ::-webkit-scrollbar-thumb:hover {
+        background: #0f5132;
+    }
+
+</style >
