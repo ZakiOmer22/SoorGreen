@@ -1,0 +1,24 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Advertisements>
+	<Ad>
+		<ImageUrl>https://via.placeholder.com/728x90/4361ee/ffffff?text=ASP.NET+Demo+Ad+1</ImageUrl>
+		<NavigateUrl>https://www.microsoft.com/net</NavigateUrl>
+		<AlternateText>ASP.NET Framework</AlternateText>
+		<Keyword>Development</Keyword>
+		<Impressions>50</Impressions>
+	</Ad>
+	<Ad>
+		<ImageUrl>https://via.placeholder.com/728x90/3f37c9/ffffff?text=Learn+Web+Forms+Today</ImageUrl>
+		<NavigateUrl>https://docs.microsoft.com/aspnet/web-forms</NavigateUrl>
+		<AlternateText>Learn ASP.NET Web Forms</AlternateText>
+		<Keyword>Tutorial</Keyword>
+		<Impressions>30</Impressions>
+	</Ad>
+	<Ad>
+		<ImageUrl>https://via.placeholder.com/728x90/4cc9f0/000000?text=University+of+Hobbies+Courses</ImageUrl>
+		<NavigateUrl>https://www.example.com</NavigateUrl>
+		<AlternateText>UOH Courses</AlternateText>
+		<Keyword>Education</Keyword>
+		<Impressions>20</Impressions>
+	</Ad>
+</Advertisements>
