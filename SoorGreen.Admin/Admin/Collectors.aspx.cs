@@ -7,38 +7,35 @@ using System.Web.UI.WebControls;
 
 namespace SoorGreen.Admin.Admin
 {
-    public partial class Users : System.Web.UI.Page
+    public partial class Collectors : System.Web.UI.Page
     {
         protected void Page_Load(object sender, EventArgs e)
         {
             if (!IsPostBack)
             {
-                LoadUsersData();
+                LoadCollectorsData();
             }
         }
 
-        protected void LoadUsers(object sender, EventArgs e)
+        protected void LoadCollectors(object sender, EventArgs e)
         {
-            LoadUsersData();
+            LoadCollectorsData();
         }
 
-        private void LoadUsersData()
+        private void LoadCollectorsData()
         {
             try
             {
-                hfUsersData.Value = "[]";
+                hfCollectorsData.Value = "[]";
 
-                // Use the correct connection string name from your Web.config
                 string connectionString = System.Configuration.ConfigurationManager.ConnectionStrings["SoorGreenDBConnectionString"].ConnectionString;
 
                 if (string.IsNullOrEmpty(connectionString))
                 {
                     System.Diagnostics.Debug.WriteLine("ERROR: Connection string is null or empty");
-                    hfUsersData.Value = "[]";
+                    hfCollectorsData.Value = "[]";
                     return;
                 }
-
-                System.Diagnostics.Debug.WriteLine("Connection String: " + connectionString);
 
                 using (SqlConnection conn = new SqlConnection(connectionString))
                 {
@@ -47,18 +44,21 @@ namespace SoorGreen.Admin.Admin
                         conn.Open();
                         System.Diagnostics.Debug.WriteLine("Database connection opened successfully");
 
+                        // Query to get only collectors with additional collector-specific data
                         string query = @"
                             SELECT 
-                                UserId,
-                                FullName,
-                                Phone,
-                                Email,
-                                RoleId,
-                                XP_Credits,
-                                CreatedAt,
-                                IsVerified
-                            FROM Users
-                            ORDER BY CreatedAt DESC";
+                                u.UserId,
+                                u.FullName,
+                                u.Phone,
+                                u.Email,
+                                r.RoleName,
+                                u.XP_Credits,
+                                u.CreatedAt,
+                                u.IsVerified
+                            FROM Users u
+                            JOIN Roles r ON u.RoleId = r.RoleId
+                            WHERE r.RoleName IN ('Collector', 'Waste Collector')
+                            ORDER BY u.CreatedAt DESC";
 
                         System.Diagnostics.Debug.WriteLine("Executing query: " + query);
 
@@ -70,71 +70,64 @@ namespace SoorGreen.Admin.Admin
 
                             System.Diagnostics.Debug.WriteLine("Query executed successfully. Rows returned: " + rowsCount);
 
-                            // Debug: Check what columns we got
-                            foreach (DataColumn col in dataTable.Columns)
-                            {
-                                System.Diagnostics.Debug.WriteLine("Column: " + col.ColumnName + " Type: " + col.DataType);
-                            }
-
-                            // Debug: Check first few rows
-                            for (int i = 0; i < Math.Min(dataTable.Rows.Count, 3); i++)
-                            {
-                                DataRow row = dataTable.Rows[i];
-                                System.Diagnostics.Debug.WriteLine(string.Format("Row {0}: UserId={1}, FullName={2}, Email={3}",
-                                    i, row["UserId"], row["FullName"], row["Email"]));
-                            }
-
                             System.Web.Script.Serialization.JavaScriptSerializer serializer =
                                 new System.Web.Script.Serialization.JavaScriptSerializer();
 
-                            List<Dictionary<string, object>> usersList = new List<Dictionary<string, object>>();
+                            List<Dictionary<string, object>> collectorsList = new List<Dictionary<string, object>>();
 
                             foreach (DataRow row in dataTable.Rows)
                             {
-                                Dictionary<string, object> user = new Dictionary<string, object>();
+                                Dictionary<string, object> collector = new Dictionary<string, object>();
 
-                                user["Id"] = row["UserId"].ToString();
-                                user["FirstName"] = row["FullName"].ToString();
-                                user["LastName"] = "";
-                                user["Email"] = row["Email"] != DBNull.Value ? row["Email"].ToString() : "";
-                                user["Phone"] = row["Phone"] != DBNull.Value ? row["Phone"].ToString() : "";
-                                user["UserType"] = row["RoleId"].ToString();
-                                user["Status"] = Convert.ToBoolean(row["IsVerified"]) ? "active" : "inactive";
-                                user["RegistrationDate"] = row["CreatedAt"].ToString();
-                                user["Address"] = "";
-                                user["Credits"] = row["XP_Credits"] != DBNull.Value ? Convert.ToDecimal(row["XP_Credits"]) : 0;
-                                user["TotalPickups"] = 0;
-                                user["CompletedPickups"] = 0;
+                                collector["Id"] = row["UserId"].ToString();
+                                collector["FirstName"] = row["FullName"].ToString();
+                                collector["LastName"] = "";
+                                collector["Email"] = row["Email"] != DBNull.Value ? row["Email"].ToString() : "";
+                                collector["Phone"] = row["Phone"] != DBNull.Value ? row["Phone"].ToString() : "";
 
-                                usersList.Add(user);
+                                // Map RoleName to frontend user types
+                                string roleName = row["RoleName"].ToString().ToLower();
+                                collector["UserType"] = "collector";
+
+                                collector["Status"] = Convert.ToBoolean(row["IsVerified"]) ? "active" : "inactive";
+                                collector["Availability"] = new Random().Next(0, 2) == 0 ? "online" : "offline"; // Mock data
+                                collector["RegistrationDate"] = row["CreatedAt"].ToString();
+                                collector["Address"] = "";
+                                collector["VehicleInfo"] = "Truck - ABC123"; // Mock data
+                                collector["CompletedPickups"] = new Random().Next(50, 500); // Mock data
+                                collector["TotalPickups"] = new Random().Next(60, 550); // Mock data
+                                collector["Rating"] = Math.Round((new Random().NextDouble() * 2) + 3, 1); // Mock data 3.0-5.0
+                                collector["Earnings"] = Math.Round(new Random().NextDouble() * 5000, 2); // Mock data
+
+                                collectorsList.Add(collector);
                             }
 
-                            hfUsersData.Value = serializer.Serialize(usersList);
-                            System.Diagnostics.Debug.WriteLine("JSON data prepared. User count: " + usersList.Count);
+                            hfCollectorsData.Value = serializer.Serialize(collectorsList);
+                            System.Diagnostics.Debug.WriteLine("JSON data prepared. Collector count: " + collectorsList.Count);
                         }
                     }
                     catch (SqlException sqlEx)
                     {
                         System.Diagnostics.Debug.WriteLine("SQL ERROR: " + sqlEx.Message);
                         System.Diagnostics.Debug.WriteLine("SQL Error Number: " + sqlEx.Number);
-                        hfUsersData.Value = "[]";
+                        hfCollectorsData.Value = "[]";
                     }
                     catch (Exception dbEx)
                     {
                         System.Diagnostics.Debug.WriteLine("DATABASE ERROR: " + dbEx.Message);
-                        hfUsersData.Value = "[]";
+                        hfCollectorsData.Value = "[]";
                     }
                 }
             }
             catch (Exception)
             {
                 System.Diagnostics.Debug.WriteLine("GENERAL ERROR occurred");
-                hfUsersData.Value = "[]";
+                hfCollectorsData.Value = "[]";
             }
         }
 
         [System.Web.Services.WebMethod]
-        public static string DeleteUser(string userId)
+        public static string DeleteCollector(string collectorId)
         {
             try
             {
@@ -147,10 +140,10 @@ namespace SoorGreen.Admin.Admin
                     string query = "DELETE FROM Users WHERE UserId = @UserId";
                     using (SqlCommand cmd = new SqlCommand(query, conn))
                     {
-                        cmd.Parameters.AddWithValue("@UserId", userId);
+                        cmd.Parameters.AddWithValue("@UserId", collectorId);
                         int rowsAffected = cmd.ExecuteNonQuery();
 
-                        return rowsAffected > 0 ? "Success: User deleted" : "Error: User not found";
+                        return rowsAffected > 0 ? "Success: Collector deleted" : "Error: Collector not found";
                     }
                 }
             }
@@ -161,7 +154,7 @@ namespace SoorGreen.Admin.Admin
         }
 
         [System.Web.Services.WebMethod]
-        public static string UpdateUserStatus(string userId, string status)
+        public static string UpdateCollectorStatus(string collectorId, string status)
         {
             try
             {
@@ -177,10 +170,10 @@ namespace SoorGreen.Admin.Admin
                     using (SqlCommand cmd = new SqlCommand(query, conn))
                     {
                         cmd.Parameters.AddWithValue("@IsVerified", isVerified);
-                        cmd.Parameters.AddWithValue("@UserId", userId);
+                        cmd.Parameters.AddWithValue("@UserId", collectorId);
                         int rowsAffected = cmd.ExecuteNonQuery();
 
-                        return rowsAffected > 0 ? "Success: Status updated" : "Error: User not found";
+                        return rowsAffected > 0 ? "Success: Status updated" : "Error: Collector not found";
                     }
                 }
             }

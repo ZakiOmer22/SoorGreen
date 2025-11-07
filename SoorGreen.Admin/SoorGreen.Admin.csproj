@@ -112,9 +112,21 @@
     <Content Include="About.aspx" />
     <Content Include="Admin Dashboard.aspx" />
     <Content Include="Admin\Analytics.aspx" />
+    <Content Include="Admin\AuditLogs.aspx" />
+    <Content Include="Admin\Citizens.aspx" />
+    <Content Include="Admin\Collections.aspx" />
+    <Content Include="Admin\Collectors.aspx" />
+    <Content Include="Admin\Credits.aspx" />
     <Content Include="Admin\Dashboard.aspx" />
+    <Content Include="Admin\Municipalities.aspx" />
+    <Content Include="Admin\Pickups.aspx" />
+    <Content Include="Admin\Redemptions.aspx" />
     <Content Include="Admin\Reports.aspx" />
+    <Content Include="Admin\Rewards.aspx" />
+    <Content Include="Admin\Transactions.aspx" />
     <Content Include="Admin\Users.aspx" />
+    <Content Include="Admin\WasteReports.aspx" />
+    <Content Include="Admin\WasteTypes.aspx" />
     <Content Include="Contact.aspx" />
     <Content Include="Content\bootstrap-grid.css" />
     <Content Include="Content\bootstrap-grid.min.css" />
@@ -226,12 +238,68 @@
     <Compile Include="Admin\Analytics.aspx.designer.cs">
       <DependentUpon>Analytics.aspx</DependentUpon>
     </Compile>
+    <Compile Include="Admin\AuditLogs.aspx.cs">
+      <DependentUpon>AuditLogs.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="Admin\AuditLogs.aspx.designer.cs">
+      <DependentUpon>AuditLogs.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="Admin\Citizens.aspx.cs">
+      <DependentUpon>Citizens.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="Admin\Citizens.aspx.designer.cs">
+      <DependentUpon>Citizens.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="Admin\Collections.aspx.cs">
+      <DependentUpon>Collections.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="Admin\Collections.aspx.designer.cs">
+      <DependentUpon>Collections.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="Admin\Collectors.aspx.cs">
+      <DependentUpon>Collectors.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="Admin\Collectors.aspx.designer.cs">
+      <DependentUpon>Collectors.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="Admin\Credits.aspx.cs">
+      <DependentUpon>Credits.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="Admin\Credits.aspx.designer.cs">
+      <DependentUpon>Credits.aspx</DependentUpon>
+    </Compile>
     <Compile Include="Admin\Dashboard.aspx.cs">
       <DependentUpon>Dashboard.aspx</DependentUpon>
       <SubType>ASPXCodeBehind</SubType>
     </Compile>
     <Compile Include="Admin\Dashboard.aspx.designer.cs">
       <DependentUpon>Dashboard.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="Admin\Municipalities.aspx.cs">
+      <DependentUpon>Municipalities.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="Admin\Municipalities.aspx.designer.cs">
+      <DependentUpon>Municipalities.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="Admin\Pickups.aspx.cs">
+      <DependentUpon>Pickups.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="Admin\Pickups.aspx.designer.cs">
+      <DependentUpon>Pickups.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="Admin\Redemptions.aspx.cs">
+      <DependentUpon>Redemptions.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="Admin\Redemptions.aspx.designer.cs">
+      <DependentUpon>Redemptions.aspx</DependentUpon>
     </Compile>
     <Compile Include="Admin\Reports.aspx.cs">
       <DependentUpon>Reports.aspx</DependentUpon>
@@ -240,6 +308,13 @@
     <Compile Include="Admin\Reports.aspx.designer.cs">
       <DependentUpon>Reports.aspx</DependentUpon>
     </Compile>
+    <Compile Include="Admin\Rewards.aspx.cs">
+      <DependentUpon>Rewards.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="Admin\Rewards.aspx.designer.cs">
+      <DependentUpon>Rewards.aspx</DependentUpon>
+    </Compile>
     <Compile Include="Admin\Site.Master.cs">
       <DependentUpon>Site.Master</DependentUpon>
       <SubType>ASPXCodeBehind</SubType>
@@ -247,12 +322,33 @@
     <Compile Include="Admin\Site.Master.designer.cs">
       <DependentUpon>Site.Master</DependentUpon>
     </Compile>
+    <Compile Include="Admin\Transactions.aspx.cs">
+      <DependentUpon>Transactions.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="Admin\Transactions.aspx.designer.cs">
+      <DependentUpon>Transactions.aspx</DependentUpon>
+    </Compile>
     <Compile Include="Admin\Users.aspx.cs">
       <DependentUpon>Users.aspx</DependentUpon>
       <SubType>ASPXCodeBehind</SubType>
     </Compile>
     <Compile Include="Admin\Users.aspx.designer.cs">
       <DependentUpon>Users.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="Admin\WasteReports.aspx.cs">
+      <DependentUpon>WasteReports.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="Admin\WasteReports.aspx.designer.cs">
+      <DependentUpon>WasteReports.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="Admin\WasteTypes.aspx.cs">
+      <DependentUpon>WasteTypes.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="Admin\WasteTypes.aspx.designer.cs">
+      <DependentUpon>WasteTypes.aspx</DependentUpon>
     </Compile>
     <Compile Include="App_Start\BundleConfig.cs" />
     <Compile Include="About.aspx.cs">

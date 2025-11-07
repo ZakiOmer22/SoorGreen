@@ -7,7 +7,7 @@ using System.Web.UI.WebControls;
 
 namespace SoorGreen.Admin.Admin
 {
-    public partial class Users : System.Web.UI.Page
+    public partial class Citizens : System.Web.UI.Page
     {
         protected void Page_Load(object sender, EventArgs e)
         {
@@ -28,7 +28,6 @@ namespace SoorGreen.Admin.Admin
             {
                 hfUsersData.Value = "[]";
 
-                // Use the correct connection string name from your Web.config
                 string connectionString = System.Configuration.ConfigurationManager.ConnectionStrings["SoorGreenDBConnectionString"].ConnectionString;
 
                 if (string.IsNullOrEmpty(connectionString))
@@ -38,8 +37,6 @@ namespace SoorGreen.Admin.Admin
                     return;
                 }
 
-                System.Diagnostics.Debug.WriteLine("Connection String: " + connectionString);
-
                 using (SqlConnection conn = new SqlConnection(connectionString))
                 {
                     try
@@ -47,18 +44,21 @@ namespace SoorGreen.Admin.Admin
                         conn.Open();
                         System.Diagnostics.Debug.WriteLine("Database connection opened successfully");
 
+                        // Updated query to get only citizens
                         string query = @"
                             SELECT 
-                                UserId,
-                                FullName,
-                                Phone,
-                                Email,
-                                RoleId,
-                                XP_Credits,
-                                CreatedAt,
-                                IsVerified
-                            FROM Users
-                            ORDER BY CreatedAt DESC";
+                                u.UserId,
+                                u.FullName,
+                                u.Phone,
+                                u.Email,
+                                r.RoleName,
+                                u.XP_Credits,
+                                u.CreatedAt,
+                                u.IsVerified
+                            FROM Users u
+                            JOIN Roles r ON u.RoleId = r.RoleId
+                            WHERE r.RoleName IN ('Citizen', 'Customer')
+                            ORDER BY u.CreatedAt DESC";
 
                         System.Diagnostics.Debug.WriteLine("Executing query: " + query);
 
@@ -69,20 +69,6 @@ namespace SoorGreen.Admin.Admin
                             int rowsCount = adapter.Fill(dataTable);
 
                             System.Diagnostics.Debug.WriteLine("Query executed successfully. Rows returned: " + rowsCount);
-
-                            // Debug: Check what columns we got
-                            foreach (DataColumn col in dataTable.Columns)
-                            {
-                                System.Diagnostics.Debug.WriteLine("Column: " + col.ColumnName + " Type: " + col.DataType);
-                            }
-
-                            // Debug: Check first few rows
-                            for (int i = 0; i < Math.Min(dataTable.Rows.Count, 3); i++)
-                            {
-                                DataRow row = dataTable.Rows[i];
-                                System.Diagnostics.Debug.WriteLine(string.Format("Row {0}: UserId={1}, FullName={2}, Email={3}",
-                                    i, row["UserId"], row["FullName"], row["Email"]));
-                            }
 
                             System.Web.Script.Serialization.JavaScriptSerializer serializer =
                                 new System.Web.Script.Serialization.JavaScriptSerializer();
@@ -98,7 +84,11 @@ namespace SoorGreen.Admin.Admin
                                 user["LastName"] = "";
                                 user["Email"] = row["Email"] != DBNull.Value ? row["Email"].ToString() : "";
                                 user["Phone"] = row["Phone"] != DBNull.Value ? row["Phone"].ToString() : "";
-                                user["UserType"] = row["RoleId"].ToString();
+
+                                // Map RoleName to frontend user types
+                                string roleName = row["RoleName"].ToString().ToLower();
+                                user["UserType"] = "customer"; // Always set as customer for citizens
+
                                 user["Status"] = Convert.ToBoolean(row["IsVerified"]) ? "active" : "inactive";
                                 user["RegistrationDate"] = row["CreatedAt"].ToString();
                                 user["Address"] = "";
@@ -110,7 +100,7 @@ namespace SoorGreen.Admin.Admin
                             }
 
                             hfUsersData.Value = serializer.Serialize(usersList);
-                            System.Diagnostics.Debug.WriteLine("JSON data prepared. User count: " + usersList.Count);
+                            System.Diagnostics.Debug.WriteLine("JSON data prepared. Citizen count: " + usersList.Count);
                         }
                     }
                     catch (SqlException sqlEx)
@@ -150,7 +140,7 @@ namespace SoorGreen.Admin.Admin
                         cmd.Parameters.AddWithValue("@UserId", userId);
                         int rowsAffected = cmd.ExecuteNonQuery();
 
-                        return rowsAffected > 0 ? "Success: User deleted" : "Error: User not found";
+                        return rowsAffected > 0 ? "Success: Citizen deleted" : "Error: Citizen not found";
                     }
                 }
             }
@@ -180,7 +170,7 @@ namespace SoorGreen.Admin.Admin
                         cmd.Parameters.AddWithValue("@UserId", userId);
                         int rowsAffected = cmd.ExecuteNonQuery();
 
-                        return rowsAffected > 0 ? "Success: Status updated" : "Error: User not found";
+                        return rowsAffected > 0 ? "Success: Status updated" : "Error: Citizen not found";
                     }
                 }
             }
