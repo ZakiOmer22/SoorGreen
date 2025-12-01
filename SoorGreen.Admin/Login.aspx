@@ -1,6 +1,5 @@
 ﻿<%@ Page Title="Login" Language="C#" MasterPageFile="~/Site.Master" AutoEventWireup="true" CodeFile="Login.aspx.cs" Inherits="LoginPage" %>
 
-
 <asp:Content ID="BodyContent" ContentPlaceHolderID="MainContent" runat="server">
     <style>
         .login-section {
@@ -13,14 +12,18 @@
             padding: 100px 0;
         }
 
+        [data-theme="light"] .login-section {
+            background: radial-gradient(ellipse at center, rgba(0, 212, 170, 0.05) 0%, transparent 70%);
+        }
+
         .login-card {
-            background: rgba(255, 255, 255, 0.05);
-            border: 1px solid rgba(255, 255, 255, 0.2);
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
             border-radius: 20px;
             padding: 3rem;
             transition: all 0.3s ease;
             backdrop-filter: blur(10px);
-            color: white;
+            color: var(--light);
             max-width: 450px;
             margin: 0 auto;
         }
@@ -30,40 +33,57 @@
             box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
         }
 
+        [data-theme="light"] .login-card:hover {
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+        }
+
         .form-control {
             background: rgba(255, 255, 255, 0.05);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            color: white;
+            border: 1px solid var(--card-border);
+            color: var(--light);
             padding: 1rem;
             border-radius: 10px;
             transition: all 0.3s ease;
         }
 
+        [data-theme="light"] .form-control {
+            background: rgba(33, 37, 41, 0.05);
+            color: var(--light);
+        }
+
         .form-control:focus {
             background: rgba(255, 255, 255, 0.1);
-            border-color: #00d4aa;
-            color: white;
+            border-color: var(--primary);
+            color: var(--light);
             box-shadow: 0 0 0 0.2rem rgba(0, 212, 170, 0.25);
+        }
+
+        [data-theme="light"] .form-control:focus {
+            background: rgba(33, 37, 41, 0.1);
         }
 
         .form-control::placeholder {
             color: rgba(255, 255, 255, 0.5);
         }
 
+        [data-theme="light"] .form-control::placeholder {
+            color: rgba(33, 37, 41, 0.5);
+        }
+
         .form-label {
-            color: white !important;
+            color: var(--light) !important;
             font-weight: 600;
             margin-bottom: 0.5rem;
         }
 
         .btn-primary {
-            background: #00d4aa;
+            background: var(--primary);
             border: none;
             padding: 1rem 2rem;
             border-radius: 10px;
             font-weight: 600;
             transition: all 0.3s ease;
-            color: white;
+            color: white !important;
             width: 100%;
         }
 
@@ -73,8 +93,8 @@
         }
 
         .btn-outline-hero {
-            border: 2px solid #00d4aa;
-            color: #00d4aa;
+            border: 2px solid var(--primary);
+            color: var(--primary);
             background: transparent;
             padding: 1rem 2rem;
             border-radius: 50px;
@@ -84,32 +104,40 @@
         }
 
         .btn-outline-hero:hover {
-            background: #00d4aa;
+            background: var(--primary);
             color: white;
             transform: translateY(-3px);
         }
 
         .login-icon {
             font-size: 4rem;
-            color: #00d4aa;
+            color: var(--primary);
             margin-bottom: 1.5rem;
         }
 
         .section-badge {
-            background: rgba(0, 212, 170, 0.1);
+            background: rgba(0, 212, 170, 0.1) !important;
             border: 1px solid rgba(0, 212, 170, 0.3);
-            color: #00d4aa !important;
+            color: var(--primary) !important;
             backdrop-filter: blur(10px);
+        }
+
+        [data-theme="light"] .section-badge {
+            background: rgba(0, 212, 170, 0.15) !important;
         }
 
         .hero-title {
             font-size: 2.5rem;
             font-weight: 800;
             margin-bottom: 1rem;
-            background: linear-gradient(45deg, #ffffff, #00d4aa, #0077b6);
+            background: linear-gradient(45deg, var(--light), var(--primary), var(--secondary));
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             text-shadow: 0 0 30px rgba(255, 255, 255, 0.1);
+        }
+
+        [data-theme="light"] .hero-title {
+            text-shadow: 0 0 30px rgba(33, 37, 41, 0.1);
         }
 
         .error-message {
@@ -125,13 +153,13 @@
         }
 
         .login-links a {
-            color: #00d4aa !important;
+            color: var(--primary) !important;
             text-decoration: none;
             transition: all 0.3s ease;
         }
 
         .login-links a:hover {
-            color: white !important;
+            color: var(--light) !important;
             text-decoration: underline;
         }
 
@@ -139,21 +167,22 @@
             display: flex;
             align-items: center;
             margin: 2rem 0;
-            color: rgba(255, 255, 255, 0.7) !important;
+            color: var(--light) !important;
+            opacity: 0.7;
         }
 
         .divider::before,
         .divider::after {
             content: '';
             flex: 1;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+            border-bottom: 1px solid var(--card-border);
         }
 
         .divider span {
             padding: 0 1rem;
         }
 
-        /* Toast Notifications */
+        /* Toast Notifications - Fixed for both themes */
         .toast-container {
             position: fixed;
             top: 20px;
@@ -162,17 +191,26 @@
         }
 
         .toast {
-            background: rgba(255, 255, 255, 0.95);
-            border-radius: 10px;
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 12px;
             padding: 1rem 1.5rem;
             margin-bottom: 1rem;
             box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
-            border-left: 4px solid #00d4aa;
-            color: #333;
+            border-left: 4px solid var(--primary);
+            color: var(--light);
             font-weight: 500;
             max-width: 350px;
             transform: translateX(400px);
             transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        [data-theme="light"] .toast {
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
         }
 
         .toast.show {
@@ -191,32 +229,85 @@
             border-left-color: #f59e0b;
         }
 
+        .toast.info {
+            border-left-color: var(--primary);
+        }
+
+        .toast-icon {
+            font-size: 1.25rem;
+            flex-shrink: 0;
+        }
+
+        .toast.success .toast-icon {
+            color: #10b981;
+        }
+
+        .toast.error .toast-icon {
+            color: #ef4444;
+        }
+
+        .toast.warning .toast-icon {
+            color: #f59e0b;
+        }
+
+        .toast.info .toast-icon {
+            color: var(--primary);
+        }
+
+        .toast-content {
+            flex: 1;
+        }
+
+        .toast-close {
+            background: none;
+            border: none;
+            color: var(--light);
+            opacity: 0.7;
+            cursor: pointer;
+            padding: 0.25rem;
+            border-radius: 4px;
+            transition: all 0.3s ease;
+            flex-shrink: 0;
+        }
+
+        .toast-close:hover {
+            opacity: 1;
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        [data-theme="light"] .toast-close:hover {
+            background: rgba(33, 37, 41, 0.1);
+        }
+
         /* Text visibility fixes */
         .text-muted {
-            color: rgba(255, 255, 255, 0.8) !important;
+            color: var(--light) !important;
+            opacity: 0.8 !important;
         }
 
         .form-check-label {
-            color: rgba(255, 255, 255, 0.9) !important;
+            color: var(--light) !important;
+            opacity: 0.9 !important;
         }
 
         .stat-item h4 {
-            color: white !important;
+            color: var(--light) !important;
         }
 
         .stat-item small {
-            color: rgba(255, 255, 255, 0.7) !important;
+            color: var(--light) !important;
+            opacity: 0.7 !important;
         }
 
         /* Features Section */
         .features-section {
             padding: 4rem 0;
-            background: rgba(255, 255, 255, 0.02);
+            background: var(--card-bg);
         }
 
         .feature-card {
-            background: rgba(255, 255, 255, 0.05);
-            border: 1px solid rgba(255, 255, 255, 0.1);
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
             border-radius: 15px;
             padding: 2rem;
             text-align: center;
@@ -226,13 +317,85 @@
 
         .feature-card:hover {
             transform: translateY(-5px);
-            border-color: #00d4aa;
+            border-color: var(--primary);
+        }
+
+        [data-theme="light"] .feature-card:hover {
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
         }
 
         .feature-icon {
             font-size: 2.5rem;
-            color: #00d4aa;
+            color: var(--primary);
             margin-bottom: 1rem;
+        }
+
+        /* Form Check Styles */
+        .form-check-input {
+            background-color: var(--card-bg);
+            border: 1px solid var(--card-border);
+        }
+
+        .form-check-input:checked {
+            background-color: var(--primary);
+            border-color: var(--primary);
+        }
+
+        /* Stats colors */
+        .text-primary { color: var(--primary) !important; }
+        .text-success { color: #10b981 !important; }
+        .text-warning { color: #f59e0b !important; }
+
+        /* Additional Light Mode Specific Styles */
+        [data-theme="light"] .login-card,
+        [data-theme="light"] .feature-card {
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        }
+
+        [data-theme="light"] .form-control,
+        [data-theme="light"] .form-select {
+            color: var(--light) !important;
+        }
+
+        /* Link styles */
+        .login-links a {
+            color: var(--primary) !important;
+        }
+
+        .login-links a:hover {
+            color: var(--light) !important;
+        }
+
+        /* Headings and text */
+        h1, h2, h3, h4, h5, h6 {
+            color: var(--light) !important;
+        }
+
+        p, span {
+            color: var(--light) !important;
+            opacity: 0.9 !important;
+        }
+
+        /* Password toggle */
+        .password-toggle {
+            position: absolute;
+            right: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            color: var(--light);
+            opacity: 0.7;
+            cursor: pointer;
+            z-index: 2;
+        }
+
+        .password-toggle:hover {
+            opacity: 1;
+        }
+
+        .password-input-container {
+            position: relative;
         }
 
         @media (max-width: 768px) {
@@ -253,7 +416,91 @@
             
             .toast {
                 max-width: none;
+                margin: 0 10px 1rem 10px;
             }
+            
+            .login-links {
+                display: flex;
+                flex-direction: column;
+                gap: 1rem;
+            }
+            
+            .login-links a {
+                display: block;
+            }
+        }
+
+        /* Stats border */
+        .stats-border {
+            border-top: 1px solid var(--card-border);
+        }
+
+        /* Feature card text */
+        .feature-card h4 {
+            margin-bottom: 1rem;
+        }
+
+        .feature-card p {
+            opacity: 0.8;
+        }
+
+        /* Button focus states */
+        .btn-primary:focus,
+        .btn-outline-hero:focus {
+            outline: none;
+            box-shadow: 0 0 0 0.2rem rgba(0, 212, 170, 0.25);
+        }
+
+        /* Form group spacing */
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        /* Animation for form elements */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .login-card {
+            animation: fadeInUp 0.6s ease-out;
+        }
+
+        /* Toast animations */
+        @keyframes slideInRight {
+            from {
+                transform: translateX(400px);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        @keyframes slideOutRight {
+            from {
+                transform: translateX(0);
+                opacity: 1;
+            }
+            to {
+                transform: translateX(400px);
+                opacity: 0;
+            }
+        }
+
+        .toast.show {
+            animation: slideInRight 0.3s ease-out;
+        }
+
+        .toast.hide {
+            animation: slideOutRight 0.3s ease-in;
         }
     </style>
 
@@ -287,8 +534,13 @@
 
                                 <div class="col-12">
                                     <label class="form-label">Password *</label>
-                                    <asp:TextBox ID="txtPassword" runat="server" CssClass="form-control" 
-                                        placeholder="Enter your password" TextMode="Password"></asp:TextBox>
+                                    <div class="password-input-container">
+                                        <asp:TextBox ID="txtPassword" runat="server" CssClass="form-control" 
+                                            placeholder="Enter your password" TextMode="Password"></asp:TextBox>
+                                        <button type="button" class="password-toggle" onclick="togglePassword('txtPassword')">
+                                            <i class="fas fa-eye"></i>
+                                        </button>
+                                    </div>
                                     <div id="errorPassword" class="error-message">Password is required</div>
                                 </div>
 
@@ -333,7 +585,7 @@
                         </div>
 
                         <!-- Quick Stats -->
-                        <div class="mt-5 pt-4 border-top border-secondary">
+                        <div class="mt-5 pt-4 stats-border">
                             <div class="row text-center">
                                 <div class="col-4">
                                     <div class="stat-item">
@@ -366,8 +618,8 @@
         <div class="container">
             <div class="row text-center mb-5">
                 <div class="col-lg-8 mx-auto">
-                    <h2 class="fw-bold text-white mb-3">Why Join SoorGreen?</h2>
-                    <p class="text-muted lead">Discover the benefits of being part of our sustainability community</p>
+                    <h2 class="fw-bold mb-3">Why Join SoorGreen?</h2>
+                    <p class="lead">Discover the benefits of being part of our sustainability community</p>
                 </div>
             </div>
             <div class="row g-4">
@@ -376,8 +628,8 @@
                         <div class="feature-icon">
                             <i class="fas fa-leaf"></i>
                         </div>
-                        <h4 class="text-white mb-3">Environmental Impact</h4>
-                        <p class="text-muted">Track your personal contribution to reducing waste and creating sustainable communities. See real-time metrics of your environmental footprint.</p>
+                        <h4 class="mb-3">Environmental Impact</h4>
+                        <p>Track your personal contribution to reducing waste and creating sustainable communities. See real-time metrics of your environmental footprint.</p>
                     </div>
                 </div>
                 <div class="col-lg-4 col-md-6">
@@ -385,8 +637,8 @@
                         <div class="feature-icon">
                             <i class="fas fa-award"></i>
                         </div>
-                        <h4 class="text-white mb-3">Earn Rewards</h4>
-                        <p class="text-muted">Get XP credits for your recycling efforts that can be redeemed for discounts, vouchers, and exclusive partner benefits.</p>
+                        <h4 class="mb-3">Earn Rewards</h4>
+                        <p>Get XP credits for your recycling efforts that can be redeemed for discounts, vouchers, and exclusive partner benefits.</p>
                     </div>
                 </div>
                 <div class="col-lg-4 col-md-6">
@@ -394,8 +646,8 @@
                         <div class="feature-icon">
                             <i class="fas fa-chart-line"></i>
                         </div>
-                        <h4 class="text-white mb-3">Track Progress</h4>
-                        <p class="text-muted">Monitor your recycling habits, set goals, and see your environmental impact grow over time with detailed analytics.</p>
+                        <h4 class="mb-3">Track Progress</h4>
+                        <p>Monitor your recycling habits, set goals, and see your environmental impact grow over time with detailed analytics.</p>
                     </div>
                 </div>
             </div>
@@ -404,35 +656,42 @@
 
     <script>
         // Toast notification function
-        function showToast(message, type = 'info') {
+        function showToast(message, type = 'info', duration = 5000) {
             const toastContainer = document.getElementById('toastContainer');
             const toast = document.createElement('div');
             toast.className = `toast ${type}`;
+
+            const icons = {
+                success: 'fa-check-circle',
+                error: 'fa-exclamation-circle',
+                warning: 'fa-exclamation-triangle',
+                info: 'fa-info-circle'
+            };
+
             toast.innerHTML = `
-                <div class="d-flex align-items-center">
-                    <i class="fas ${getToastIcon(type)} me-2"></i>
-                    <span>${message}</span>
+                <div class="toast-icon">
+                    <i class="fas ${icons[type]}"></i>
                 </div>
+                <div class="toast-content">
+                    ${message}
+                </div>
+                <button class="toast-close" onclick="this.parentElement.remove()">
+                    <i class="fas fa-times"></i>
+                </button>
             `;
 
             toastContainer.appendChild(toast);
 
-            // Show toast
+            // Show toast with animation
             setTimeout(() => toast.classList.add('show'), 100);
 
-            // Remove toast after 5 seconds
-            setTimeout(() => {
-                toast.classList.remove('show');
-                setTimeout(() => toast.remove(), 300);
-            }, 5000);
-        }
-
-        function getToastIcon(type) {
-            switch (type) {
-                case 'success': return 'fa-check-circle';
-                case 'error': return 'fa-exclamation-circle';
-                case 'warning': return 'fa-exclamation-triangle';
-                default: return 'fa-info-circle';
+            // Auto remove after duration
+            if (duration > 0) {
+                setTimeout(() => {
+                    toast.classList.remove('show');
+                    toast.classList.add('hide');
+                    setTimeout(() => toast.remove(), 300);
+                }, duration);
             }
         }
 
@@ -457,7 +716,9 @@
             }
 
             if (!isValid) {
-                showToast('Please fix the errors above', 'warning');
+                showToast('Please check the form for errors', 'warning', 4000);
+            } else {
+                showToast('Signing you in...', 'info', 2000);
             }
 
             return isValid;
@@ -480,25 +741,50 @@
             });
         }
 
-        // Add some interactive effects
+        // Password visibility toggle
+        function togglePassword(fieldId) {
+            const field = document.getElementById(fieldId);
+            const toggle = field.nextElementSibling;
+            const icon = toggle.querySelector('i');
+
+            if (field.type === 'password') {
+                field.type = 'text';
+                icon.className = 'fas fa-eye-slash';
+                showToast('Password is now visible', 'info', 2000);
+            } else {
+                field.type = 'password';
+                icon.className = 'fas fa-eye';
+            }
+        }
+
+        // Demo toast on page load
         document.addEventListener('DOMContentLoaded', function () {
+            setTimeout(() => {
+                showToast('Welcome back! Ready to continue your sustainability journey?', 'info', 4000);
+            }, 1000);
+
+            // Add focus effects to form inputs
             const inputs = document.querySelectorAll('.form-control');
             inputs.forEach(input => {
                 input.addEventListener('focus', function () {
-                    this.parentElement.classList.add('focused');
+                    this.style.transform = 'scale(1.02)';
                 });
 
                 input.addEventListener('blur', function () {
-                    if (!this.value) {
-                        this.parentElement.classList.remove('focused');
-                    }
+                    this.style.transform = 'scale(1)';
                 });
             });
-
-            // Demo toast on page load
-            setTimeout(() => {
-                showToast('Welcome back! Sign in to continue your sustainability journey.', 'info');
-            }, 1000);
         });
+
+        // Demo function to show different toast types
+        function demoToasts() {
+            showToast('Login successful! Redirecting to dashboard...', 'success', 3000);
+            setTimeout(() => {
+                showToast('Invalid email or password', 'error', 4000);
+            }, 3500);
+            setTimeout(() => {
+                showToast('Your session will expire soon', 'warning', 5000);
+            }, 8000);
+        }
     </script>
 </asp:Content>

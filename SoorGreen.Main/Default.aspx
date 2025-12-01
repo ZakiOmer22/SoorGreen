@@ -1,4 +1,5 @@
 ﻿<%@ Page Language="C#" AutoEventWireup="true" CodeBehind="Default.aspx.cs" Inherits="SoorGreen.Main._Default" %>
+
 <!DOCTYPE html>
 <html lang="en">
 <head runat="server">
@@ -36,6 +37,92 @@
             line-height: 1.6;
         }
 
+        /* Video Intro Overlay - Full Screen */
+        .video-intro-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: #000;
+            z-index: 9999;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: opacity 1.5s ease-in-out;
+        }
+
+        .video-intro {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .video-intro-overlay.fade-out {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        /* Skip Button - Fixed at Bottom */
+        .skip-button-container {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 10000;
+            text-align: center;
+            transition: opacity 0.5s ease;
+        }
+
+        .btn-skip-intro {
+            background: rgba(255, 255, 255, 0.2);
+            border: 2px solid rgba(255, 255, 255, 0.5);
+            color: white;
+            padding: 12px 30px;
+            border-radius: 50px;
+            font-weight: 600;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+            .btn-skip-intro:hover {
+                background: rgba(255, 255, 255, 0.3);
+                border-color: rgba(255, 255, 255, 0.8);
+                transform: translateY(-2px);
+            }
+
+        .skip-text {
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 0.9rem;
+            margin-top: 8px;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% {
+                opacity: 0.7;
+            }
+
+            50% {
+                opacity: 1;
+            }
+        }
+
+        /* Main Content - Initially Hidden */
+        .main-content {
+            opacity: 0;
+            transition: opacity 1.5s ease-in-out;
+        }
+
+            .main-content.show {
+                opacity: 1;
+            }
+
         /* Navigation */
         .navbar {
             background: rgba(10, 25, 47, 0.95);
@@ -62,10 +149,10 @@
             transition: all 0.3s ease;
         }
 
-        .nav-link:hover {
-            color: var(--primary) !important;
-            transform: translateY(-2px);
-        }
+            .nav-link:hover {
+                color: var(--primary) !important;
+                transform: translateY(-2px);
+            }
 
         /* Hero Section */
         .hero-section {
@@ -83,21 +170,27 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background: 
-                radial-gradient(circle at 20% 80%, rgba(0, 212, 170, 0.15) 0%, transparent 50%),
-                radial-gradient(circle at 80% 20%, rgba(9, 132, 227, 0.15) 0%, transparent 50%);
+            background: radial-gradient(circle at 20% 80%, rgba(0, 212, 170, 0.15) 0%, transparent 50%), radial-gradient(circle at 80% 20%, rgba(9, 132, 227, 0.15) 0%, transparent 50%);
             animation: float 8s ease-in-out infinite;
         }
 
         @keyframes float {
-            0%, 100% { transform: translateY(0px) rotate(0deg); }
-            33% { transform: translateY(-20px) rotate(1deg); }
-            66% { transform: translateY(10px) rotate(-1deg); }
+            0%, 100% {
+                transform: translateY(0px) rotate(0deg);
+            }
+
+            33% {
+                transform: translateY(-20px) rotate(1deg);
+            }
+
+            66% {
+                transform: translateY(10px) rotate(-1deg);
+            }
         }
 
         .hero-content {
             position: relative;
-            z-index: 2;
+            z-index: 3;
             text-align: center;
             padding: 0 2rem;
         }
@@ -111,9 +204,17 @@
         }
 
         @keyframes bounce {
-            0%, 20%, 50%, 80%, 100% { transform: translateY(0) scale(1); }
-            40% { transform: translateY(-20px) scale(1.1); }
-            60% { transform: translateY(-10px) scale(1.05); }
+            0%, 20%, 50%, 80%, 100% {
+                transform: translateY(0) scale(1);
+            }
+
+            40% {
+                transform: translateY(-20px) scale(1.1);
+            }
+
+            60% {
+                transform: translateY(-10px) scale(1.05);
+            }
         }
 
         .hero-title {
@@ -128,8 +229,13 @@
         }
 
         @keyframes titleGlow {
-            from { text-shadow: 0 0 20px rgba(255, 255, 255, 0.1); }
-            to { text-shadow: 0 0 30px rgba(255, 255, 255, 0.3), 0 0 40px rgba(0, 212, 170, 0.2); }
+            from {
+                text-shadow: 0 0 20px rgba(255, 255, 255, 0.1);
+            }
+
+            to {
+                text-shadow: 0 0 30px rgba(255, 255, 255, 0.3), 0 0 40px rgba(0, 212, 170, 0.2);
+            }
         }
 
         .hero-subtitle {
@@ -158,27 +264,28 @@
             gap: 0.8rem;
             position: relative;
             overflow: hidden;
+            text-decoration: none;
         }
 
-        .btn-hero::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: -100%;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
-            transition: left 0.5s ease;
-        }
+            .btn-hero::before {
+                content: '';
+                position: absolute;
+                top: 0;
+                left: -100%;
+                width: 100%;
+                height: 100%;
+                background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+                transition: left 0.5s ease;
+            }
 
-        .btn-hero:hover::before {
-            left: 100%;
-        }
+            .btn-hero:hover::before {
+                left: 100%;
+            }
 
-        .btn-hero:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 15px 30px rgba(0, 212, 170, 0.4);
-        }
+            .btn-hero:hover {
+                transform: translateY(-3px);
+                box-shadow: 0 15px 30px rgba(0, 212, 170, 0.4);
+            }
 
         /* Stats Section */
         .stats-section {
@@ -206,11 +313,11 @@
             transition: all 0.3s ease;
         }
 
-        .stat-card:hover {
-            transform: translateY(-10px);
-            border-color: var(--primary);
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
-        }
+            .stat-card:hover {
+                transform: translateY(-10px);
+                border-color: var(--primary);
+                box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+            }
 
         .stat-number {
             font-size: 3rem;
@@ -271,11 +378,11 @@
             text-align: center;
         }
 
-        .feature-card:hover {
-            transform: translateY(-10px);
-            border-color: var(--primary);
-            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.3);
-        }
+            .feature-card:hover {
+                transform: translateY(-10px);
+                border-color: var(--primary);
+                box-shadow: 0 25px 50px rgba(0, 0, 0, 0.3);
+            }
 
         .feature-icon {
             font-size: 3rem;
@@ -321,26 +428,26 @@
             overflow: hidden;
         }
 
-        .platform-card::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: -100%;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.05), transparent);
-            transition: left 0.6s ease;
-        }
+            .platform-card::before {
+                content: '';
+                position: absolute;
+                top: 0;
+                left: -100%;
+                width: 100%;
+                height: 100%;
+                background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.05), transparent);
+                transition: left 0.6s ease;
+            }
 
-        .platform-card:hover::before {
-            left: 100%;
-        }
+            .platform-card:hover::before {
+                left: 100%;
+            }
 
-        .platform-card:hover {
-            transform: translateY(-15px);
-            border-color: var(--primary);
-            box-shadow: 0 30px 60px rgba(0, 0, 0, 0.4);
-        }
+            .platform-card:hover {
+                transform: translateY(-15px);
+                border-color: var(--primary);
+                box-shadow: 0 30px 60px rgba(0, 0, 0, 0.4);
+            }
 
         .platform-icon {
             font-size: 4rem;
@@ -375,17 +482,17 @@
             position: relative;
         }
 
-        .steps-container::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 4px;
-            height: 100%;
-            background: linear-gradient(to bottom, var(--primary), var(--secondary));
-            border-radius: 10px;
-        }
+            .steps-container::before {
+                content: '';
+                position: absolute;
+                top: 0;
+                left: 50%;
+                transform: translateX(-50%);
+                width: 4px;
+                height: 100%;
+                background: linear-gradient(to bottom, var(--primary), var(--secondary));
+                border-radius: 10px;
+            }
 
         .step {
             display: flex;
@@ -394,9 +501,9 @@
             position: relative;
         }
 
-        .step:nth-child(even) {
-            flex-direction: row-reverse;
-        }
+            .step:nth-child(even) {
+                flex-direction: row-reverse;
+            }
 
         .step-content {
             flex: 1;
@@ -459,11 +566,11 @@
             position: relative;
         }
 
-        .testimonial-card:hover {
-            transform: translateY(-10px);
-            border-color: var(--primary);
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
-        }
+            .testimonial-card:hover {
+                transform: translateY(-10px);
+                border-color: var(--primary);
+                box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+            }
 
         .testimonial-quote {
             font-size: 3rem;
@@ -535,23 +642,23 @@
             transition: all 0.3s ease;
         }
 
-        .partner-logo:hover {
-            transform: translateY(-5px);
-            border-color: var(--primary);
-            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.2);
-        }
+            .partner-logo:hover {
+                transform: translateY(-5px);
+                border-color: var(--primary);
+                box-shadow: 0 15px 30px rgba(0, 0, 0, 0.2);
+            }
 
-        .partner-logo img {
-            max-width: 100%;
-            max-height: 60px;
-            filter: brightness(0) invert(1);
-            opacity: 0.7;
-            transition: all 0.3s ease;
-        }
+            .partner-logo img {
+                max-width: 100%;
+                max-height: 60px;
+                filter: brightness(0) invert(1);
+                opacity: 0.7;
+                transition: all 0.3s ease;
+            }
 
-        .partner-logo:hover img {
-            opacity: 1;
-        }
+            .partner-logo:hover img {
+                opacity: 1;
+            }
 
         /* FAQ Section */
         .faq-section {
@@ -583,9 +690,9 @@
             transition: all 0.3s ease;
         }
 
-        .faq-question:hover {
-            background: rgba(255, 255, 255, 0.05);
-        }
+            .faq-question:hover {
+                background: rgba(255, 255, 255, 0.05);
+            }
 
         .faq-answer {
             padding: 0 1.5rem;
@@ -632,11 +739,11 @@
             transition: all 0.3s ease;
         }
 
-        .tech-card:hover {
-            transform: translateY(-10px);
-            border-color: var(--primary);
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
-        }
+            .tech-card:hover {
+                transform: translateY(-10px);
+                border-color: var(--primary);
+                box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+            }
 
         .tech-icon {
             font-size: 3rem;
@@ -678,11 +785,11 @@
             transition: all 0.3s ease;
         }
 
-        .team-card:hover {
-            transform: translateY(-10px);
-            border-color: var(--primary);
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
-        }
+            .team-card:hover {
+                transform: translateY(-10px);
+                border-color: var(--primary);
+                box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+            }
 
         .team-avatar {
             width: 120px;
@@ -721,23 +828,23 @@
             gap: 1rem;
         }
 
-        .team-social a {
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            background: rgba(255, 255, 255, 0.1);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            text-decoration: none;
-            transition: all 0.3s ease;
-        }
+            .team-social a {
+                width: 40px;
+                height: 40px;
+                border-radius: 50%;
+                background: rgba(255, 255, 255, 0.1);
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                color: white;
+                text-decoration: none;
+                transition: all 0.3s ease;
+            }
 
-        .team-social a:hover {
-            background: var(--primary);
-            transform: translateY(-3px);
-        }
+                .team-social a:hover {
+                    background: var(--primary);
+                    transform: translateY(-3px);
+                }
 
         /* CTA Section */
         .cta-section {
@@ -784,11 +891,11 @@
             text-decoration: none;
         }
 
-        .btn-cta:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 20px 40px rgba(253, 121, 168, 0.4);
-            color: white;
-        }
+            .btn-cta:hover {
+                transform: translateY(-5px);
+                box-shadow: 0 20px 40px rgba(253, 121, 168, 0.4);
+                color: white;
+            }
 
         /* Footer */
         .footer {
@@ -836,10 +943,10 @@
             transition: all 0.3s ease;
         }
 
-        .social-link:hover {
-            background: var(--primary);
-            transform: translateY(-3px);
-        }
+            .social-link:hover {
+                background: var(--primary);
+                transform: translateY(-3px);
+            }
 
         .copyright {
             opacity: 0.5;
@@ -854,6 +961,7 @@
             pointer-events: none;
             top: 0;
             left: 0;
+            z-index: 2;
         }
 
         .floating-element {
@@ -862,443 +970,1257 @@
             opacity: 0.1;
             animation: floatElement 20s ease-in-out infinite;
         }
+        /* Additional Styles for Database Sections */
+        .tech-badge {
+            background: linear-gradient(45deg, var(--primary), var(--secondary));
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            margin-top: 1rem;
+            display: inline-block;
+        }
+
+        .feature-list {
+            text-align: left;
+            margin-top: 1.5rem;
+        }
+
+        .feature-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 0.5rem;
+            font-size: 0.9rem;
+        }
+
+            .feature-item i {
+                color: var(--primary);
+                font-size: 0.8rem;
+            }
+
+        .step-tech {
+            display: flex;
+            gap: 0.5rem;
+            margin-top: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .tech-tag {
+            background: rgba(0, 212, 170, 0.1);
+            color: var(--primary);
+            padding: 0.3rem 0.8rem;
+            border-radius: 15px;
+            font-size: 0.8rem;
+            border: 1px solid rgba(0, 212, 170, 0.3);
+        }
+
+        .benefit-metric {
+            text-align: center;
+            margin-top: 1.5rem;
+            padding: 1rem;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+        }
+
+        .metric-value {
+            display: block;
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: 0.5rem;
+        }
+
+        .metric-label {
+            font-size: 0.9rem;
+            opacity: 0.8;
+        }
+
+        .testimonial-card .feature-title {
+            margin-bottom: 1rem;
+            color: var(--primary);
+        }
+
+        .testimonial-card .testimonial-text {
+            margin-bottom: 0;
+            font-style: normal;
+        }
 
         @keyframes floatElement {
-            0%, 100% { transform: translate(0, 0) rotate(0deg) scale(1); }
-            25% { transform: translate(100px, -80px) rotate(90deg) scale(1.1); }
-            50% { transform: translate(50px, -120px) rotate(180deg) scale(0.9); }
-            75% { transform: translate(-80px, -60px) rotate(270deg) scale(1.05); }
+            0%, 100% {
+                transform: translate(0, 0) rotate(0deg) scale(1);
+            }
+
+            25% {
+                transform: translate(100px, -80px) rotate(90deg) scale(1.1);
+            }
+
+            50% {
+                transform: translate(50px, -120px) rotate(180deg) scale(0.9);
+            }
+
+            75% {
+                transform: translate(-80px, -60px) rotate(270deg) scale(1.05);
+            }
         }
 
         /* Responsive */
         @media (max-width: 768px) {
-            .hero-title { font-size: 2.5rem; }
-            .section-title { font-size: 2.5rem; }
-            .features-grid, .platform-grid { grid-template-columns: 1fr; }
-            .stats-grid { grid-template-columns: repeat(2, 1fr); }
-            .steps-container::before { display: none; }
-            .step { flex-direction: column !important; }
-            .step-number { margin: 0 0 1rem 0; }
+            .hero-title {
+                font-size: 2.5rem;
+            }
+
+            .section-title {
+                font-size: 2.5rem;
+            }
+
+            .features-grid, .platform-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .steps-container::before {
+                display: none;
+            }
+
+            .step {
+                flex-direction: column !important;
+            }
+
+            .step-number {
+                margin: 0 0 1rem 0;
+            }
+
+            .btn-skip-intro {
+                padding: 10px 20px;
+                font-size: 0.9rem;
+            }
         }
     </style>
 </head>
 <body>
-    <form id="form1" runat="server">
-        <!-- Navigation -->
-        <nav class="navbar navbar-expand-lg navbar-dark">
-            <div class="container">
-                <a class="navbar-brand" href="#">
-                    <i class="fas fa-recycle me-2"></i>
-                    SoorGreen
-                </a>
-                <div class="navbar-nav ms-auto">
-                    <a class="nav-link" href="#features">Features</a>
-                    <a class="nav-link" href="#platform">Platform</a>
-                    <a class="nav-link" href="#how-it-works">How It Works</a>
-                    <a class="nav-link" href="#stats">Impact</a>
-                    <a class="nav-link" href="#testimonials">Testimonials</a>
-                    <a class="nav-link" href="#cta">Get Started</a>
-                </div>
-            </div>
-        </nav>
+    <!-- Video Intro Overlay - Full Screen Video Only -->
+    <div class="video-intro-overlay" id="videoIntro">
+        <video class="video-intro" autoplay muted playsinline loop>
+            <source src="Videos/demo.mp4" type="video/mp4">
+            Your browser does not support the video tag.
+        </video>
+    </div>
 
-        <!-- Hero Section -->
-        <section class="hero-section" id="home">
-            <div class="hero-bg"></div>
-            <div class="floating-elements">
-                <div class="floating-element" style="top: 20%; left: 10%;"><i class="fas fa-leaf"></i></div>
-                <div class="floating-element" style="top: 60%; left: 85%;"><i class="fas fa-recycle"></i></div>
-                <div class="floating-element" style="top: 80%; left: 15%;"><i class="fas fa-seedling"></i></div>
-            </div>
-            <div class="container">
-                <div class="hero-content">
-                    <div class="hero-logo">
-                        <i class="fas fa-recycle"></i>
+    <!-- Skip Button - Fixed at Bottom -->
+    <div class="skip-button-container" id="skipButtonContainer">
+        <button class="btn-skip-intro" onclick="skipVideo()">
+            <i class="fas fa-forward"></i>
+            Skip Intro
+        </button>
+        <div class="skip-text">Click to explore SoorGreen</div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-content" id="mainContent">
+        <form id="form1" runat="server">
+            <!-- Navigation -->
+            <nav class="navbar navbar-expand-lg navbar-dark">
+                <div class="container">
+                    <a class="navbar-brand" href="#">
+                        <i class="fas fa-recycle me-2"></i>
+                        SoorGreen
+                    </a>
+                    <div class="navbar-nav ms-auto">
+                        <a class="nav-link" href="#features">Features</a>
+                        <a class="nav-link" href="#platform">Platform</a>
+                        <a class="nav-link" href="#how-it-works">How It Works</a>
+                        <a class="nav-link" href="#stats">Impact</a>
+                        <a class="nav-link" href="#testimonials">Testimonials</a>
+                        <a class="nav-link" href="#cta">Get Started</a>
                     </div>
-                    <h1 class="hero-title">SoorGreen Initiative</h1>
-                    <p class="hero-subtitle">
-                        Transforming waste management through technology, community engagement, and sustainable innovation. 
-                        Join us in building cleaner, greener cities for future generations.
+                </div>
+            </nav>
+
+            <!-- Hero Section -->
+            <section class="hero-section" id="home">
+                <div class="hero-bg"></div>
+                <div class="floating-elements">
+                    <div class="floating-element" style="top: 20%; left: 10%;"><i class="fas fa-leaf"></i></div>
+                    <div class="floating-element" style="top: 60%; left: 85%;"><i class="fas fa-recycle"></i></div>
+                    <div class="floating-element" style="top: 80%; left: 15%;"><i class="fas fa-seedling"></i></div>
+                </div>
+                <div class="container">
+                    <div class="hero-content">
+                        <div class="hero-logo">
+                            <i class="fas fa-recycle"></i>
+                        </div>
+                        <h1 class="hero-title">SoorGreen Initiative</h1>
+                        <p class="hero-subtitle">
+                            Transforming waste management through technology, community engagement, and sustainable innovation. 
+                Join us in building cleaner, greener cities for future generations.
+                        </p>
+                        <div style="display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap;">
+                            <a href="ChooseApp.aspx" class="btn-hero">
+                                <i class="fas fa-rocket"></i>
+                                Launch Platform
+                            </a>
+                            <button class="btn-hero" onclick="replayVideo()" style="background: linear-gradient(45deg, var(--accent), var(--secondary));">
+                                <i class="fas fa-play-circle"></i>
+                                View Demo
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Database Architecture Overview -->
+            <section class="features-section" id="database-architecture">
+                <div class="container">
+                    <h2 class="section-title" data-aos="fade-up">Smart Database Architecture</h2>
+                    <p class="section-subtitle" data-aos="fade-up" data-aos-delay="100">
+                        Powered by advanced SQL Server technologies for optimal performance and scalability
                     </p>
-                    <a href="ChooseApp.aspx" class="btn-hero">
-                        <i class="fas fa-rocket"></i>
-                        Launch Platform
+                    <div class="features-grid">
+                        <div class="feature-card" data-aos="fade-up" data-aos-delay="200">
+                            <div class="feature-icon">
+                                <i class="fas fa-database"></i>
+                            </div>
+                            <h3 class="feature-title">Database Schema</h3>
+                            <p class="feature-desc">
+                                Well-structured relational design with optimized tables, relationships, and constraints 
+                    for efficient waste management data organization.
+                            </p>
+                            <div class="tech-badge">Normalized Design</div>
+                        </div>
+                        <div class="feature-card" data-aos="fade-up" data-aos-delay="300">
+                            <div class="feature-icon">
+                                <i class="fas fa-eye"></i>
+                            </div>
+                            <h3 class="feature-title">SQL Views</h3>
+                            <p class="feature-desc">
+                                Predefined query perspectives that simplify complex data access and provide 
+                    secure, customized data representations for different user roles.
+                            </p>
+                            <div class="tech-badge">Data Abstraction</div>
+                        </div>
+                        <div class="feature-card" data-aos="fade-up" data-aos-delay="400">
+                            <div class="feature-icon">
+                                <i class="fas fa-search"></i>
+                            </div>
+                            <h3 class="feature-title">Indexes</h3>
+                            <p class="feature-desc">
+                                High-performance indexing strategies that accelerate data retrieval 
+                    and ensure quick response times for real-time waste management operations.
+                            </p>
+                            <div class="tech-badge">Fast Queries</div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Advanced Database Features -->
+            <section class="platform-section" id="advanced-features">
+                <div class="container">
+                    <h2 class="section-title" data-aos="fade-up">Advanced Database Features</h2>
+                    <p class="section-subtitle" data-aos="fade-up" data-aos-delay="100">
+                        Intelligent automation and business logic implementation
+                    </p>
+                    <div class="platform-grid">
+                        <div class="platform-card" data-aos="fade-up" data-aos-delay="200">
+                            <div class="platform-icon">
+                                <i class="fas fa-bolt"></i>
+                            </div>
+                            <h3 class="platform-title">Triggers</h3>
+                            <p class="platform-desc">
+                                Automated database responses that enforce business rules, maintain data integrity, 
+                    and trigger notifications for critical waste management events.
+                            </p>
+                            <div class="feature-list">
+                                <div class="feature-item">
+                                    <i class="fas fa-check-circle"></i>
+                                    <span>Real-time data validation</span>
+                                </div>
+                                <div class="feature-item">
+                                    <i class="fas fa-check-circle"></i>
+                                    <span>Automatic audit trails</span>
+                                </div>
+                                <div class="feature-item">
+                                    <i class="fas fa-check-circle"></i>
+                                    <span>Event-driven notifications</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="platform-card" data-aos="fade-up" data-aos-delay="400">
+                            <div class="platform-icon">
+                                <i class="fas fa-cogs"></i>
+                            </div>
+                            <h3 class="platform-title">Stored Procedures</h3>
+                            <p class="platform-desc">
+                                Precompiled database routines that encapsulate complex business logic, 
+                    improve performance, and ensure consistent data processing across applications.
+                            </p>
+                            <div class="feature-list">
+                                <div class="feature-item">
+                                    <i class="fas fa-check-circle"></i>
+                                    <span>Parameterized operations</span>
+                                </div>
+                                <div class="feature-item">
+                                    <i class="fas fa-check-circle"></i>
+                                    <span>Transaction management</span>
+                                </div>
+                                <div class="feature-item">
+                                    <i class="fas fa-check-circle"></i>
+                                    <span>Reusable business logic</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="platform-card" data-aos="fade-up" data-aos-delay="600">
+                            <div class="platform-icon">
+                                <i class="fas fa-shield-alt"></i>
+                            </div>
+                            <h3 class="platform-title">Security & Functions</h3>
+                            <p class="platform-desc">
+                                Comprehensive security model with user-defined functions for data protection, 
+                    access control, and custom calculations within the database layer.
+                            </p>
+                            <div class="feature-list">
+                                <div class="feature-item">
+                                    <i class="fas fa-check-circle"></i>
+                                    <span>Role-based permissions</span>
+                                </div>
+                                <div class="feature-item">
+                                    <i class="fas fa-check-circle"></i>
+                                    <span>Data encryption</span>
+                                </div>
+                                <div class="feature-item">
+                                    <i class="fas fa-check-circle"></i>
+                                    <span>Custom calculations</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Database Performance Section -->
+            <section class="stats-section" id="database-performance">
+                <div class="container">
+                    <h2 class="section-title" data-aos="fade-up">Database Performance Metrics</h2>
+                    <p class="section-subtitle" data-aos="fade-up" data-aos-delay="100">
+                        Optimized for high-throughput waste management operations
+                    </p>
+                    <div class="stats-grid">
+                        <div class="stat-card" data-aos="zoom-in" data-aos-delay="200">
+                            <span class="stat-number">99.9%</span>
+                            <span class="stat-label">Uptime Reliability</span>
+                        </div>
+                        <div class="stat-card" data-aos="zoom-in" data-aos-delay="300">
+                            <span class="stat-number">&lt;50ms</span>
+                            <span class="stat-label">Query Response Time</span>
+                        </div>
+                        <div class="stat-card" data-aos="zoom-in" data-aos-delay="400">
+                            <span class="stat-number">10K+</span>
+                            <span class="stat-label">Transactions/Second</span>
+                        </div>
+                        <div class="stat-card" data-aos="zoom-in" data-aos-delay="500">
+                            <span class="stat-number">24/7</span>
+                            <span class="stat-label">Monitoring & Backup</span>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Database Implementation Timeline -->
+            <section class="how-it-works-section" id="database-implementation">
+                <div class="container">
+                    <h2 class="section-title" data-aos="fade-up">Database Implementation Process</h2>
+                    <p class="section-subtitle" data-aos="fade-up" data-aos-delay="100">
+                        Structured approach to building robust database systems
+                    </p>
+                    <div class="steps-container">
+                        <div class="step" data-aos="fade-right" data-aos-delay="200">
+                            <div class="step-number">1</div>
+                            <div class="step-content">
+                                <h3 class="step-title">Schema Design & Normalization</h3>
+                                <p class="step-desc">
+                                    Create optimized table structures with proper relationships, constraints, 
+                        and normalization to eliminate data redundancy and ensure integrity.
+                                </p>
+                                <div class="step-tech">
+                                    <span class="tech-tag">Tables</span>
+                                    <span class="tech-tag">Relationships</span>
+                                    <span class="tech-tag">Constraints</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="step" data-aos="fade-left" data-aos-delay="300">
+                            <div class="step-number">2</div>
+                            <div class="step-content">
+                                <h3 class="step-title">Views & Data Abstraction</h3>
+                                <p class="step-desc">
+                                    Implement SQL Views to simplify complex queries, provide data security, 
+                        and create customized data perspectives for different application needs.
+                                </p>
+                                <div class="step-tech">
+                                    <span class="tech-tag">SQL Views</span>
+                                    <span class="tech-tag">Security</span>
+                                    <span class="tech-tag">Abstraction</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="step" data-aos="fade-right" data-aos-delay="400">
+                            <div class="step-number">3</div>
+                            <div class="step-content">
+                                <h3 class="step-title">Index Optimization</h3>
+                                <p class="step-desc">
+                                    Design and implement strategic indexes to accelerate data retrieval, 
+                        optimize query performance, and support real-time reporting requirements.
+                                </p>
+                                <div class="step-tech">
+                                    <span class="tech-tag">Clustered Index</span>
+                                    <span class="tech-tag">Non-Clustered</span>
+                                    <span class="tech-tag">Performance</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="step" data-aos="fade-left" data-aos-delay="500">
+                            <div class="step-number">4</div>
+                            <div class="step-content">
+                                <h3 class="step-title">Triggers & Automation</h3>
+                                <p class="step-desc">
+                                    Develop database triggers for automated business rules enforcement, 
+                        data validation, audit trails, and real-time event processing.
+                                </p>
+                                <div class="step-tech">
+                                    <span class="tech-tag">DML Triggers</span>
+                                    <span class="tech-tag">DDL Triggers</span>
+                                    <span class="tech-tag">Automation</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="step" data-aos="fade-right" data-aos-delay="600">
+                            <div class="step-number">5</div>
+                            <div class="step-content">
+                                <h3 class="step-title">Stored Procedures</h3>
+                                <p class="step-desc">
+                                    Create optimized stored procedures for complex business operations, 
+                        transaction management, and reusable database logic implementation.
+                                </p>
+                                <div class="step-tech">
+                                    <span class="tech-tag">T-SQL</span>
+                                    <span class="tech-tag">Transactions</span>
+                                    <span class="tech-tag">Optimization</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Database Benefits Section -->
+            <section class="testimonials-section" id="database-benefits">
+                <div class="container">
+                    <h2 class="section-title" data-aos="fade-up">Database System Benefits</h2>
+                    <p class="section-subtitle" data-aos="fade-up" data-aos-delay="100">
+                        How our advanced database architecture powers SoorGreen's success
+                    </p>
+                    <div class="testimonials-grid">
+                        <div class="testimonial-card" data-aos="fade-up" data-aos-delay="200">
+                            <div class="testimonial-quote">
+                                <i class="fas fa-rocket"></i>
+                            </div>
+                            <h3 class="feature-title">High Performance</h3>
+                            <p class="testimonial-text">
+                                Optimized queries and indexing ensure sub-second response times for all waste management 
+                    operations, from pickup scheduling to real-time tracking.
+                            </p>
+                            <div class="benefit-metric">
+                                <span class="metric-value">0.2s</span>
+                                <span class="metric-label">Average Query Time</span>
+                            </div>
+                        </div>
+                        <div class="testimonial-card" data-aos="fade-up" data-aos-delay="300">
+                            <div class="testimonial-quote">
+                                <i class="fas fa-shield-alt"></i>
+                            </div>
+                            <h3 class="feature-title">Data Integrity</h3>
+                            <p class="testimonial-text">
+                                Comprehensive constraints, triggers, and validation rules maintain data accuracy 
+                    and consistency across millions of waste management transactions.
+                            </p>
+                            <div class="benefit-metric">
+                                <span class="metric-value">100%</span>
+                                <span class="metric-label">Data Accuracy</span>
+                            </div>
+                        </div>
+                        <div class="testimonial-card" data-aos="fade-up" data-aos-delay="400">
+                            <div class="testimonial-quote">
+                                <i class="fas fa-expand-arrows-alt"></i>
+                            </div>
+                            <h3 class="feature-title">Scalability</h3>
+                            <p class="testimonial-text">
+                                Designed to handle exponential growth with partitioned tables, 
+                    optimized indexes, and efficient stored procedures supporting thousands of concurrent users.
+                            </p>
+                            <div class="benefit-metric">
+                                <span class="metric-value">10x</span>
+                                <span class="metric-label">Growth Capacity</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Database CTA Section -->
+            <section class="cta-section" id="database-cta">
+                <div class="container">
+                    <div class="cta-content" data-aos="zoom-in">
+                        <h2 class="cta-title">Ready to Experience Powerful Database Performance?</h2>
+                        <p class="cta-subtitle">
+                            Our robust SQL Server architecture ensures lightning-fast operations, data integrity, 
+                and seamless scalability for all your waste management needs.
+                        </p>
+                        <div style="display: flex; gap: 1.5rem; justify-content: center; flex-wrap: wrap;">
+                            <a href="ChooseApp.aspx" class="btn-cta">
+                                <i class="fas fa-database"></i>
+                                Explore Platform
+                            </a>
+                            <button class="btn-cta" style="background: linear-gradient(45deg, var(--primary), var(--secondary));">
+                                <i class="fas fa-book"></i>
+                                Technical Documentation
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+            <!-- Database Architecture Overview -->
+            <section class="features-section" id="database-architecture">
+                <div class="container">
+                    <h2 class="section-title" data-aos="fade-up">Smart Database Architecture</h2>
+                    <p class="section-subtitle" data-aos="fade-up" data-aos-delay="100">
+                        Powered by advanced SQL Server technologies for optimal performance and scalability
+                    </p>
+                    <div class="features-grid">
+                        <div class="feature-card" data-aos="fade-up" data-aos-delay="200">
+                            <div class="feature-icon">
+                                <i class="fas fa-database"></i>
+                            </div>
+                            <h3 class="feature-title">Database Schema</h3>
+                            <p class="feature-desc">
+                                Well-structured relational design with optimized tables, relationships, and constraints 
+                    for efficient waste management data organization.
+                            </p>
+                            <div class="tech-badge">Normalized Design</div>
+                        </div>
+                        <div class="feature-card" data-aos="fade-up" data-aos-delay="300">
+                            <div class="feature-icon">
+                                <i class="fas fa-eye"></i>
+                            </div>
+                            <h3 class="feature-title">SQL Views</h3>
+                            <p class="feature-desc">
+                                Predefined query perspectives that simplify complex data access and provide 
+                    secure, customized data representations for different user roles.
+                            </p>
+                            <div class="tech-badge">Data Abstraction</div>
+                        </div>
+                        <div class="feature-card" data-aos="fade-up" data-aos-delay="400">
+                            <div class="feature-icon">
+                                <i class="fas fa-search"></i>
+                            </div>
+                            <h3 class="feature-title">Indexes</h3>
+                            <p class="feature-desc">
+                                High-performance indexing strategies that accelerate data retrieval 
+                    and ensure quick response times for real-time waste management operations.
+                            </p>
+                            <div class="tech-badge">Fast Queries</div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Advanced Database Features -->
+            <section class="platform-section" id="advanced-features">
+                <div class="container">
+                    <h2 class="section-title" data-aos="fade-up">Advanced Database Features</h2>
+                    <p class="section-subtitle" data-aos="fade-up" data-aos-delay="100">
+                        Intelligent automation and business logic implementation
+                    </p>
+                    <div class="platform-grid">
+                        <div class="platform-card" data-aos="fade-up" data-aos-delay="200">
+                            <div class="platform-icon">
+                                <i class="fas fa-bolt"></i>
+                            </div>
+                            <h3 class="platform-title">Triggers</h3>
+                            <p class="platform-desc">
+                                Automated database responses that enforce business rules, maintain data integrity, 
+                    and trigger notifications for critical waste management events.
+                            </p>
+                            <div class="feature-list">
+                                <div class="feature-item">
+                                    <i class="fas fa-check-circle"></i>
+                                    <span>Real-time data validation</span>
+                                </div>
+                                <div class="feature-item">
+                                    <i class="fas fa-check-circle"></i>
+                                    <span>Automatic audit trails</span>
+                                </div>
+                                <div class="feature-item">
+                                    <i class="fas fa-check-circle"></i>
+                                    <span>Event-driven notifications</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="platform-card" data-aos="fade-up" data-aos-delay="400">
+                            <div class="platform-icon">
+                                <i class="fas fa-cogs"></i>
+                            </div>
+                            <h3 class="platform-title">Stored Procedures</h3>
+                            <p class="platform-desc">
+                                Precompiled database routines that encapsulate complex business logic, 
+                    improve performance, and ensure consistent data processing across applications.
+                            </p>
+                            <div class="feature-list">
+                                <div class="feature-item">
+                                    <i class="fas fa-check-circle"></i>
+                                    <span>Parameterized operations</span>
+                                </div>
+                                <div class="feature-item">
+                                    <i class="fas fa-check-circle"></i>
+                                    <span>Transaction management</span>
+                                </div>
+                                <div class="feature-item">
+                                    <i class="fas fa-check-circle"></i>
+                                    <span>Reusable business logic</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="platform-card" data-aos="fade-up" data-aos-delay="600">
+                            <div class="platform-icon">
+                                <i class="fas fa-shield-alt"></i>
+                            </div>
+                            <h3 class="platform-title">Security & Functions</h3>
+                            <p class="platform-desc">
+                                Comprehensive security model with user-defined functions for data protection, 
+                    access control, and custom calculations within the database layer.
+                            </p>
+                            <div class="feature-list">
+                                <div class="feature-item">
+                                    <i class="fas fa-check-circle"></i>
+                                    <span>Role-based permissions</span>
+                                </div>
+                                <div class="feature-item">
+                                    <i class="fas fa-check-circle"></i>
+                                    <span>Data encryption</span>
+                                </div>
+                                <div class="feature-item">
+                                    <i class="fas fa-check-circle"></i>
+                                    <span>Custom calculations</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Database Performance Section -->
+            <section class="stats-section" id="database-performance">
+                <div class="container">
+                    <h2 class="section-title" data-aos="fade-up">Database Performance Metrics</h2>
+                    <p class="section-subtitle" data-aos="fade-up" data-aos-delay="100">
+                        Optimized for high-throughput waste management operations
+                    </p>
+                    <div class="stats-grid">
+                        <div class="stat-card" data-aos="zoom-in" data-aos-delay="200">
+                            <span class="stat-number">99.9%</span>
+                            <span class="stat-label">Uptime Reliability</span>
+                        </div>
+                        <div class="stat-card" data-aos="zoom-in" data-aos-delay="300">
+                            <span class="stat-number">&lt;50ms</span>
+                            <span class="stat-label">Query Response Time</span>
+                        </div>
+                        <div class="stat-card" data-aos="zoom-in" data-aos-delay="400">
+                            <span class="stat-number">10K+</span>
+                            <span class="stat-label">Transactions/Second</span>
+                        </div>
+                        <div class="stat-card" data-aos="zoom-in" data-aos-delay="500">
+                            <span class="stat-number">24/7</span>
+                            <span class="stat-label">Monitoring & Backup</span>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Database Implementation Timeline -->
+            <section class="how-it-works-section" id="database-implementation">
+                <div class="container">
+                    <h2 class="section-title" data-aos="fade-up">Database Implementation Process</h2>
+                    <p class="section-subtitle" data-aos="fade-up" data-aos-delay="100">
+                        Structured approach to building robust database systems
+                    </p>
+                    <div class="steps-container">
+                        <div class="step" data-aos="fade-right" data-aos-delay="200">
+                            <div class="step-number">1</div>
+                            <div class="step-content">
+                                <h3 class="step-title">Schema Design & Normalization</h3>
+                                <p class="step-desc">
+                                    Create optimized table structures with proper relationships, constraints, 
+                        and normalization to eliminate data redundancy and ensure integrity.
+                                </p>
+                                <div class="step-tech">
+                                    <span class="tech-tag">Tables</span>
+                                    <span class="tech-tag">Relationships</span>
+                                    <span class="tech-tag">Constraints</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="step" data-aos="fade-left" data-aos-delay="300">
+                            <div class="step-number">2</div>
+                            <div class="step-content">
+                                <h3 class="step-title">Views & Data Abstraction</h3>
+                                <p class="step-desc">
+                                    Implement SQL Views to simplify complex queries, provide data security, 
+                        and create customized data perspectives for different application needs.
+                                </p>
+                                <div class="step-tech">
+                                    <span class="tech-tag">SQL Views</span>
+                                    <span class="tech-tag">Security</span>
+                                    <span class="tech-tag">Abstraction</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="step" data-aos="fade-right" data-aos-delay="400">
+                            <div class="step-number">3</div>
+                            <div class="step-content">
+                                <h3 class="step-title">Index Optimization</h3>
+                                <p class="step-desc">
+                                    Design and implement strategic indexes to accelerate data retrieval, 
+                        optimize query performance, and support real-time reporting requirements.
+                                </p>
+                                <div class="step-tech">
+                                    <span class="tech-tag">Clustered Index</span>
+                                    <span class="tech-tag">Non-Clustered</span>
+                                    <span class="tech-tag">Performance</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="step" data-aos="fade-left" data-aos-delay="500">
+                            <div class="step-number">4</div>
+                            <div class="step-content">
+                                <h3 class="step-title">Triggers & Automation</h3>
+                                <p class="step-desc">
+                                    Develop database triggers for automated business rules enforcement, 
+                        data validation, audit trails, and real-time event processing.
+                                </p>
+                                <div class="step-tech">
+                                    <span class="tech-tag">DML Triggers</span>
+                                    <span class="tech-tag">DDL Triggers</span>
+                                    <span class="tech-tag">Automation</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="step" data-aos="fade-right" data-aos-delay="600">
+                            <div class="step-number">5</div>
+                            <div class="step-content">
+                                <h3 class="step-title">Stored Procedures</h3>
+                                <p class="step-desc">
+                                    Create optimized stored procedures for complex business operations, 
+                        transaction management, and reusable database logic implementation.
+                                </p>
+                                <div class="step-tech">
+                                    <span class="tech-tag">T-SQL</span>
+                                    <span class="tech-tag">Transactions</span>
+                                    <span class="tech-tag">Optimization</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Database Benefits Section -->
+            <section class="testimonials-section" id="database-benefits">
+                <div class="container">
+                    <h2 class="section-title" data-aos="fade-up">Database System Benefits</h2>
+                    <p class="section-subtitle" data-aos="fade-up" data-aos-delay="100">
+                        How our advanced database architecture powers SoorGreen's success
+                    </p>
+                    <div class="testimonials-grid">
+                        <div class="testimonial-card" data-aos="fade-up" data-aos-delay="200">
+                            <div class="testimonial-quote">
+                                <i class="fas fa-rocket"></i>
+                            </div>
+                            <h3 class="feature-title">High Performance</h3>
+                            <p class="testimonial-text">
+                                Optimized queries and indexing ensure sub-second response times for all waste management 
+                    operations, from pickup scheduling to real-time tracking.
+                            </p>
+                            <div class="benefit-metric">
+                                <span class="metric-value">0.2s</span>
+                                <span class="metric-label">Average Query Time</span>
+                            </div>
+                        </div>
+                        <div class="testimonial-card" data-aos="fade-up" data-aos-delay="300">
+                            <div class="testimonial-quote">
+                                <i class="fas fa-shield-alt"></i>
+                            </div>
+                            <h3 class="feature-title">Data Integrity</h3>
+                            <p class="testimonial-text">
+                                Comprehensive constraints, triggers, and validation rules maintain data accuracy 
+                    and consistency across millions of waste management transactions.
+                            </p>
+                            <div class="benefit-metric">
+                                <span class="metric-value">100%</span>
+                                <span class="metric-label">Data Accuracy</span>
+                            </div>
+                        </div>
+                        <div class="testimonial-card" data-aos="fade-up" data-aos-delay="400">
+                            <div class="testimonial-quote">
+                                <i class="fas fa-expand-arrows-alt"></i>
+                            </div>
+                            <h3 class="feature-title">Scalability</h3>
+                            <p class="testimonial-text">
+                                Designed to handle exponential growth with partitioned tables, 
+                    optimized indexes, and efficient stored procedures supporting thousands of concurrent users.
+                            </p>
+                            <div class="benefit-metric">
+                                <span class="metric-value">10x</span>
+                                <span class="metric-label">Growth Capacity</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Database CTA Section -->
+            <section class="cta-section" id="database-cta">
+                <div class="container">
+                    <div class="cta-content" data-aos="zoom-in">
+                        <h2 class="cta-title">Ready to Experience Powerful Database Performance?</h2>
+                        <p class="cta-subtitle">
+                            Our robust SQL Server architecture ensures lightning-fast operations, data integrity, 
+                and seamless scalability for all your waste management needs.
+                        </p>
+                        <div style="display: flex; gap: 1.5rem; justify-content: center; flex-wrap: wrap;">
+                            <a href="ChooseApp.aspx" class="btn-cta">
+                                <i class="fas fa-database"></i>
+                                Explore Platform
+                            </a>
+                            <button class="btn-cta" style="background: linear-gradient(45deg, var(--primary), var(--secondary));">
+                                <i class="fas fa-book"></i>
+                                Technical Documentation
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Stats Section -->
+            <section class="stats-section" id="stats" data-aos="fade-up">
+                <div class="stats-grid">
+                    <div class="stat-card" data-aos="zoom-in" data-aos-delay="100">
+                        <span class="stat-number">2.5K+</span>
+                        <span class="stat-label">Active Users</span>
+                    </div>
+                    <div class="stat-card" data-aos="zoom-in" data-aos-delay="200">
+                        <span class="stat-number">1.2K+</span>
+                        <span class="stat-label">Pickups Completed</span>
+                    </div>
+                    <div class="stat-card" data-aos="zoom-in" data-aos-delay="300">
+                        <span class="stat-number">45K+</span>
+                        <span class="stat-label">Credits Earned</span>
+                    </div>
+                    <div class="stat-card" data-aos="zoom-in" data-aos-delay="400">
+                        <span class="stat-number">85+</span>
+                        <span class="stat-label">Tons Recycled</span>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Features Section -->
+            <section class="features-section" id="features">
+                <h2 class="section-title" data-aos="fade-up">Why Choose SoorGreen?</h2>
+                <p class="section-subtitle" data-aos="fade-up" data-aos-delay="200">
+                    Our comprehensive platform offers innovative solutions for modern waste management challenges
+                </p>
+                <div class="features-grid">
+                    <div class="feature-card" data-aos="fade-up" data-aos-delay="200">
+                        <div class="feature-icon">
+                            <i class="fas fa-shield-alt"></i>
+                        </div>
+                        <h3 class="feature-title">Secure & Reliable</h3>
+                        <p class="feature-desc">Enterprise-grade security with encrypted data transmission and secure authentication systems.</p>
+                    </div>
+                    <div class="feature-card" data-aos="fade-up" data-aos-delay="400">
+                        <div class="feature-icon">
+                            <i class="fas fa-rocket"></i>
+                        </div>
+                        <h3 class="feature-title">High Performance</h3>
+                        <p class="feature-desc">Optimized for speed and scalability, handling thousands of concurrent users seamlessly.</p>
+                    </div>
+                    <div class="feature-card" data-aos="fade-up" data-aos-delay="600">
+                        <div class="feature-icon">
+                            <i class="fas fa-mobile-alt"></i>
+                        </div>
+                        <h3 class="feature-title">Mobile First</h3>
+                        <p class="feature-desc">Responsive design that works perfectly on all devices, from desktop to mobile.</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Platform Showcase -->
+            <section class="platform-section" id="platform">
+                <h2 class="section-title" data-aos="fade-up">Our Integrated Platform</h2>
+                <p class="section-subtitle" data-aos="fade-up" data-aos-delay="200">
+                    Three powerful applications, one unified mission
+                </p>
+                <div class="platform-grid">
+                    <div class="platform-card" data-aos="fade-up" data-aos-delay="200">
+                        <div class="platform-icon">
+                            <i class="fas fa-tachometer-alt"></i>
+                        </div>
+                        <h3 class="platform-title">Admin Dashboard</h3>
+                        <p class="platform-desc">Complete administrative interface for municipalities and system administrators with real-time analytics and management tools.</p>
+                        <div class="tech-tags">
+                            <span class="badge bg-primary">ASP.NET WebForms</span>
+                            <span class="badge bg-secondary">SQL Server</span>
+                        </div>
+                    </div>
+                    <div class="platform-card" data-aos="fade-up" data-aos-delay="400">
+                        <div class="platform-icon">
+                            <i class="fas fa-users"></i>
+                        </div>
+                        <h3 class="platform-title">Citizen Portal</h3>
+                        <p class="platform-desc">Modern web application for citizens to report waste, track pickups, and redeem rewards with interactive features.</p>
+                        <div class="tech-tags">
+                            <span class="badge bg-primary">ASP.NET Core MVC</span>
+                            <span class="badge bg-secondary">Entity Framework</span>
+                        </div>
+                    </div>
+                    <div class="platform-card" data-aos="fade-up" data-aos-delay="600">
+                        <div class="platform-icon">
+                            <i class="fas fa-code"></i>
+                        </div>
+                        <h3 class="platform-title">API Services</h3>
+                        <p class="platform-desc">RESTful API backend that powers all applications, enabling mobile apps and third-party integrations.</p>
+                        <div class="tech-tags">
+                            <span class="badge bg-primary">Web API</span>
+                            <span class="badge bg-secondary">JWT Authentication</span>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- How It Works Section -->
+            <section class="how-it-works-section" id="how-it-works">
+                <h2 class="section-title" data-aos="fade-up">How It Works</h2>
+                <p class="section-subtitle" data-aos="fade-up" data-aos-delay="200">
+                    Simple steps to transform your waste management experience
+                </p>
+                <div class="steps-container">
+                    <div class="step" data-aos="fade-right" data-aos-delay="200">
+                        <div class="step-number">1</div>
+                        <div class="step-content">
+                            <h3 class="step-title">Sign Up & Profile Setup</h3>
+                            <p class="step-desc">Create your account and set up your profile. Choose your location and waste management preferences to get personalized service.</p>
+                        </div>
+                    </div>
+                    <div class="step" data-aos="fade-left" data-aos-delay="400">
+                        <div class="step-number">2</div>
+                        <div class="step-content">
+                            <h3 class="step-title">Schedule Waste Pickup</h3>
+                            <p class="step-desc">Use our intuitive interface to schedule waste pickups at your convenience. Select date, time, and type of waste for collection.</p>
+                        </div>
+                    </div>
+                    <div class="step" data-aos="fade-right" data-aos-delay="600">
+                        <div class="step-number">3</div>
+                        <div class="step-content">
+                            <h3 class="step-title">Track Collection & Earn Credits</h3>
+                            <p class="step-desc">Monitor your waste collection in real-time. Earn green credits for every successful pickup that you can redeem for rewards.</p>
+                        </div>
+                    </div>
+                    <div class="step" data-aos="fade-left" data-aos-delay="800">
+                        <div class="step-number">4</div>
+                        <div class="step-content">
+                            <h3 class="step-title">Redeem Rewards & Track Impact</h3>
+                            <p class="step-desc">Use your earned credits to get discounts, vouchers, or donate to environmental causes. Track your personal environmental impact.</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Testimonials Section -->
+            <section class="testimonials-section" id="testimonials">
+                <h2 class="section-title" data-aos="fade-up">What Our Users Say</h2>
+                <p class="section-subtitle" data-aos="fade-up" data-aos-delay="200">
+                    Hear from citizens and municipalities who have transformed their waste management
+                </p>
+                <div class="testimonials-grid">
+                    <div class="testimonial-card" data-aos="fade-up" data-aos-delay="200">
+                        <div class="testimonial-quote">"</div>
+                        <p class="testimonial-text">SoorGreen has completely changed how our community handles waste. The reward system motivates everyone to participate, and our neighborhood has never been cleaner!</p>
+                        <div class="testimonial-author">
+                            <div class="author-avatar">SJ</div>
+                            <div class="author-info">
+                                <h4>Sarah Johnson</h4>
+                                <p>Community Leader, Green Valley</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="testimonial-card" data-aos="fade-up" data-aos-delay="400">
+                        <div class="testimonial-quote">"</div>
+                        <p class="testimonial-text">As a municipal administrator, SoorGreen has given us unprecedented visibility into our waste management operations. The analytics help us optimize routes and reduce costs significantly.</p>
+                        <div class="testimonial-author">
+                            <div class="author-avatar">MR</div>
+                            <div class="author-info">
+                                <h4>Michael Rodriguez</h4>
+                                <p>City Waste Management Director</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="testimonial-card" data-aos="fade-up" data-aos-delay="600">
+                        <div class="testimonial-quote">"</div>
+                        <p class="testimonial-text">I love how easy it is to schedule pickups and track my environmental impact. The reward points I've earned have paid for my grocery discounts multiple times!</p>
+                        <div class="testimonial-author">
+                            <div class="author-avatar">EP</div>
+                            <div class="author-info">
+                                <h4>Emma Patel</h4>
+                                <p>Resident & Active User</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Partners Section -->
+            <section class="partners-section" id="partners">
+                <h2 class="section-title" data-aos="fade-up">Our Trusted Partners</h2>
+                <p class="section-subtitle" data-aos="fade-up" data-aos-delay="200">
+                    Collaborating with leading organizations for a sustainable future
+                </p>
+                <div class="partners-grid">
+                    <div class="partner-logo" data-aos="zoom-in" data-aos-delay="200">
+                        <i class="fas fa-city fa-3x"></i>
+                    </div>
+                    <div class="partner-logo" data-aos="zoom-in" data-aos-delay="300">
+                        <i class="fas fa-recycle fa-3x"></i>
+                    </div>
+                    <div class="partner-logo" data-aos="zoom-in" data-aos-delay="400">
+                        <i class="fas fa-leaf fa-3x"></i>
+                    </div>
+                    <div class="partner-logo" data-aos="zoom-in" data-aos-delay="500">
+                        <i class="fas fa-globe-americas fa-3x"></i>
+                    </div>
+                    <div class="partner-logo" data-aos="zoom-in" data-aos-delay="600">
+                        <i class="fas fa-hand-holding-heart fa-3x"></i>
+                    </div>
+                    <div class="partner-logo" data-aos="zoom-in" data-aos-delay="700">
+                        <i class="fas fa-tree fa-3x"></i>
+                    </div>
+                </div>
+            </section>
+
+            <!-- FAQ Section -->
+            <section class="faq-section" id="faq">
+                <h2 class="section-title" data-aos="fade-up">Frequently Asked Questions</h2>
+                <p class="section-subtitle" data-aos="fade-up" data-aos-delay="200">
+                    Find answers to common questions about SoorGreen
+                </p>
+                <div class="faq-container">
+                    <div class="faq-item" data-aos="fade-up" data-aos-delay="200">
+                        <div class="faq-question">
+                            How do I sign up for SoorGreen?
+                            <i class="fas fa-chevron-down faq-icon"></i>
+                        </div>
+                        <div class="faq-answer">
+                            Signing up is easy! Simply click on the "Launch Platform" button and select the Citizen Portal. You'll be guided through a quick registration process where you'll provide basic information and set up your profile.
+                        </div>
+                    </div>
+                    <div class="faq-item" data-aos="fade-up" data-aos-delay="300">
+                        <div class="faq-question">
+                            What types of waste can I schedule for pickup?
+                            <i class="fas fa-chevron-down faq-icon"></i>
+                        </div>
+                        <div class="faq-answer">
+                            We accept a wide range of waste types including recyclables (paper, plastic, glass, metal), organic waste, e-waste, and hazardous materials (with special handling). During scheduling, you'll be able to specify the type and quantity of waste.
+                        </div>
+                    </div>
+                    <div class="faq-item" data-aos="fade-up" data-aos-delay="400">
+                        <div class="faq-question">
+                            How are the green credits calculated?
+                            <i class="fas fa-chevron-down faq-icon"></i>
+                        </div>
+                        <div class="faq-answer">
+                            Credits are calculated based on the type and quantity of waste you recycle. Recyclable materials earn more credits than regular waste. The exact calculation varies by material type and local recycling market values.
+                        </div>
+                    </div>
+                    <div class="faq-item" data-aos="fade-up" data-aos-delay="500">
+                        <div class="faq-question">
+                            Can municipalities integrate with existing systems?
+                            <i class="fas fa-chevron-down faq-icon"></i>
+                        </div>
+                        <div class="faq-answer">
+                            Yes! Our platform offers robust API integration capabilities that allow municipalities to connect SoorGreen with their existing waste management systems, CRM, and billing platforms for seamless operations.
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Technology Stack Section -->
+            <section class="tech-stack-section" id="technology">
+                <h2 class="section-title" data-aos="fade-up">Our Technology Stack</h2>
+                <p class="section-subtitle" data-aos="fade-up" data-aos-delay="200">
+                    Built with cutting-edge technologies for performance and scalability
+                </p>
+                <div class="tech-grid">
+                    <div class="tech-card" data-aos="fade-up" data-aos-delay="200">
+                        <div class="tech-icon">
+                            <i class="fab fa-microsoft"></i>
+                        </div>
+                        <h3 class="tech-name">ASP.NET Core</h3>
+                        <p class="tech-desc">High-performance web framework for building modern web applications and APIs.</p>
+                    </div>
+                    <div class="tech-card" data-aos="fade-up" data-aos-delay="300">
+                        <div class="tech-icon">
+                            <i class="fas fa-database"></i>
+                        </div>
+                        <h3 class="tech-name">SQL Server</h3>
+                        <p class="tech-desc">Enterprise-grade database system for secure and reliable data storage.</p>
+                    </div>
+                    <div class="tech-card" data-aos="fade-up" data-aos-delay="400">
+                        <div class="tech-icon">
+                            <i class="fab fa-js-square"></i>
+                        </div>
+                        <h3 class="tech-name">JavaScript/TypeScript</h3>
+                        <p class="tech-desc">Modern frontend development for interactive and responsive user interfaces.</p>
+                    </div>
+                    <div class="tech-card" data-aos="fade-up" data-aos-delay="500">
+                        <div class="tech-icon">
+                            <i class="fab fa-microsoft"></i>
+                        </div>
+                        <h3 class="tech-name">Azure Cloud</h3>
+                        <p class="tech-desc">Scalable cloud infrastructure for global availability and performance.</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Team Section -->
+            <section class="team-section" id="team">
+                <h2 class="section-title" data-aos="fade-up">Meet Our Team</h2>
+                <p class="section-subtitle" data-aos="fade-up" data-aos-delay="200">
+                    Passionate individuals dedicated to sustainable innovation
+                </p>
+                <div class="team-grid">
+                    <div class="team-card" data-aos="fade-up" data-aos-delay="200">
+                        <div class="team-avatar">AJ</div>
+                        <h3 class="team-name">Alex Johnson</h3>
+                        <p class="team-role">CEO & Founder</p>
+                        <p class="team-desc">Environmental engineer with 10+ years experience in sustainable technology solutions and urban planning.</p>
+                        <div class="team-social">
+                            <a href="#"><i class="fab fa-linkedin"></i></a>
+                            <a href="#"><i class="fab fa-twitter"></i></a>
+                        </div>
+                    </div>
+                    <div class="team-card" data-aos="fade-up" data-aos-delay="400">
+                        <div class="team-avatar">MS</div>
+                        <h3 class="team-name">Maria Sanchez</h3>
+                        <p class="team-role">CTO</p>
+                        <p class="team-desc">Software architect specializing in scalable cloud systems and IoT integration for smart city solutions.</p>
+                        <div class="team-social">
+                            <a href="#"><i class="fab fa-linkedin"></i></a>
+                            <a href="#"><i class="fab fa-github"></i></a>
+                        </div>
+                    </div>
+                    <div class="team-card" data-aos="fade-up" data-aos-delay="600">
+                        <div class="team-avatar">DW</div>
+                        <h3 class="team-name">David Wilson</h3>
+                        <p class="team-role">Head of Operations</p>
+                        <p class="team-desc">Operations expert with background in municipal waste management and community engagement programs.</p>
+                        <div class="team-social">
+                            <a href="#"><i class="fab fa-linkedin"></i></a>
+                            <a href="#"><i class="fas fa-envelope"></i></a>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- CTA Section -->
+            <section class="cta-section" id="cta">
+                <div class="cta-content">
+                    <h2 class="cta-title" data-aos="fade-up">Ready to Make a Difference?</h2>
+                    <p class="cta-subtitle" data-aos="fade-up" data-aos-delay="200">
+                        Join thousands of users already transforming their communities through smart waste management. 
+                        Choose your platform and start your sustainability journey today.
+                    </p>
+                    <a href="ChooseApp.aspx" class="btn-cta" data-aos="fade-up" data-aos-delay="400">
+                        <i class="fas fa-play"></i>
+                        Launch Application Portal
                     </a>
                 </div>
-            </div>
-        </section>
+            </section>
 
-        <!-- Stats Section -->
-        <section class="stats-section" id="stats" data-aos="fade-up">
-            <div class="stats-grid">
-                <div class="stat-card" data-aos="zoom-in" data-aos-delay="100">
-                    <span class="stat-number">2.5K+</span>
-                    <span class="stat-label">Active Users</span>
-                </div>
-                <div class="stat-card" data-aos="zoom-in" data-aos-delay="200">
-                    <span class="stat-number">1.2K+</span>
-                    <span class="stat-label">Pickups Completed</span>
-                </div>
-                <div class="stat-card" data-aos="zoom-in" data-aos-delay="300">
-                    <span class="stat-number">45K+</span>
-                    <span class="stat-label">Credits Earned</span>
-                </div>
-                <div class="stat-card" data-aos="zoom-in" data-aos-delay="400">
-                    <span class="stat-number">85+</span>
-                    <span class="stat-label">Tons Recycled</span>
-                </div>
-            </div>
-        </section>
-
-        <!-- Features Section -->
-        <section class="features-section" id="features">
-            <h2 class="section-title" data-aos="fade-up">Why Choose SoorGreen?</h2>
-            <p class="section-subtitle" data-aos="fade-up" data-aos-delay="200">
-                Our comprehensive platform offers innovative solutions for modern waste management challenges
-            </p>
-            <div class="features-grid">
-                <div class="feature-card" data-aos="fade-up" data-aos-delay="200">
-                    <div class="feature-icon">
-                        <i class="fas fa-shield-alt"></i>
+            <!-- Footer -->
+            <footer class="footer">
+                <div class="footer-content">
+                    <div class="footer-logo">
+                        <i class="fas fa-recycle me-2"></i>
+                        SoorGreen
                     </div>
-                    <h3 class="feature-title">Secure & Reliable</h3>
-                    <p class="feature-desc">Enterprise-grade security with encrypted data transmission and secure authentication systems.</p>
-                </div>
-                <div class="feature-card" data-aos="fade-up" data-aos-delay="400">
-                    <div class="feature-icon">
-                        <i class="fas fa-rocket"></i>
+                    <p class="footer-text">
+                        Transforming waste into opportunity through technology and community engagement.
+                    </p>
+                    <div class="social-links">
+                        <a href="#" class="social-link"><i class="fab fa-twitter"></i></a>
+                        <a href="#" class="social-link"><i class="fab fa-linkedin"></i></a>
+                        <a href="#" class="social-link"><i class="fab fa-github"></i></a>
+                        <a href="#" class="social-link"><i class="fab fa-instagram"></i></a>
                     </div>
-                    <h3 class="feature-title">High Performance</h3>
-                    <p class="feature-desc">Optimized for speed and scalability, handling thousands of concurrent users seamlessly.</p>
+                    <p class="copyright">
+                        &copy; 2024 SoorGreen Initiative. All rights reserved. | Built with ❤️ for a sustainable future
+                    </p>
                 </div>
-                <div class="feature-card" data-aos="fade-up" data-aos-delay="600">
-                    <div class="feature-icon">
-                        <i class="fas fa-mobile-alt"></i>
-                    </div>
-                    <h3 class="feature-title">Mobile First</h3>
-                    <p class="feature-desc">Responsive design that works perfectly on all devices, from desktop to mobile.</p>
-                </div>
-            </div>
-        </section>
-
-        <!-- Platform Showcase -->
-        <section class="platform-section" id="platform">
-            <h2 class="section-title" data-aos="fade-up">Our Integrated Platform</h2>
-            <p class="section-subtitle" data-aos="fade-up" data-aos-delay="200">
-                Three powerful applications, one unified mission
-            </p>
-            <div class="platform-grid">
-                <div class="platform-card" data-aos="fade-up" data-aos-delay="200">
-                    <div class="platform-icon">
-                        <i class="fas fa-tachometer-alt"></i>
-                    </div>
-                    <h3 class="platform-title">Admin Dashboard</h3>
-                    <p class="platform-desc">Complete administrative interface for municipalities and system administrators with real-time analytics and management tools.</p>
-                    <div class="tech-tags">
-                        <span class="badge bg-primary">ASP.NET WebForms</span>
-                        <span class="badge bg-secondary">SQL Server</span>
-                    </div>
-                </div>
-                <div class="platform-card" data-aos="fade-up" data-aos-delay="400">
-                    <div class="platform-icon">
-                        <i class="fas fa-users"></i>
-                    </div>
-                    <h3 class="platform-title">Citizen Portal</h3>
-                    <p class="platform-desc">Modern web application for citizens to report waste, track pickups, and redeem rewards with interactive features.</p>
-                    <div class="tech-tags">
-                        <span class="badge bg-primary">ASP.NET Core MVC</span>
-                        <span class="badge bg-secondary">Entity Framework</span>
-                    </div>
-                </div>
-                <div class="platform-card" data-aos="fade-up" data-aos-delay="600">
-                    <div class="platform-icon">
-                        <i class="fas fa-code"></i>
-                    </div>
-                    <h3 class="platform-title">API Services</h3>
-                    <p class="platform-desc">RESTful API backend that powers all applications, enabling mobile apps and third-party integrations.</p>
-                    <div class="tech-tags">
-                        <span class="badge bg-primary">Web API</span>
-                        <span class="badge bg-secondary">JWT Authentication</span>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <!-- How It Works Section -->
-        <section class="how-it-works-section" id="how-it-works">
-            <h2 class="section-title" data-aos="fade-up">How It Works</h2>
-            <p class="section-subtitle" data-aos="fade-up" data-aos-delay="200">
-                Simple steps to transform your waste management experience
-            </p>
-            <div class="steps-container">
-                <div class="step" data-aos="fade-right" data-aos-delay="200">
-                    <div class="step-number">1</div>
-                    <div class="step-content">
-                        <h3 class="step-title">Sign Up & Profile Setup</h3>
-                        <p class="step-desc">Create your account and set up your profile. Choose your location and waste management preferences to get personalized service.</p>
-                    </div>
-                </div>
-                <div class="step" data-aos="fade-left" data-aos-delay="400">
-                    <div class="step-number">2</div>
-                    <div class="step-content">
-                        <h3 class="step-title">Schedule Waste Pickup</h3>
-                        <p class="step-desc">Use our intuitive interface to schedule waste pickups at your convenience. Select date, time, and type of waste for collection.</p>
-                    </div>
-                </div>
-                <div class="step" data-aos="fade-right" data-aos-delay="600">
-                    <div class="step-number">3</div>
-                    <div class="step-content">
-                        <h3 class="step-title">Track Collection & Earn Credits</h3>
-                        <p class="step-desc">Monitor your waste collection in real-time. Earn green credits for every successful pickup that you can redeem for rewards.</p>
-                    </div>
-                </div>
-                <div class="step" data-aos="fade-left" data-aos-delay="800">
-                    <div class="step-number">4</div>
-                    <div class="step-content">
-                        <h3 class="step-title">Redeem Rewards & Track Impact</h3>
-                        <p class="step-desc">Use your earned credits to get discounts, vouchers, or donate to environmental causes. Track your personal environmental impact.</p>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <!-- Testimonials Section -->
-        <section class="testimonials-section" id="testimonials">
-            <h2 class="section-title" data-aos="fade-up">What Our Users Say</h2>
-            <p class="section-subtitle" data-aos="fade-up" data-aos-delay="200">
-                Hear from citizens and municipalities who have transformed their waste management
-            </p>
-            <div class="testimonials-grid">
-                <div class="testimonial-card" data-aos="fade-up" data-aos-delay="200">
-                    <div class="testimonial-quote">"</div>
-                    <p class="testimonial-text">SoorGreen has completely changed how our community handles waste. The reward system motivates everyone to participate, and our neighborhood has never been cleaner!</p>
-                    <div class="testimonial-author">
-                        <div class="author-avatar">SR</div>
-                        <div class="author-info">
-                            <h4>Sarah Johnson</h4>
-                            <p>Community Leader, Green Valley</p>
-                        </div>
-                    </div>
-                </div>
-                <div class="testimonial-card" data-aos="fade-up" data-aos-delay="400">
-                    <div class="testimonial-quote">"</div>
-                    <p class="testimonial-text">As a municipal administrator, SoorGreen has given us unprecedented visibility into our waste management operations. The analytics help us optimize routes and reduce costs significantly.</p>
-                    <div class="testimonial-author">
-                        <div class="author-avatar">MR</div>
-                        <div class="author-info">
-                            <h4>Michael Rodriguez</h4>
-                            <p>City Waste Management Director</p>
-                        </div>
-                    </div>
-                </div>
-                <div class="testimonial-card" data-aos="fade-up" data-aos-delay="600">
-                    <div class="testimonial-quote">"</div>
-                    <p class="testimonial-text">I love how easy it is to schedule pickups and track my environmental impact. The reward points I've earned have paid for my grocery discounts multiple times!</p>
-                    <div class="testimonial-author">
-                        <div class="author-avatar">EP</div>
-                        <div class="author-info">
-                            <h4>Emma Patel</h4>
-                            <p>Resident & Active User</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <!-- Partners Section -->
-        <section class="partners-section" id="partners">
-            <h2 class="section-title" data-aos="fade-up">Our Trusted Partners</h2>
-            <p class="section-subtitle" data-aos="fade-up" data-aos-delay="200">
-                Collaborating with leading organizations for a sustainable future
-            </p>
-            <div class="partners-grid">
-                <div class="partner-logo" data-aos="zoom-in" data-aos-delay="200">
-                    <i class="fas fa-city fa-3x"></i>
-                </div>
-                <div class="partner-logo" data-aos="zoom-in" data-aos-delay="300">
-                    <i class="fas fa-recycle fa-3x"></i>
-                </div>
-                <div class="partner-logo" data-aos="zoom-in" data-aos-delay="400">
-                    <i class="fas fa-leaf fa-3x"></i>
-                </div>
-                <div class="partner-logo" data-aos="zoom-in" data-aos-delay="500">
-                    <i class="fas fa-globe-americas fa-3x"></i>
-                </div>
-                <div class="partner-logo" data-aos="zoom-in" data-aos-delay="600">
-                    <i class="fas fa-hand-holding-heart fa-3x"></i>
-                </div>
-                <div class="partner-logo" data-aos="zoom-in" data-aos-delay="700">
-                    <i class="fas fa-tree fa-3x"></i>
-                </div>
-            </div>
-        </section>
-
-        <!-- FAQ Section -->
-        <section class="faq-section" id="faq">
-            <h2 class="section-title" data-aos="fade-up">Frequently Asked Questions</h2>
-            <p class="section-subtitle" data-aos="fade-up" data-aos-delay="200">
-                Find answers to common questions about SoorGreen
-            </p>
-            <div class="faq-container">
-                <div class="faq-item" data-aos="fade-up" data-aos-delay="200">
-                    <div class="faq-question">
-                        How do I sign up for SoorGreen?
-                        <i class="fas fa-chevron-down faq-icon"></i>
-                    </div>
-                    <div class="faq-answer">
-                        Signing up is easy! Simply click on the "Launch Platform" button and select the Citizen Portal. You'll be guided through a quick registration process where you'll provide basic information and set up your profile.
-                    </div>
-                </div>
-                <div class="faq-item" data-aos="fade-up" data-aos-delay="300">
-                    <div class="faq-question">
-                        What types of waste can I schedule for pickup?
-                        <i class="fas fa-chevron-down faq-icon"></i>
-                    </div>
-                    <div class="faq-answer">
-                        We accept a wide range of waste types including recyclables (paper, plastic, glass, metal), organic waste, e-waste, and hazardous materials (with special handling). During scheduling, you'll be able to specify the type and quantity of waste.
-                    </div>
-                </div>
-                <div class="faq-item" data-aos="fade-up" data-aos-delay="400">
-                    <div class="faq-question">
-                        How are the green credits calculated?
-                        <i class="fas fa-chevron-down faq-icon"></i>
-                    </div>
-                    <div class="faq-answer">
-                        Credits are calculated based on the type and quantity of waste you recycle. Recyclable materials earn more credits than regular waste. The exact calculation varies by material type and local recycling market values.
-                    </div>
-                </div>
-                <div class="faq-item" data-aos="fade-up" data-aos-delay="500">
-                    <div class="faq-question">
-                        Can municipalities integrate with existing systems?
-                        <i class="fas fa-chevron-down faq-icon"></i>
-                    </div>
-                    <div class="faq-answer">
-                        Yes! Our platform offers robust API integration capabilities that allow municipalities to connect SoorGreen with their existing waste management systems, CRM, and billing platforms for seamless operations.
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <!-- Technology Stack Section -->
-        <section class="tech-stack-section" id="technology">
-            <h2 class="section-title" data-aos="fade-up">Our Technology Stack</h2>
-            <p class="section-subtitle" data-aos="fade-up" data-aos-delay="200">
-                Built with cutting-edge technologies for performance and scalability
-            </p>
-            <div class="tech-grid">
-                <div class="tech-card" data-aos="fade-up" data-aos-delay="200">
-                    <div class="tech-icon">
-                        <i class="fab fa-microsoft"></i>
-                    </div>
-                    <h3 class="tech-name">ASP.NET Core</h3>
-                    <p class="tech-desc">High-performance web framework for building modern web applications and APIs.</p>
-                </div>
-                <div class="tech-card" data-aos="fade-up" data-aos-delay="300">
-                    <div class="tech-icon">
-                        <i class="fas fa-database"></i>
-                    </div>
-                    <h3 class="tech-name">SQL Server</h3>
-                    <p class="tech-desc">Enterprise-grade database system for secure and reliable data storage.</p>
-                </div>
-                <div class="tech-card" data-aos="fade-up" data-aos-delay="400">
-                    <div class="tech-icon">
-                        <i class="fab fa-js-square"></i>
-                    </div>
-                    <h3 class="tech-name">JavaScript/TypeScript</h3>
-                    <p class="tech-desc">Modern frontend development for interactive and responsive user interfaces.</p>
-                </div>
-                <div class="tech-card" data-aos="fade-up" data-aos-delay="500">
-                    <div class="tech-icon">
-                        <i class="fab fa-microsoft"></i>
-                    </div>
-                    <h3 class="tech-name">Azure Cloud</h3>
-                    <p class="tech-desc">Scalable cloud infrastructure for global availability and performance.</p>
-                </div>
-            </div>
-        </section>
-
-        <!-- Team Section -->
-        <section class="team-section" id="team">
-            <h2 class="section-title" data-aos="fade-up">Meet Our Team</h2>
-            <p class="section-subtitle" data-aos="fade-up" data-aos-delay="200">
-                Passionate individuals dedicated to sustainable innovation
-            </p>
-            <div class="team-grid">
-                <div class="team-card" data-aos="fade-up" data-aos-delay="200">
-                    <div class="team-avatar">AJ</div>
-                    <h3 class="team-name">Alex Johnson</h3>
-                    <p class="team-role">CEO & Founder</p>
-                    <p class="team-desc">Environmental engineer with 10+ years experience in sustainable technology solutions and urban planning.</p>
-                    <div class="team-social">
-                        <a href="#"><i class="fab fa-linkedin"></i></a>
-                        <a href="#"><i class="fab fa-twitter"></i></a>
-                    </div>
-                </div>
-                <div class="team-card" data-aos="fade-up" data-aos-delay="400">
-                    <div class="team-avatar">MS</div>
-                    <h3 class="team-name">Maria Sanchez</h3>
-                    <p class="team-role">CTO</p>
-                    <p class="team-desc">Software architect specializing in scalable cloud systems and IoT integration for smart city solutions.</p>
-                    <div class="team-social">
-                        <a href="#"><i class="fab fa-linkedin"></i></a>
-                        <a href="#"><i class="fab fa-github"></i></a>
-                    </div>
-                </div>
-                <div class="team-card" data-aos="fade-up" data-aos-delay="600">
-                    <div class="team-avatar">DW</div>
-                    <h3 class="team-name">David Wilson</h3>
-                    <p class="team-role">Head of Operations</p>
-                    <p class="team-desc">Operations expert with background in municipal waste management and community engagement programs.</p>
-                    <div class="team-social">
-                        <a href="#"><i class="fab fa-linkedin"></i></a>
-                        <a href="#"><i class="fas fa-envelope"></i></a>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <!-- CTA Section -->
-        <section class="cta-section" id="cta">
-            <div class="cta-content">
-                <h2 class="cta-title" data-aos="fade-up">Ready to Make a Difference?</h2>
-                <p class="cta-subtitle" data-aos="fade-up" data-aos-delay="200">
-                    Join thousands of users already transforming their communities through smart waste management. 
-                    Choose your platform and start your sustainability journey today.
-                </p>
-                <a href="ChooseApp.aspx" class="btn-cta" data-aos="fade-up" data-aos-delay="400">
-                    <i class="fas fa-play"></i>
-                    Launch Application Portal
-                </a>
-            </div>
-        </section>
-
-        <!-- Footer -->
-        <footer class="footer">
-            <div class="footer-content">
-                <div class="footer-logo">
-                    <i class="fas fa-recycle me-2"></i>
-                    SoorGreen
-                </div>
-                <p class="footer-text">
-                    Transforming waste into opportunity through technology and community engagement.
-                </p>
-                <div class="social-links">
-                    <a href="#" class="social-link"><i class="fab fa-twitter"></i></a>
-                    <a href="#" class="social-link"><i class="fab fa-linkedin"></i></a>
-                    <a href="#" class="social-link"><i class="fab fa-github"></i></a>
-                    <a href="#" class="social-link"><i class="fab fa-instagram"></i></a>
-                </div>
-                <p class="copyright">
-                    &copy; 2024 SoorGreen Initiative. All rights reserved. | Built with ❤️ for a sustainable future
-                </p>
-            </div>
-        </footer>
-    </form>
+            </footer>
+        </form>
+    </div>
 
     <!-- Scripts -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
     <script>
+        // Video Intro Functionality
+        const videoIntro = document.getElementById('videoIntro');
+        const mainContent = document.getElementById('mainContent');
+        const skipButtonContainer = document.getElementById('skipButtonContainer');
+        const video = document.querySelector('.video-intro');
+
+        function skipVideo() {
+            // Fade out video and skip button
+            videoIntro.classList.add('fade-out');
+            skipButtonContainer.style.opacity = '0';
+
+            setTimeout(() => {
+                videoIntro.style.display = 'none';
+                skipButtonContainer.style.display = 'none';
+                mainContent.classList.add('show');
+            }, 1500);
+        }
+
+        function replayVideo() {
+            videoIntro.style.display = 'flex';
+            skipButtonContainer.style.display = 'block';
+            videoIntro.classList.remove('fade-out');
+            skipButtonContainer.style.opacity = '1';
+            mainContent.classList.remove('show');
+            video.currentTime = 0;
+            video.play();
+        }
+
+        // Auto-skip after 15 seconds
+        setTimeout(() => {
+            if (videoIntro.style.display !== 'none') {
+                skipVideo();
+            }
+        }, 145000);
+
         // Initialize AOS
         AOS.init({
             duration: 1000,

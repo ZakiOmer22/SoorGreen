@@ -1,0 +1,608 @@
+﻿<%@ Page Title="My Rewards" Language="C#" MasterPageFile="~/Pages/Citizen/Site.Master" AutoEventWireup="true" CodeFile="MyRewards.aspx.cs" Inherits="SoorGreen.Citizen.MyRewards" %>
+
+<asp:Content ID="Content1" ContentPlaceHolderID="TitleContent" runat="server">
+    My Rewards - SoorGreen Citizen
+</asp:Content>
+
+<asp:Content ID="Content2" ContentPlaceHolderID="MainContent" runat="server">
+    <style>
+        .rewards-container {
+            margin-top: 20px;
+            max-width: 1200px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .stats-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 1.5rem;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+
+            .stat-card:hover {
+                transform: translateY(-3px);
+                border-color: rgba(0, 212, 170, 0.3);
+            }
+
+        .stat-value {
+            font-size: 2rem;
+            font-weight: 800;
+            color: #ffffff !important;
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-label {
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 0.9rem;
+            font-weight: 600;
+        }
+
+        .xp-badge {
+            background: linear-gradient(135deg, #FFD700, #FFA500);
+            color: #000 !important;
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-weight: 700;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .rewards-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .reward-card {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 1.5rem;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+            .reward-card:hover {
+                transform: translateY(-5px);
+                border-color: rgba(0, 212, 170, 0.3);
+                box-shadow: 0 10px 30px rgba(0, 212, 170, 0.1);
+            }
+
+            .reward-card.featured {
+                border-color: #FFD700;
+                background: linear-gradient(135deg, rgba(255, 215, 0, 0.1), rgba(255, 165, 0, 0.05));
+            }
+
+        .reward-badge {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            background: #FFD700;
+            color: #000 !important;
+            padding: 0.3rem 0.8rem;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: 700;
+        }
+
+        .reward-image {
+            width: 100%;
+            height: 120px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            color: rgba(255, 255, 255, 0.3);
+        }
+
+        .reward-title {
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: #ffffff !important;
+            margin-bottom: 0.5rem;
+        }
+
+        .reward-description {
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 0.9rem;
+            margin-bottom: 1rem;
+            line-height: 1.4;
+        }
+
+        .reward-meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .reward-xp {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: #FFD700;
+            font-weight: 600;
+        }
+
+        .reward-stock {
+            color: rgba(255, 255, 255, 0.6);
+            font-size: 0.8rem;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #0d6efd, #0dcaf0);
+            border: none;
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 600;
+            width: 100%;
+        }
+
+            .btn-primary:hover {
+                background: linear-gradient(135deg, #0b5ed7, #0baccc);
+                transform: translateY(-2px);
+            }
+
+            .btn-primary:disabled {
+                background: rgba(255, 255, 255, 0.1);
+                color: rgba(255, 255, 255, 0.3);
+                cursor: not-allowed;
+                transform: none;
+            }
+
+        .btn-outline-light {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 600;
+        }
+
+            .btn-outline-light:hover {
+                background: rgba(255, 255, 255, 0.2);
+            }
+
+        .tabs {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 1.5rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            padding-bottom: 0.5rem;
+        }
+
+        .tab {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: rgba(255, 255, 255, 0.7) !important;
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px 8px 0 0;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 600;
+        }
+
+            .tab.active {
+                background: rgba(255, 255, 255, 0.1);
+                border-color: var(--primary);
+                color: #ffffff !important;
+            }
+
+        .tab-content {
+            display: none;
+        }
+
+            .tab-content.active {
+                display: block;
+            }
+
+        .empty-state {
+            text-align: center;
+            padding: 3rem 2rem;
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+        .empty-state-icon {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+            color: rgba(255, 255, 255, 0.3);
+        }
+
+        .empty-state-title {
+            font-size: 1.5rem;
+            margin-bottom: 0.5rem;
+            color: rgba(255, 255, 255, 0.8);
+        }
+
+        .empty-state-description {
+            font-size: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .achievements-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .achievement-card {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            padding: 1.5rem;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+
+            .achievement-card.unlocked {
+                border-color: #FFD700;
+                background: rgba(255, 215, 0, 0.1);
+            }
+
+        .achievement-icon {
+            width: 80px;
+            height: 80px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 1rem;
+            font-size: 2rem;
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+        .achievement-card.unlocked .achievement-icon {
+            background: linear-gradient(135deg, #FFD700, #FFA500);
+            color: #000 !important;
+        }
+
+        .achievement-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: #ffffff !important;
+            margin-bottom: 0.5rem;
+        }
+
+        .achievement-description {
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 0.9rem;
+            margin-bottom: 1rem;
+        }
+
+        .achievement-xp {
+            color: #FFD700;
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+
+        .progress-bar {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            height: 8px;
+            margin: 0.5rem 0;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            background: linear-gradient(135deg, #FFD700, #FFA500);
+            height: 100%;
+            border-radius: 10px;
+            transition: width 0.3s ease;
+        }
+
+        .progress-text {
+            color: rgba(255, 255, 255, 0.6);
+            font-size: 0.8rem;
+        }
+
+        .custom-notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: rgba(255, 255, 255, 0.95);
+            color: #000000 !important;
+            padding: 1rem 1.5rem;
+            border-radius: 8px;
+            border-left: 4px solid #ccc;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            z-index: 10000;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            max-width: 400px;
+            animation: slideInRight 0.3s ease;
+        }
+
+        .notification-error {
+            border-left-color: #dc3545;
+        }
+
+        .notification-success {
+            border-left-color: #198754;
+        }
+
+        .notification-info {
+            border-left-color: #0dcaf0;
+        }
+
+        .custom-notification button {
+            background: none;
+            border: none;
+            font-size: 1.2rem;
+            cursor: pointer;
+            color: #666 !important;
+        }
+
+        @keyframes slideInRight {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        .level-badge {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white !important;
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-weight: 700;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .transaction-history {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 15px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .transaction-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+            .transaction-item:last-child {
+                border-bottom: none;
+            }
+
+        .transaction-info {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .transaction-title {
+            color: #ffffff !important;
+            font-weight: 600;
+            margin-bottom: 0.25rem;
+        }
+
+        .transaction-date {
+            color: rgba(255, 255, 255, 0.6);
+            font-size: 0.8rem;
+        }
+
+        .transaction-xp {
+            color: #FFD700;
+            font-weight: 700;
+            font-size: 1.1rem;
+        }
+
+            .transaction-xp.negative {
+                color: #dc3545;
+            }
+
+        .text-light, h1, h2, h3, h4, h5, h6 {
+            color: #ffffff !important;
+        }
+
+        .text-muted {
+            color: rgba(255, 255, 255, 0.7) !important;
+        }
+
+        @media (max-width: 768px) {
+            .stats-cards {
+                grid-template-columns: 1fr;
+            }
+
+            .rewards-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .achievements-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .tabs {
+                flex-direction: column;
+            }
+        }
+    </style>
+
+    <!-- Hidden field for user stats only -->
+    <asp:HiddenField ID="hfUserStats" runat="server" Value="{}" />
+
+    <div class="rewards-container">
+        <br />
+        <br />
+        <br />
+
+        <div class="stats-cards">
+            <div class="stat-card">
+                <div class="stat-value" id="totalXP">0</div>
+                <div class="stat-label">Total XP</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="currentLevel">1</div>
+                <div class="stat-label">Current Level</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="rewardsClaimed">0</div>
+                <div class="stat-label">Rewards Claimed</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="nextLevelXP">100</div>
+                <div class="stat-label">XP to Next Level</div>
+            </div>
+        </div>
+
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <div>
+                <h1 style="color: #ffffff !important; margin: 0;">My Rewards</h1>
+                <p class="text-muted mb-0">Earn XP and unlock amazing rewards for your eco-friendly actions</p>
+            </div>
+            <div class="xp-badge">
+                <i class="fas fa-star me-2"></i>
+                <span id="userXP">0</span> XP Available
+            </div>
+        </div>
+
+        <div class="tabs">
+            <asp:Button ID="btnTabRewards" runat="server" Text="Available Rewards" CssClass="tab active" CommandArgument="rewards" OnClick="btnTab_Click" />
+            <asp:Button ID="btnTabAchievements" runat="server" Text="Achievements" CssClass="tab" CommandArgument="achievements" OnClick="btnTab_Click" />
+            <asp:Button ID="btnTabHistory" runat="server" Text="XP History" CssClass="tab" CommandArgument="history" OnClick="btnTab_Click" />
+        </div>
+
+        <!-- Rewards Tab -->
+        <div id="rewardsTab" class="tab-content active" runat="server">
+            <div class="mb-4">
+                <h4 class="fw-bold text-light mb-3">Featured Rewards</h4>
+                <div class="rewards-grid" id="featuredRewardsGrid" runat="server">
+                    <!-- Featured rewards populated server-side -->
+                </div>
+            </div>
+
+            <div>
+                <h4 class="fw-bold text-light mb-3">More Rewards</h4>
+                <div class="rewards-grid" id="regularRewardsGrid" runat="server">
+                    <!-- Regular rewards populated server-side -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Achievements Tab -->
+        <div id="achievementsTab" class="tab-content" runat="server">
+            <div class="achievements-grid" id="achievementsGrid" runat="server">
+                <!-- Achievements populated server-side -->
+            </div>
+        </div>
+
+        <!-- History Tab -->
+        <div id="historyTab" class="tab-content" runat="server">
+            <div class="transaction-history">
+                <h4 class="fw-bold text-light mb-3">Recent XP Transactions</h4>
+                <div id="xpHistoryList" runat="server">
+                    <!-- XP History populated server-side -->
+                </div>
+            </div>
+
+            <div class="text-center">
+                <asp:Button ID="btnLoadMoreHistory" runat="server" Text="Load More History" CssClass="btn-outline-light" OnClick="btnLoadMoreHistory_Click" />
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            // Load user stats from hidden field
+            const userStats = JSON.parse(document.getElementById('<%= hfUserStats.ClientID %>').value || '{}');
+
+            // Update UI with loaded data
+            updateUserStats(userStats);
+            updateRewardButtons();
+        });
+
+        function updateUserStats(stats) {
+            if (!stats) return;
+
+            document.getElementById('totalXP').textContent = stats.TotalXP || 0;
+            document.getElementById('currentLevel').textContent = stats.CurrentLevel || 1;
+            document.getElementById('rewardsClaimed').textContent = stats.RewardsClaimed || 0;
+            document.getElementById('nextLevelXP').textContent = stats.XPToNextLevel || 100;
+            document.getElementById('userXP').textContent = stats.AvailableXP || 0;
+        }
+
+        function updateRewardButtons() {
+            const availableXP = parseInt(document.getElementById('userXP').textContent) || 0;
+            const buttons = document.querySelectorAll('.btn-primary');
+
+            buttons.forEach(button => {
+                const xpText = button.closest('.reward-card').querySelector('.reward-xp span').textContent;
+                const xpCost = parseInt(xpText.replace(' XP', ''));
+
+                if (availableXP < xpCost) {
+                    button.disabled = true;
+                    button.innerHTML = '<i class="fas fa-lock me-2"></i>Need More XP';
+                } else {
+                    button.disabled = false;
+                    button.innerHTML = '<i class="fas fa-gift me-2"></i>Claim Reward';
+                }
+            });
+        }
+
+        function confirmClaim(xpCost, rewardTitle) {
+            const availableXP = parseInt(document.getElementById('userXP').textContent) || 0;
+
+            if (availableXP < xpCost) {
+                showNotification(`Not enough XP to claim ${rewardTitle}. You need ${xpCost - availableXP} more XP.`, 'error');
+                return false;
+            }
+
+            return confirm(`Are you sure you want to claim "${rewardTitle}" for ${xpCost} XP?`);
+        }
+
+        function showNotification(message, type) {
+            const existingNotifications = document.querySelectorAll('.custom-notification');
+            existingNotifications.forEach(notification => notification.remove());
+
+            const notification = document.createElement('div');
+            notification.className = `custom-notification notification-${type}`;
+            notification.innerHTML = `
+                <i class="fas ${type === 'success' ? 'fa-check-circle' : type === 'error' ? 'fa-exclamation-circle' : 'fa-info-circle'}"></i>
+                <span>${message}</span>
+                <button onclick="this.parentElement.remove()">&times;</button>
+            `;
+
+            document.body.appendChild(notification);
+
+            setTimeout(() => {
+                if (notification.parentElement) {
+                    notification.remove();
+                }
+            }, 5000);
+        }
+    </script>
+</asp:Content>

@@ -159,16 +159,16 @@ public partial class Dashboard : System.Web.UI.Page
         {
             case "CITZ":
             case "R001":
-                return "CitizenDashboard.aspx";
+                return "/Pages/Citizen/Dashboard.aspx";
             case "COLL":
             case "R002":
-                return "CollectorDashboard.aspx";
+                return "/Pages/Collector/Dashboard.aspx";
             case "ADMN":
             case "R004":
-                return "Admin/Dashboard.aspx";
+                return "Pages/Admin/Dashboard.aspx";
             case "COMP":
             case "R003":
-                return "CompanyDashboard.aspx";
+                return "Pages/Company/Dashboard.aspx";
             default:
                 return "Default.aspx";
         }

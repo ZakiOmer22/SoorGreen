@@ -109,24 +109,67 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Content Include="404.aspx" />
     <Content Include="About.aspx" />
     <Content Include="Admin Dashboard.aspx" />
-    <Content Include="Admin\Analytics.aspx" />
-    <Content Include="Admin\AuditLogs.aspx" />
-    <Content Include="Admin\Citizens.aspx" />
-    <Content Include="Admin\Collections.aspx" />
-    <Content Include="Admin\Collectors.aspx" />
-    <Content Include="Admin\Credits.aspx" />
-    <Content Include="Admin\Dashboard.aspx" />
-    <Content Include="Admin\Municipalities.aspx" />
-    <Content Include="Admin\Pickups.aspx" />
-    <Content Include="Admin\Redemptions.aspx" />
-    <Content Include="Admin\Reports.aspx" />
-    <Content Include="Admin\Rewards.aspx" />
-    <Content Include="Admin\Transactions.aspx" />
-    <Content Include="Admin\Users.aspx" />
-    <Content Include="Admin\WasteReports.aspx" />
-    <Content Include="Admin\WasteTypes.aspx" />
+    <Content Include="Content\Pages\about.css" />
+    <Content Include="Scripts\Pages\about.js" />
+    <Content Include="Content\Pages\Admin\adminauditlogs.css" />
+    <Content Include="Content\Pages\Admin\admincitizens.css" />
+    <Content Include="Content\Pages\Admin\admincollections.css" />
+    <Content Include="Content\Pages\Admin\admincollectors.css" />
+    <Content Include="Content\Pages\Admin\admincredits.css" />
+    <Content Include="Content\Pages\Admin\adminfeedbacks.css" />
+    <Content Include="Content\Pages\Admin\adminmunicipalities.css" />
+    <Content Include="Content\Pages\Admin\adminnotificationsmgmt.css" />
+    <Content Include="Content\Pages\Admin\adminpickups.css" />
+    <Content Include="Content\Pages\Admin\adminprofile.css" />
+    <Content Include="Content\Pages\Admin\adminredemptions.css" />
+    <Content Include="Content\Pages\Admin\adminreports.css" />
+    <Content Include="Content\Pages\Admin\adminrewards.css" />
+    <Content Include="Content\Pages\Admin\adminsettings.css" />
+    <Content Include="Content\Pages\Admin\admintransactions.css" />
+    <Content Include="Content\Pages\Admin\adminusers.css" />
+    <Content Include="Content\Pages\Admin\adminwastereports.css" />
+    <Content Include="Content\Pages\Admin\adminwastetypes.css" />
+    <Content Include="Content\Pages\Admin\Analytics.css" />
+    <Content Include="Content\Pages\Admin\Dashboard.css" />
+    <Content Include="Content\Pages\Citizen\citizencommunity.css" />
+    <Content Include="Content\Pages\Citizen\citizendashboard.css" />
+    <Content Include="Content\Pages\Citizen\citizenfeedback.css" />
+    <Content Include="Content\Pages\Citizen\citizenhelp.css" />
+    <Content Include="Content\Pages\Citizen\citizenleaderboard.css" />
+    <Content Include="Content\Pages\Citizen\citizenmyreports.css" />
+    <Content Include="Content\Pages\Citizen\citizenmyrewards.css" />
+    <Content Include="Content\Pages\Citizen\citizennotifications.css" />
+    <Content Include="Content\Pages\Citizen\citizenpickupstatus.css" />
+    <Content Include="Content\Pages\Citizen\citizenredemptionhistory.css" />
+    <Content Include="Content\Pages\Citizen\citizenreportwaste.css" />
+    <Content Include="Content\Pages\Citizen\citizenschedulepickup.css" />
+    <Content Include="Content\Pages\Citizen\citizenuserprofile.css" />
+    <Content Include="HowITWorks.aspx" />
+    <Content Include="Pages\Citizen\Community.aspx" />
+    <Content Include="Pages\Citizen\Dashboard.aspx" />
+    <Content Include="Pages\Admin\Analytics.aspx" />
+    <Content Include="Pages\Admin\AuditLogs.aspx" />
+    <Content Include="Pages\Admin\Citizens.aspx" />
+    <Content Include="Pages\Admin\Collections.aspx" />
+    <Content Include="Pages\Admin\Collectors.aspx" />
+    <Content Include="Pages\Admin\Credits.aspx" />
+    <Content Include="Pages\Admin\Dashboard.aspx" />
+    <Content Include="Pages\Admin\Feedbacks.aspx" />
+    <Content Include="Pages\Admin\Municipalities.aspx" />
+    <Content Include="Pages\Admin\NotificationsMgmt.aspx" />
+    <Content Include="Pages\Admin\Pickups.aspx" />
+    <Content Include="Pages\Admin\Profile.aspx" />
+    <Content Include="Pages\Admin\Redemptions.aspx" />
+    <Content Include="Pages\Admin\Reports.aspx" />
+    <Content Include="Pages\Admin\Rewards.aspx" />
+    <Content Include="Pages\Admin\Settings.aspx" />
+    <Content Include="Pages\Admin\Transactions.aspx" />
+    <Content Include="Pages\Admin\Users.aspx" />
+    <Content Include="Pages\Admin\WasteReports.aspx" />
+    <Content Include="Pages\Admin\WasteTypes.aspx" />
     <Content Include="Contact.aspx" />
     <Content Include="Content\bootstrap-grid.css" />
     <Content Include="Content\bootstrap-grid.min.css" />
@@ -148,8 +191,20 @@
     <Content Include="Dashboard.aspx" />
     <Content Include="Default.aspx" />
     <Content Include="favicon.ico" />
+    <Content Include="ForgotPassword.aspx" />
     <Content Include="Global.asax" />
     <Content Include="Login.aspx" />
+    <Content Include="Pages\Citizen\Feedback.aspx" />
+    <Content Include="Pages\Citizen\Help.aspx" />
+    <Content Include="Pages\Citizen\Leaderboard.aspx" />
+    <Content Include="Pages\Citizen\MyReports.aspx" />
+    <Content Include="Pages\Citizen\MyRewards.aspx" />
+    <Content Include="Pages\Citizen\Notifications.aspx" />
+    <Content Include="Pages\Citizen\PickupStatus.aspx" />
+    <Content Include="Pages\Citizen\RedemptionHistory.aspx" />
+    <Content Include="Pages\Citizen\ReportWaste.aspx" />
+    <Content Include="Pages\Citizen\SchedulePickup.aspx" />
+    <Content Include="Pages\Citizen\UserProfile.aspx" />
     <Content Include="Register.aspx" />
     <Content Include="RegistrationForm.aspx" />
     <Content Include="Scripts\bootstrap.bundle.js" />
@@ -180,7 +235,8 @@
     <Content Include="Content\bootstrap-grid.rtl.css.map" />
     <Content Include="Content\bootstrap-grid.min.css.map" />
     <Content Include="Content\bootstrap-grid.css.map" />
-    <Content Include="Admin\Site.Master" />
+    <Content Include="Pages\Admin\Site.Master" />
+    <Content Include="Pages\Citizen\Site.Master" />
     <None Include="Dockerfile" />
     <None Include=".dockerignore">
       <DependentUpon>Dockerfile</DependentUpon>
@@ -191,6 +247,39 @@
     <Content Include="Scripts\jquery-3.7.0.slim.js" />
     <Content Include="Scripts\jquery-3.7.0.slim.min.js" />
     <Content Include="Scripts\modernizr-2.8.3.js" />
+    <Content Include="Scripts\Pages\Admin\adminauditlogs.js" />
+    <Content Include="Scripts\Pages\Admin\admincitizens.js" />
+    <Content Include="Scripts\Pages\Admin\admincollections.js" />
+    <Content Include="Scripts\Pages\Admin\admincollectors.js" />
+    <Content Include="Scripts\Pages\Admin\admincredits.js" />
+    <Content Include="Scripts\Pages\Admin\adminfeedbacks.js" />
+    <Content Include="Scripts\Pages\Admin\adminmunicipalities.js" />
+    <Content Include="Scripts\Pages\Admin\adminnotificationsmgmt.js" />
+    <Content Include="Scripts\Pages\Admin\adminpickups.js" />
+    <Content Include="Scripts\Pages\Admin\adminprofile.js" />
+    <Content Include="Scripts\Pages\Admin\adminredemptions.js" />
+    <Content Include="Scripts\Pages\Admin\adminreports.js" />
+    <Content Include="Scripts\Pages\Admin\adminrewards.js" />
+    <Content Include="Scripts\Pages\Admin\adminsettings.js" />
+    <Content Include="Scripts\Pages\Admin\admintransactions.js" />
+    <Content Include="Scripts\Pages\Admin\adminusers.js" />
+    <Content Include="Scripts\Pages\Admin\adminwastereports.js" />
+    <Content Include="Scripts\Pages\Admin\adminwastetypes.js" />
+    <Content Include="Scripts\Pages\Admin\Analytics.js" />
+    <Content Include="Scripts\Pages\Admin\Dashboard.js" />
+    <Content Include="Scripts\Pages\Citizen\citizencommunity.js" />
+    <Content Include="Scripts\Pages\Citizen\citizendashboard.js" />
+    <Content Include="Scripts\Pages\Citizen\citizenfeedback.js" />
+    <Content Include="Scripts\Pages\Citizen\citizenhelp.js" />
+    <Content Include="Scripts\Pages\Citizen\citizenleaderboard.js" />
+    <Content Include="Scripts\Pages\Citizen\citizenmyreports.js" />
+    <Content Include="Scripts\Pages\Citizen\citizenmyrewards.js" />
+    <Content Include="Scripts\Pages\Citizen\citizennotifications.js" />
+    <Content Include="Scripts\Pages\Citizen\citizenpickupstatus.js" />
+    <Content Include="Scripts\Pages\Citizen\citizenredemptionhistory.js" />
+    <Content Include="Scripts\Pages\Citizen\citizenreportwaste.js" />
+    <Content Include="Scripts\Pages\Citizen\citizenschedulepickup.js" />
+    <Content Include="Scripts\Pages\Citizen\citizenuserprofile.js" />
     <Content Include="Scripts\WebForms\DetailsView.js" />
     <Content Include="Scripts\WebForms\Focus.js" />
     <Content Include="Scripts\WebForms\GridView.js" />
@@ -224,6 +313,13 @@
     <Content Include="Site.Mobile.Master" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="404.aspx.cs">
+      <DependentUpon>404.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="404.aspx.designer.cs">
+      <DependentUpon>404.aspx</DependentUpon>
+    </Compile>
     <Compile Include="Admin Dashboard.aspx.cs">
       <DependentUpon>Admin Dashboard.aspx</DependentUpon>
       <SubType>ASPXCodeBehind</SubType>
@@ -231,123 +327,172 @@
     <Compile Include="Admin Dashboard.aspx.designer.cs">
       <DependentUpon>Admin Dashboard.aspx</DependentUpon>
     </Compile>
-    <Compile Include="Admin\Analytics.aspx.cs">
-      <DependentUpon>Analytics.aspx</DependentUpon>
+    <Compile Include="HowITWorks.aspx.cs">
+      <DependentUpon>HowITWorks.aspx</DependentUpon>
       <SubType>ASPXCodeBehind</SubType>
     </Compile>
-    <Compile Include="Admin\Analytics.aspx.designer.cs">
-      <DependentUpon>Analytics.aspx</DependentUpon>
+    <Compile Include="HowITWorks.aspx.designer.cs">
+      <DependentUpon>HowITWorks.aspx</DependentUpon>
     </Compile>
-    <Compile Include="Admin\AuditLogs.aspx.cs">
-      <DependentUpon>AuditLogs.aspx</DependentUpon>
+    <Compile Include="Pages\Citizen\Community.aspx.cs">
+      <DependentUpon>Community.aspx</DependentUpon>
       <SubType>ASPXCodeBehind</SubType>
     </Compile>
-    <Compile Include="Admin\AuditLogs.aspx.designer.cs">
-      <DependentUpon>AuditLogs.aspx</DependentUpon>
+    <Compile Include="Pages\Citizen\Community.aspx.designer.cs">
+      <DependentUpon>Community.aspx</DependentUpon>
     </Compile>
-    <Compile Include="Admin\Citizens.aspx.cs">
-      <DependentUpon>Citizens.aspx</DependentUpon>
-      <SubType>ASPXCodeBehind</SubType>
-    </Compile>
-    <Compile Include="Admin\Citizens.aspx.designer.cs">
-      <DependentUpon>Citizens.aspx</DependentUpon>
-    </Compile>
-    <Compile Include="Admin\Collections.aspx.cs">
-      <DependentUpon>Collections.aspx</DependentUpon>
-      <SubType>ASPXCodeBehind</SubType>
-    </Compile>
-    <Compile Include="Admin\Collections.aspx.designer.cs">
-      <DependentUpon>Collections.aspx</DependentUpon>
-    </Compile>
-    <Compile Include="Admin\Collectors.aspx.cs">
-      <DependentUpon>Collectors.aspx</DependentUpon>
-      <SubType>ASPXCodeBehind</SubType>
-    </Compile>
-    <Compile Include="Admin\Collectors.aspx.designer.cs">
-      <DependentUpon>Collectors.aspx</DependentUpon>
-    </Compile>
-    <Compile Include="Admin\Credits.aspx.cs">
-      <DependentUpon>Credits.aspx</DependentUpon>
-      <SubType>ASPXCodeBehind</SubType>
-    </Compile>
-    <Compile Include="Admin\Credits.aspx.designer.cs">
-      <DependentUpon>Credits.aspx</DependentUpon>
-    </Compile>
-    <Compile Include="Admin\Dashboard.aspx.cs">
+    <Compile Include="Pages\Citizen\Dashboard.aspx.cs">
       <DependentUpon>Dashboard.aspx</DependentUpon>
       <SubType>ASPXCodeBehind</SubType>
     </Compile>
-    <Compile Include="Admin\Dashboard.aspx.designer.cs">
+    <Compile Include="Pages\Citizen\Dashboard.aspx.designer.cs">
       <DependentUpon>Dashboard.aspx</DependentUpon>
     </Compile>
-    <Compile Include="Admin\Municipalities.aspx.cs">
+    <Compile Include="Pages\Admin\Analytics.aspx.cs">
+      <DependentUpon>Analytics.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="Pages\Admin\Analytics.aspx.designer.cs">
+      <DependentUpon>Analytics.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="Pages\Admin\AuditLogs.aspx.cs">
+      <DependentUpon>AuditLogs.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="Pages\Admin\AuditLogs.aspx.designer.cs">
+      <DependentUpon>AuditLogs.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="Pages\Admin\Citizens.aspx.cs">
+      <DependentUpon>Citizens.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="Pages\Admin\Citizens.aspx.designer.cs">
+      <DependentUpon>Citizens.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="Pages\Admin\Collections.aspx.cs">
+      <DependentUpon>Collections.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="Pages\Admin\Collections.aspx.designer.cs">
+      <DependentUpon>Collections.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="Pages\Admin\Collectors.aspx.cs">
+      <DependentUpon>Collectors.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="Pages\Admin\Collectors.aspx.designer.cs">
+      <DependentUpon>Collectors.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="Pages\Admin\Credits.aspx.cs">
+      <DependentUpon>Credits.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="Pages\Admin\Credits.aspx.designer.cs">
+      <DependentUpon>Credits.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="Pages\Admin\Dashboard.aspx.cs">
+      <DependentUpon>Dashboard.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="Pages\Admin\Dashboard.aspx.designer.cs">
+      <DependentUpon>Dashboard.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="Pages\Admin\Feedbacks.aspx.cs">
+      <DependentUpon>Feedbacks.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="Pages\Admin\Feedbacks.aspx.designer.cs">
+      <DependentUpon>Feedbacks.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="Pages\Admin\Municipalities.aspx.cs">
       <DependentUpon>Municipalities.aspx</DependentUpon>
       <SubType>ASPXCodeBehind</SubType>
     </Compile>
-    <Compile Include="Admin\Municipalities.aspx.designer.cs">
+    <Compile Include="Pages\Admin\Municipalities.aspx.designer.cs">
       <DependentUpon>Municipalities.aspx</DependentUpon>
     </Compile>
-    <Compile Include="Admin\Pickups.aspx.cs">
+    <Compile Include="Pages\Admin\NotificationsMgmt.aspx.cs">
+      <DependentUpon>NotificationsMgmt.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="Pages\Admin\NotificationsMgmt.aspx.designer.cs">
+      <DependentUpon>NotificationsMgmt.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="Pages\Admin\Pickups.aspx.cs">
       <DependentUpon>Pickups.aspx</DependentUpon>
       <SubType>ASPXCodeBehind</SubType>
     </Compile>
-    <Compile Include="Admin\Pickups.aspx.designer.cs">
+    <Compile Include="Pages\Admin\Pickups.aspx.designer.cs">
       <DependentUpon>Pickups.aspx</DependentUpon>
     </Compile>
-    <Compile Include="Admin\Redemptions.aspx.cs">
+    <Compile Include="Pages\Admin\Profile.aspx.cs">
+      <DependentUpon>Profile.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="Pages\Admin\Profile.aspx.designer.cs">
+      <DependentUpon>Profile.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="Pages\Admin\Redemptions.aspx.cs">
       <DependentUpon>Redemptions.aspx</DependentUpon>
       <SubType>ASPXCodeBehind</SubType>
     </Compile>
-    <Compile Include="Admin\Redemptions.aspx.designer.cs">
+    <Compile Include="Pages\Admin\Redemptions.aspx.designer.cs">
       <DependentUpon>Redemptions.aspx</DependentUpon>
     </Compile>
-    <Compile Include="Admin\Reports.aspx.cs">
+    <Compile Include="Pages\Admin\Reports.aspx.cs">
       <DependentUpon>Reports.aspx</DependentUpon>
       <SubType>ASPXCodeBehind</SubType>
     </Compile>
-    <Compile Include="Admin\Reports.aspx.designer.cs">
+    <Compile Include="Pages\Admin\Reports.aspx.designer.cs">
       <DependentUpon>Reports.aspx</DependentUpon>
     </Compile>
-    <Compile Include="Admin\Rewards.aspx.cs">
+    <Compile Include="Pages\Admin\Rewards.aspx.cs">
       <DependentUpon>Rewards.aspx</DependentUpon>
       <SubType>ASPXCodeBehind</SubType>
     </Compile>
-    <Compile Include="Admin\Rewards.aspx.designer.cs">
+    <Compile Include="Pages\Admin\Rewards.aspx.designer.cs">
       <DependentUpon>Rewards.aspx</DependentUpon>
     </Compile>
-    <Compile Include="Admin\Site.Master.cs">
+    <Compile Include="Pages\Admin\Settings.aspx.cs">
+      <DependentUpon>Settings.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="Pages\Admin\Settings.aspx.designer.cs">
+      <DependentUpon>Settings.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="Pages\Admin\Site.Master.cs">
       <DependentUpon>Site.Master</DependentUpon>
       <SubType>ASPXCodeBehind</SubType>
     </Compile>
-    <Compile Include="Admin\Site.Master.designer.cs">
+    <Compile Include="Pages\Admin\Site.Master.designer.cs">
       <DependentUpon>Site.Master</DependentUpon>
     </Compile>
-    <Compile Include="Admin\Transactions.aspx.cs">
+    <Compile Include="Pages\Admin\Transactions.aspx.cs">
       <DependentUpon>Transactions.aspx</DependentUpon>
       <SubType>ASPXCodeBehind</SubType>
     </Compile>
-    <Compile Include="Admin\Transactions.aspx.designer.cs">
+    <Compile Include="Pages\Admin\Transactions.aspx.designer.cs">
       <DependentUpon>Transactions.aspx</DependentUpon>
     </Compile>
-    <Compile Include="Admin\Users.aspx.cs">
+    <Compile Include="Pages\Admin\Users.aspx.cs">
       <DependentUpon>Users.aspx</DependentUpon>
       <SubType>ASPXCodeBehind</SubType>
     </Compile>
-    <Compile Include="Admin\Users.aspx.designer.cs">
+    <Compile Include="Pages\Admin\Users.aspx.designer.cs">
       <DependentUpon>Users.aspx</DependentUpon>
     </Compile>
-    <Compile Include="Admin\WasteReports.aspx.cs">
+    <Compile Include="Pages\Admin\WasteReports.aspx.cs">
       <DependentUpon>WasteReports.aspx</DependentUpon>
       <SubType>ASPXCodeBehind</SubType>
     </Compile>
-    <Compile Include="Admin\WasteReports.aspx.designer.cs">
+    <Compile Include="Pages\Admin\WasteReports.aspx.designer.cs">
       <DependentUpon>WasteReports.aspx</DependentUpon>
     </Compile>
-    <Compile Include="Admin\WasteTypes.aspx.cs">
+    <Compile Include="Pages\Admin\WasteTypes.aspx.cs">
       <DependentUpon>WasteTypes.aspx</DependentUpon>
       <SubType>ASPXCodeBehind</SubType>
     </Compile>
-    <Compile Include="Admin\WasteTypes.aspx.designer.cs">
+    <Compile Include="Pages\Admin\WasteTypes.aspx.designer.cs">
       <DependentUpon>WasteTypes.aspx</DependentUpon>
     </Compile>
     <Compile Include="App_Start\BundleConfig.cs" />
@@ -359,6 +504,83 @@
       <DependentUpon>About.aspx</DependentUpon>
     </Compile>
     <Compile Include="App_Start\RouteConfig.cs" />
+    <Compile Include="Pages\Citizen\Feedback.aspx.cs">
+      <DependentUpon>Feedback.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="Pages\Citizen\Feedback.aspx.designer.cs">
+      <DependentUpon>Feedback.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="Pages\Citizen\Help.aspx.cs">
+      <DependentUpon>Help.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="Pages\Citizen\Help.aspx.designer.cs">
+      <DependentUpon>Help.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="Pages\Citizen\Leaderboard.aspx.cs">
+      <DependentUpon>Leaderboard.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="Pages\Citizen\Leaderboard.aspx.designer.cs">
+      <DependentUpon>Leaderboard.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="Pages\Citizen\MyReports.aspx.cs">
+      <DependentUpon>MyReports.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="Pages\Citizen\MyReports.aspx.designer.cs">
+      <DependentUpon>MyReports.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="Pages\Citizen\MyRewards.aspx.cs">
+      <DependentUpon>MyRewards.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="Pages\Citizen\MyRewards.aspx.designer.cs">
+      <DependentUpon>MyRewards.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="Pages\Citizen\Notifications.aspx.cs">
+      <DependentUpon>Notifications.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="Pages\Citizen\Notifications.aspx.designer.cs">
+      <DependentUpon>Notifications.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="Pages\Citizen\PickupStatus.aspx.cs">
+      <DependentUpon>PickupStatus.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="Pages\Citizen\PickupStatus.aspx.designer.cs">
+      <DependentUpon>PickupStatus.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="Pages\Citizen\RedemptionHistory.aspx.cs">
+      <DependentUpon>RedemptionHistory.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="Pages\Citizen\RedemptionHistory.aspx.designer.cs">
+      <DependentUpon>RedemptionHistory.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="Pages\Citizen\ReportWaste.aspx.cs">
+      <DependentUpon>ReportWaste.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="Pages\Citizen\ReportWaste.aspx.designer.cs">
+      <DependentUpon>ReportWaste.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="Pages\Citizen\SchedulePickup.aspx.cs">
+      <DependentUpon>SchedulePickup.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="Pages\Citizen\SchedulePickup.aspx.designer.cs">
+      <DependentUpon>SchedulePickup.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="Pages\Citizen\Site.Master.cs">
+      <DependentUpon>Site.Master</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="Pages\Citizen\Site.Master.designer.cs">
+      <DependentUpon>Site.Master</DependentUpon>
+    </Compile>
     <Compile Include="Contact.aspx.cs">
       <DependentUpon>Contact.aspx</DependentUpon>
       <SubType>ASPXCodeBehind</SubType>
@@ -380,6 +602,13 @@
     <Compile Include="Default.aspx.designer.cs">
       <DependentUpon>Default.aspx</DependentUpon>
     </Compile>
+    <Compile Include="ForgotPassword.aspx.cs">
+      <DependentUpon>ForgotPassword.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="ForgotPassword.aspx.designer.cs">
+      <DependentUpon>ForgotPassword.aspx</DependentUpon>
+    </Compile>
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
@@ -389,6 +618,13 @@
     </Compile>
     <Compile Include="Login.aspx.designer.cs">
       <DependentUpon>Login.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="Pages\Citizen\UserProfile.aspx.cs">
+      <DependentUpon>UserProfile.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="Pages\Citizen\UserProfile.aspx.designer.cs">
+      <DependentUpon>UserProfile.aspx</DependentUpon>
     </Compile>
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Register.aspx.cs">

@@ -1,0 +1,770 @@
+﻿<%@ Page Title="Redemption History" Language="C#" MasterPageFile="~/Pages/Citizen/Site.Master" AutoEventWireup="true" CodeFile="RedemptionHistory.aspx.cs" Inherits="SoorGreen.Citizen.RedemptionHistory" %>
+
+<asp:Content ID="Content1" ContentPlaceHolderID="TitleContent" runat="server">
+    Redemption History - SoorGreen Citizen
+</asp:Content>
+
+<asp:Content ID="Content2" ContentPlaceHolderID="MainContent" runat="server">
+    <style>
+        /* Your existing CSS styles remain exactly the same */
+        .history-container {
+            margin-top: 20px;
+            max-width: 1200px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .stats-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 1.5rem;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+
+            .stat-card:hover {
+                transform: translateY(-3px);
+                border-color: rgba(0, 212, 170, 0.3);
+            }
+
+        .stat-value {
+            font-size: 2rem;
+            font-weight: 800;
+            color: #ffffff !important;
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-label {
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 0.9rem;
+            font-weight: 600;
+        }
+
+        .filters-section {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(20px);
+            border-radius: 15px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .filter-group {
+            display: flex;
+            gap: 1rem;
+            align-items: end;
+            flex-wrap: wrap;
+        }
+
+        .form-group {
+            margin-bottom: 0;
+        }
+
+        .form-label {
+            color: rgba(255, 255, 255, 0.8) !important;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            display: block;
+        }
+
+        .form-control {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 8px;
+            color: white !important;
+            padding: 0.75rem;
+            transition: all 0.3s ease;
+        }
+
+            .form-control:focus {
+                outline: none;
+                border-color: var(--primary);
+                background: rgba(255, 255, 255, 0.15);
+            }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #0d6efd, #0dcaf0);
+            border: none;
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 600;
+        }
+
+            .btn-primary:hover {
+                background: linear-gradient(135deg, #0b5ed7, #0baccc);
+                transform: translateY(-2px);
+            }
+
+        .btn-outline-light {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 600;
+        }
+
+            .btn-outline-light:hover {
+                background: rgba(255, 255, 255, 0.2);
+            }
+
+        .history-table {
+            width: 100%;
+            background: rgba(255, 255, 255, 0.02);
+            border-collapse: collapse;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+            .history-table th {
+                background: rgba(255, 255, 255, 0.1);
+                color: #ffffff !important;
+                font-weight: 600;
+                padding: 1rem;
+                text-align: left;
+                border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            }
+
+            .history-table td {
+                padding: 1rem;
+                border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+                color: rgba(255, 255, 255, 0.8) !important;
+            }
+
+            .history-table tr:hover {
+                background: rgba(255, 255, 255, 0.03);
+            }
+
+        .status-badge {
+            padding: 0.3rem 0.8rem;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            display: inline-block;
+        }
+
+        .status-redeemed {
+            background: rgba(25, 135, 84, 0.2);
+            color: #198754;
+            border: 1px solid rgba(25, 135, 84, 0.3);
+        }
+
+        .status-pending {
+            background: rgba(255, 193, 7, 0.2);
+            color: #ffc107;
+            border: 1px solid rgba(255, 193, 7, 0.3);
+        }
+
+        .status-expired {
+            background: rgba(108, 117, 125, 0.2);
+            color: #6c757d;
+            border: 1px solid rgba(108, 117, 125, 0.3);
+        }
+
+        .status-cancelled {
+            background: rgba(220, 53, 69, 0.2);
+            color: #dc3545;
+            border: 1px solid rgba(220, 53, 69, 0.3);
+        }
+
+        .reward-type {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.3rem 0.8rem;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .type-digital {
+            border-color: rgba(13, 110, 253, 0.3);
+        }
+
+        .type-physical {
+            border-color: rgba(25, 135, 84, 0.3);
+        }
+
+        .type-discount {
+            border-color: rgba(255, 193, 7, 0.3);
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 3rem 2rem;
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+        .empty-state-icon {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+            color: rgba(255, 255, 255, 0.3);
+        }
+
+        .empty-state-title {
+            font-size: 1.5rem;
+            margin-bottom: 0.5rem;
+            color: rgba(255, 255, 255, 0.8);
+        }
+
+        .empty-state-description {
+            font-size: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .pagination {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 0.5rem;
+            margin-top: 2rem;
+        }
+
+        .page-item {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 8px;
+            padding: 0.5rem 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+            .page-item:hover {
+                background: rgba(255, 255, 255, 0.2);
+            }
+
+            .page-item.active {
+                background: var(--primary);
+                border-color: var(--primary);
+            }
+
+        .action-btn {
+            background: none;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: rgba(255, 255, 255, 0.8);
+            padding: 0.3rem 0.8rem;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 0.8rem;
+        }
+
+            .action-btn:hover {
+                background: rgba(255, 255, 255, 0.1);
+                border-color: var(--primary);
+            }
+
+        .xp-badge {
+            background: linear-gradient(135deg, #FFD700, #FFA500);
+            color: #000 !important;
+            padding: 0.3rem 0.6rem;
+            border-radius: 12px;
+            font-weight: 700;
+            font-size: 0.8rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.3rem;
+        }
+
+        .custom-notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: rgba(255, 255, 255, 0.95);
+            color: #000000 !important;
+            padding: 1rem 1.5rem;
+            border-radius: 8px;
+            border-left: 4px solid #ccc;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            z-index: 10000;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            max-width: 400px;
+            animation: slideInRight 0.3s ease;
+        }
+
+        .notification-error {
+            border-left-color: #dc3545;
+        }
+
+        .notification-success {
+            border-left-color: #198754;
+        }
+
+        .notification-info {
+            border-left-color: #0dcaf0;
+        }
+
+        .custom-notification button {
+            background: none;
+            border: none;
+            font-size: 1.2rem;
+            cursor: pointer;
+            color: #666 !important;
+        }
+
+        @keyframes slideInRight {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        .text-light, h1, h2, h3, h4, h5, h6 {
+            color: #ffffff !important;
+        }
+
+        .text-muted {
+            color: rgba(255, 255, 255, 0.7) !important;
+        }
+
+        @media (max-width: 768px) {
+            .stats-cards {
+                grid-template-columns: 1fr;
+            }
+
+            .filter-group {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .history-table {
+                font-size: 0.8rem;
+            }
+
+                .history-table th,
+                .history-table td {
+                    padding: 0.5rem;
+                }
+        }
+    </style>
+
+    <!-- Hidden fields to store server data -->
+    <asp:HiddenField ID="hfRedemptionData" runat="server" Value="[]" />
+    <asp:HiddenField ID="hfStatsData" runat="server" Value="{}" />
+
+    <div class="history-container">
+        <br />
+        <br />
+        <br />
+
+        <div class="stats-cards">
+            <div class="stat-card">
+                <div class="stat-value" id="totalRedemptions">0</div>
+                <div class="stat-label">Total Redemptions</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="totalXPSpent">0</div>
+                <div class="stat-label">Total XP Spent</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="activeRewards">0</div>
+                <div class="stat-label">Active Rewards</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="savingsAmount">$0</div>
+                <div class="stat-label">Total Savings</div>
+            </div>
+        </div>
+
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <div>
+                <h1 style="color: #ffffff !important; margin: 0;">Redemption History</h1>
+                <p class="text-muted mb-0">Track your reward claims and redemption status</p>
+            </div>
+            <div>
+                <button type="button" class="btn-outline-light me-2" onclick="exportHistory()">
+                    <i class="fas fa-download me-2"></i>Export CSV
+                </button>
+                <asp:Button ID="btnRefresh" runat="server" Text="Refresh" CssClass="btn-primary" OnClick="btnRefresh_Click" />
+            </div>
+        </div>
+
+        <div class="filters-section">
+            <div class="filter-group">
+                <div class="form-group">
+                    <label class="form-label">Status</label>
+                    <select class="form-control" id="statusFilter" style="min-width: 150px;">
+                        <option value="all">All Status</option>
+                        <option value="redeemed">Redeemed</option>
+                        <option value="pending">Pending</option>
+                        <option value="expired">Expired</option>
+                        <option value="cancelled">Cancelled</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Reward Type</label>
+                    <select class="form-control" id="typeFilter" style="min-width: 150px;">
+                        <option value="all">All Types</option>
+                        <option value="digital">Digital</option>
+                        <option value="physical">Physical</option>
+                        <option value="discount">Discount</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Date From</label>
+                    <input type="date" class="form-control" id="dateFrom" style="min-width: 150px;">
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Date To</label>
+                    <input type="date" class="form-control" id="dateTo" style="min-width: 150px;">
+                </div>
+
+                <div class="form-group">
+                    <asp:Button ID="btnApplyFilters" runat="server" Text="Apply Filters" CssClass="btn-primary" OnClick="btnApplyFilters_Click" style="margin-top: 24px;" />
+                </div>
+
+                <div class="form-group">
+                    <button type="button" class="btn-outline-light" onclick="clearFilters()" style="margin-top: 24px;">
+                        <i class="fas fa-times me-2"></i>Clear
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div class="table-responsive">
+            <table class="history-table">
+                <thead>
+                    <tr>
+                        <th>Reward</th>
+                        <th>Type</th>
+                        <th>XP Cost</th>
+                        <th>Claimed Date</th>
+                        <th>Expiry Date</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="historyTableBody">
+                    <!-- Data will be populated by JavaScript -->
+                </tbody>
+            </table>
+        </div>
+
+        <div id="emptyState" class="empty-state" style="display: none;">
+            <div class="empty-state-icon">
+                <i class="fas fa-history"></i>
+            </div>
+            <h3 class="empty-state-title">No Redemption History</h3>
+            <p class="empty-state-description">You haven't claimed any rewards yet.</p>
+            <button type="button" class="btn-primary" onclick="window.location.href='MyRewards.aspx'">
+                <i class="fas fa-gift me-2"></i>Browse Rewards
+            </button>
+        </div>
+
+        <div class="pagination" id="paginationContainer" style="display: none;">
+            <div class="page-item" onclick="changePage(-1)">
+                <i class="fas fa-chevron-left"></i>
+            </div>
+            <div class="page-item active">1</div>
+            <div class="page-item">2</div>
+            <div class="page-item">3</div>
+            <div class="page-item" onclick="changePage(1)">
+                <i class="fas fa-chevron-right"></i>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Load data from hidden fields on page load
+        document.addEventListener('DOMContentLoaded', function () {
+            const redemptionData = JSON.parse(document.getElementById('<%= hfRedemptionData.ClientID %>').value);
+            const statsData = JSON.parse(document.getElementById('<%= hfStatsData.ClientID %>').value);
+
+            updateHistoryTable(redemptionData);
+            updateStats(statsData);
+            setupEventListeners();
+        });
+
+        function setupEventListeners() {
+            document.getElementById('statusFilter').addEventListener('change', function () {
+                applyFilters();
+            });
+
+            document.getElementById('typeFilter').addEventListener('change', function () {
+                applyFilters();
+            });
+
+            document.getElementById('dateFrom').addEventListener('change', function () {
+                applyFilters();
+            });
+
+            document.getElementById('dateTo').addEventListener('change', function () {
+                applyFilters();
+            });
+        }
+
+        function updateHistoryTable(data) {
+            const tbody = document.getElementById('historyTableBody');
+
+            if (!data || data.length === 0) {
+                document.getElementById('emptyState').style.display = 'block';
+                document.querySelector('.table-responsive').style.display = 'none';
+                document.getElementById('paginationContainer').style.display = 'none';
+                return;
+            }
+
+            let html = '';
+
+            data.forEach(function (item) {
+                const statusClass = getStatusClass(item.Status);
+                const typeClass = getTypeClass(item.Type);
+                const typeIcon = getTypeIcon(item.Type);
+
+                html += `
+                <tr>
+                    <td>
+                        <div class="fw-bold text-light">${item.RewardName}</div>
+                        ${item.Code ? '<div class="text-muted small">Code: ' + item.Code + '</div>' : ''}
+                    </td>
+                    <td>
+                        <span class="reward-type ${typeClass}">
+                            <i class="fas ${typeIcon}"></i>
+                            ${item.Type ? item.Type.charAt(0).toUpperCase() + item.Type.slice(1) : 'Unknown'}
+                        </span>
+                    </td>
+                    <td>
+                        <span class="xp-badge">
+                            <i class="fas fa-star"></i>
+                            ${item.XPCost || 0}
+                        </span>
+                    </td>
+                    <td>${formatDate(item.ClaimedDate)}</td>
+                    <td>${formatDate(item.ExpiryDate)}</td>
+                    <td>
+                        <span class="status-badge ${statusClass}">
+                            ${item.Status ? item.Status.charAt(0).toUpperCase() + item.Status.slice(1) : 'Unknown'}
+                        </span>
+                    </td>
+                    <td>
+                        <div class="d-flex gap-2">
+                            ${item.Status === 'redeemed' ? `
+                                <button class="action-btn" onclick="viewDetails('${item.RedemptionId}')" title="View Details">
+                                    <i class="fas fa-eye"></i>
+                                </button>
+                            ` : ''}
+                            
+                            ${item.Status === 'pending' ? `
+                                <button class="action-btn" onclick="redeemReward('${item.RedemptionId}')" title="Redeem Now">
+                                    <i class="fas fa-check"></i>
+                                </button>
+                            ` : ''}
+                            
+                            ${item.Status !== 'redeemed' && item.Status !== 'expired' ? `
+                                <button class="action-btn" onclick="cancelRedemption('${item.RedemptionId}')" title="Cancel">
+                                    <i class="fas fa-times"></i>
+                                </button>
+                            ` : ''}
+                        </div>
+                    </td>
+                </tr>
+            `;
+            });
+
+            tbody.innerHTML = html;
+            document.getElementById('emptyState').style.display = 'none';
+            document.querySelector('.table-responsive').style.display = 'block';
+            document.getElementById('paginationContainer').style.display = data.length > 0 ? 'flex' : 'none';
+        }
+
+        function updateStats(stats) {
+            if (!stats) return;
+
+            document.getElementById('totalRedemptions').textContent = stats.TotalRedemptions || 0;
+            document.getElementById('totalXPSpent').textContent = stats.TotalXPSpent || 0;
+            document.getElementById('activeRewards').textContent = stats.ActiveRewards || 0;
+            document.getElementById('savingsAmount').textContent = '$' + (stats.TotalSavings || 0).toFixed(2);
+        }
+
+        function getStatusClass(status) {
+            if (!status) return 'status-pending';
+
+            switch (status.toLowerCase()) {
+                case 'redeemed': return 'status-redeemed';
+                case 'pending': return 'status-pending';
+                case 'expired': return 'status-expired';
+                case 'cancelled': return 'status-cancelled';
+                default: return 'status-pending';
+            }
+        }
+
+        function getTypeClass(type) {
+            if (!type) return '';
+
+            switch (type.toLowerCase()) {
+                case 'digital': return 'type-digital';
+                case 'physical': return 'type-physical';
+                case 'discount': return 'type-discount';
+                default: return '';
+            }
+        }
+
+        function getTypeIcon(type) {
+            if (!type) return 'fa-gift';
+
+            switch (type.toLowerCase()) {
+                case 'digital': return 'fa-file-download';
+                case 'physical': return 'fa-box';
+                case 'discount': return 'fa-tag';
+                default: return 'fa-gift';
+            }
+        }
+
+        function formatDate(dateString) {
+            if (!dateString) return 'N/A';
+
+            const date = new Date(dateString);
+            if (isNaN(date.getTime())) return 'N/A';
+
+            return date.toLocaleDateString('en-US', {
+                year: 'numeric',
+                month: 'short',
+                day: 'numeric'
+            });
+        }
+
+        function applyFilters() {
+            showNotification('Applying filters...', 'info');
+            // Trigger postback to apply filters
+            document.getElementById('<%= btnApplyFilters.ClientID %>').click();
+        }
+
+        function clearFilters() {
+            document.getElementById('statusFilter').value = 'all';
+            document.getElementById('typeFilter').value = 'all';
+            document.getElementById('dateFrom').value = '';
+            document.getElementById('dateTo').value = '';
+
+            applyFilters();
+        }
+
+        function changePage(direction) {
+            showNotification('Loading page ' + (currentPage + direction) + '...', 'info');
+            // In a real implementation, you would handle pagination here
+        }
+
+        function viewDetails(redemptionId) {
+            showNotification('Loading reward details...', 'info');
+            // Simple implementation - just show an alert with basic info
+            const row = event.target.closest('tr');
+            const cells = row.getElementsByTagName('td');
+            const rewardName = cells[0].querySelector('.fw-bold').textContent;
+            const type = cells[1].querySelector('.reward-type').textContent;
+            const xpCost = cells[2].querySelector('.xp-badge').textContent;
+            const claimedDate = cells[3].textContent;
+            const expiryDate = cells[4].textContent;
+            const status = cells[5].querySelector('.status-badge').textContent;
+            
+            alert('Reward Details:\n\n' +
+                'Name: ' + rewardName + '\n' +
+                'Type: ' + type + '\n' +
+                'XP Cost: ' + xpCost + '\n' +
+                'Status: ' + status + '\n' +
+                'Claimed: ' + claimedDate + '\n' +
+                'Expires: ' + expiryDate);
+        }
+
+        function redeemReward(redemptionId) {
+            if (confirm('Are you sure you want to redeem this reward?')) {
+                showNotification('Redeeming reward...', 'info');
+                // In a real implementation, you would call a server method here
+                // For now, just show success message
+                setTimeout(function() {
+                    showNotification('Reward redeemed successfully!', 'success');
+                    // Reload the page to reflect changes
+                    document.getElementById('<%= btnRefresh.ClientID %>').click();
+                }, 1000);
+            }
+        }
+
+        function cancelRedemption(redemptionId) {
+            if (confirm('Are you sure you want to cancel this redemption?')) {
+                showNotification('Cancelling redemption...', 'info');
+                // In a real implementation, you would call a server method here
+                // For now, just show success message
+                setTimeout(function() {
+                    showNotification('Redemption cancelled successfully!', 'success');
+                    // Reload the page to reflect changes
+                    document.getElementById('<%= btnRefresh.ClientID %>').click();
+                }, 1000);
+            }
+        }
+
+        function exportHistory() {
+            showNotification('Preparing export...', 'info');
+            
+            const data = JSON.parse(document.getElementById('<%= hfRedemptionData.ClientID %>').value);
+
+            // Generate CSV
+            let csv = 'Reward Name,Type,XP Cost,Claimed Date,Expiry Date,Status,Code,Savings\n';
+
+            data.forEach(function (item) {
+                csv += '"' + (item.RewardName || '') + '",';
+                csv += '"' + (item.Type || '') + '",';
+                csv += (item.XPCost || 0) + ',';
+                csv += '"' + formatDate(item.ClaimedDate) + '",';
+                csv += '"' + formatDate(item.ExpiryDate) + '",';
+                csv += '"' + (item.Status || '') + '",';
+                csv += '"' + (item.Code || 'N/A') + '",';
+                csv += '$' + (item.Savings || 0).toFixed(2) + '\n';
+            });
+
+            // Create download link
+            const link = document.createElement('a');
+            link.download = 'redemption-history.csv';
+            const blob = new Blob([csv], { type: 'text/csv' });
+            link.href = window.URL.createObjectURL(blob);
+            link.click();
+
+            showNotification('Export completed!', 'success');
+        }
+
+        function showNotification(message, type) {
+            const existingNotifications = document.querySelectorAll('.custom-notification');
+            existingNotifications.forEach(function (notification) {
+                notification.remove();
+            });
+
+            const notification = document.createElement('div');
+            notification.className = 'custom-notification notification-' + type;
+            notification.innerHTML = `
+            <i class="fas ${type === 'success' ? 'fa-check-circle' : type === 'error' ? 'fa-exclamation-circle' : 'fa-info-circle'}"></i>
+            <span>${message}</span>
+            <button onclick="this.parentElement.remove()">&times;</button>
+        `;
+
+            document.body.appendChild(notification);
+
+            setTimeout(function () {
+                if (notification.parentElement) {
+                    notification.remove();
+                }
+            }, 5000);
+        }
+    </script>
+</asp:Content>

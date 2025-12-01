@@ -1,10 +1,11 @@
 ﻿using System;
 using System.Data.SqlClient;
 using System.Web.Configuration;
+using System.Security.Cryptography;
+using System.Text;
 
 public partial class LoginPage : System.Web.UI.Page
 {
-   
     protected void Page_Load(object sender, EventArgs e)
     {
         if (!IsPostBack)
@@ -30,68 +31,80 @@ public partial class LoginPage : System.Web.UI.Page
                 {
                     conn.Open();
 
-                    string query = @"SELECT UserId, FullName, Email, RoleId, IsVerified, Phone
-                               FROM Users 
-                               WHERE (Email = @Email OR Phone = @Email) AND Phone = @Password";
+                    // UPDATED: Get user data including password hash
+                    string query = @"SELECT UserId, FullName, Email, RoleId, IsVerified, Phone, Password
+                           FROM Users 
+                           WHERE Email = @Email OR Phone = @Email";
 
                     using (SqlCommand cmd = new SqlCommand(query, conn))
                     {
-                        string emailValue = "";
-                        if (txtEmail != null && txtEmail.Text != null)
-                        {
-                            emailValue = txtEmail.Text.Trim();
-                        }
-
-                        string passwordValue = "";
-                        if (txtPassword != null && txtPassword.Text != null)
-                        {
-                            passwordValue = txtPassword.Text.Trim();
-                        }
+                        string emailValue = (txtEmail != null && txtEmail.Text != null) ? txtEmail.Text.Trim() : "";
+                        string passwordValue = (txtPassword != null && txtPassword.Text != null) ? txtPassword.Text.Trim() : "";
 
                         cmd.Parameters.AddWithValue("@Email", emailValue);
-                        cmd.Parameters.AddWithValue("@Password", passwordValue);
 
                         using (SqlDataReader reader = cmd.ExecuteReader())
                         {
                             if (reader.Read())
                             {
-                                Session["UserID"] = reader["UserId"].ToString();
-                                Session["UserName"] = reader["FullName"].ToString();
-                                Session["UserEmail"] = reader["Email"].ToString();
-                                Session["UserRole"] = reader["RoleId"].ToString();
-                                Session["IsVerified"] = reader["IsVerified"];
-                                Session["UserPhone"] = reader["Phone"].ToString();
+                                // FIXED: Compare hashed passwords - .NET 4.0 compatible
+                                string storedHashedPassword = reader["Password"] != null ? reader["Password"].ToString() : "";
+                                string inputHashedPassword = HashPassword(passwordValue);
 
-                                UpdateLastLogin(reader["UserId"].ToString());
-                                LogAudit(reader["UserId"].ToString(), "User Login", "Successful login");
+                                if (storedHashedPassword == inputHashedPassword)
+                                {
+                                    // Login successful
+                                    Session["UserID"] = reader["UserId"].ToString();
+                                    Session["UserName"] = reader["FullName"].ToString();
+                                    Session["UserEmail"] = reader["Email"].ToString();
+                                    Session["UserRole"] = reader["RoleId"].ToString();
+                                    Session["IsVerified"] = reader["IsVerified"];
+                                    Session["UserPhone"] = reader["Phone"] != null ? reader["Phone"].ToString() : "";
 
-                                ShowToast("Welcome back, " + reader["FullName"].ToString() + "!", "success");
-                                RedirectToDashboard(reader["RoleId"].ToString());
+                                    UpdateLastLogin(reader["UserId"].ToString());
+                                    LogAudit(reader["UserId"].ToString(), "User Login", "Successful login");
+
+                                    ShowToast("Welcome back, " + reader["FullName"].ToString() + "!", "success");
+                                    RedirectToDashboard(reader["RoleId"].ToString());
+                                }
+                                else
+                                {
+                                    // Password doesn't match
+                                    LogAudit(null, "Failed Login", "Invalid password for: " + emailValue);
+                                    ShowToast("Invalid email/phone or password. Please try again.", "error");
+                                }
                             }
                             else
                             {
-                                string emailText = "unknown";
-                                if (txtEmail != null && txtEmail.Text != null)
-                                {
-                                    emailText = txtEmail.Text;
-                                }
-                                LogAudit(null, "Failed Login", "Failed login attempt for email: " + emailText);
-                                ShowToast("Invalid email or password. Please try again.", "error");
+                                // User not found
+                                LogAudit(null, "Failed Login", "User not found: " + emailValue);
+                                ShowToast("Invalid email/phone or password. Please try again.", "error");
                             }
                         }
                     }
                 }
             }
-            catch (SqlException ex)
-            {
-                LogAudit(null, "Login Error", "Database error: " + ex.Message);
-                ShowToast("Login temporarily unavailable. Please try again later.", "error");
-            }
             catch (Exception ex)
             {
-                LogAudit(null, "Login Error", "System error: " + ex.Message);
-                ShowToast("An unexpected error occurred. Please try again.", "error");
+                LogAudit(null, "Login Error", "Exception: " + ex.Message);
+                ShowToast("An error occurred during login. Please try again.", "error");
             }
+        }
+    }
+
+    // FIXED: Added password hashing function to match ForgotPassword page
+    private string HashPassword(string password)
+    {
+        using (SHA256 sha256Hash = SHA256.Create())
+        {
+            byte[] bytes = sha256Hash.ComputeHash(Encoding.UTF8.GetBytes(password));
+
+            StringBuilder builder = new StringBuilder();
+            for (int i = 0; i < bytes.Length; i++)
+            {
+                builder.Append(bytes[i].ToString("x2"));
+            }
+            return builder.ToString();
         }
     }
 
@@ -99,7 +112,7 @@ public partial class LoginPage : System.Web.UI.Page
     {
         if (txtEmail == null || string.IsNullOrEmpty(txtEmail.Text))
         {
-            ShowToast("Email is required.", "warning");
+            ShowToast("Email or phone number is required.", "warning");
             return false;
         }
 
@@ -212,5 +225,11 @@ public partial class LoginPage : System.Web.UI.Page
         string escapedMessage = message.Replace("'", "\\'");
         string script = string.Format("showToast('{0}', '{1}');", escapedMessage, type);
         ClientScript.RegisterStartupScript(this.GetType(), "toast", script, true);
+    }
+
+    // NEW: Method to handle password reset link
+    protected void btnForgotPassword_Click(object sender, EventArgs e)
+    {
+        Response.Redirect("ForgotPassword.aspx");
     }
 }

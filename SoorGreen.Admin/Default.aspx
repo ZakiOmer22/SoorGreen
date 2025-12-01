@@ -2,17 +2,312 @@
 
 <asp:Content ID="MainContent" ContentPlaceHolderID="MainContent" runat="server">
     <style>
-        :root {
-            --primary: #00d4aa;
-            --primary-dark: #00b894;
-            --secondary: #0984e3;
-            --accent: #fd79a8;
-            --dark: #0a192f;
-            --darker: #051122;
-            --light: #ffffff;
-            --card-bg: rgba(255, 255, 255, 0.08);
-            --card-border: rgba(255, 255, 255, 0.12);
+        /* Light mode specific colors - properly designed for light backgrounds */
+        [data-theme="light"] {
+            --light-bg: #f8f9fa;
+            --light-card: #ffffff;
+            --light-border: #e9ecef;
+            --light-text: #212529;
+            --light-muted: #6c757d;
+            --light-shadow: rgba(0, 0, 0, 0.1);
+            --light-overlay: rgba(255, 255, 255, 0.8);
         }
+
+        /* Hero Section Light Mode */
+        [data-theme="light"] .hero-section {
+            background: radial-gradient(ellipse at center, rgba(0, 212, 170, 0.08) 0%, transparent 70%);
+        }
+
+        [data-theme="light"] .hero-bg {
+            background: radial-gradient(circle at 20% 80%, rgba(0, 212, 170, 0.1) 0%, transparent 50%), 
+                        radial-gradient(circle at 80% 20%, rgba(9, 132, 227, 0.1) 0%, transparent 50%);
+        }
+
+        [data-theme="light"] .hero-badge .badge {
+            background: rgba(255, 255, 255, 0.9) !important;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(0, 212, 170, 0.3);
+            color: var(--primary) !important;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        [data-theme="light"] .hero-title {
+            background: linear-gradient(45deg, var(--light-text), var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: 0 0 30px rgba(0, 212, 170, 0.2);
+        }
+
+        [data-theme="light"] .hero-subtitle {
+            color: var(--light-muted);
+            opacity: 0.9;
+        }
+
+        [data-theme="light"] .floating-card {
+            background: var(--light-card);
+            border: 1px solid var(--light-border);
+            color: var(--light-text);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Section Backgrounds Light Mode */
+        [data-theme="light"] .stats-section,
+        [data-theme="light"] .features-section,
+        [data-theme="light"] .how-it-works-section,
+        [data-theme="light"] .platform-section,
+        [data-theme="light"] .testimonials-section,
+        [data-theme="light"] .mobile-app-section,
+        [data-theme="light"] .pricing-section,
+        [data-theme="light"] .partners-section,
+        [data-theme="light"] .faq-section,
+        [data-theme="light"] .tech-stack-section,
+        [data-theme="light"] .impact-section,
+        [data-theme="light"] .case-studies-section,
+        [data-theme="light"] .team-section,
+        [data-theme="light"] .awards-section,
+        [data-theme="light"] .integration-section {
+            background: var(--light-bg) !important;
+        }
+
+        /* Card Styles Light Mode */
+        [data-theme="light"] .stat-card,
+        [data-theme="light"] .feature-card,
+        [data-theme="light"] .step-card,
+        [data-theme="light"] .feature-item,
+        [data-theme="light"] .testimonial-card,
+        [data-theme="light"] .pricing-card,
+        [data-theme="light"] .partner-logo,
+        [data-theme="light"] .tech-card,
+        [data-theme="light"] .impact-card,
+        [data-theme="light"] .case-study-card,
+        [data-theme="light"] .team-card,
+        [data-theme="light"] .award-card {
+            background: var(--light-card) !important;
+            border: 1px solid var(--light-border) !important;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+        }
+
+        [data-theme="light"] .stat-card:hover,
+        [data-theme="light"] .feature-card:hover,
+        [data-theme="light"] .step-card:hover,
+        [data-theme="light"] .testimonial-card:hover,
+        [data-theme="light"] .pricing-card:hover,
+        [data-theme="light"] .tech-card:hover {
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.15);
+            transform: translateY(-5px);
+        }
+
+        /* Text Colors Light Mode */
+        [data-theme="light"] .text-white {
+            color: var(--light-text) !important;
+        }
+
+        [data-theme="light"] .text-muted {
+            color: var(--light-muted) !important;
+        }
+
+        [data-theme="light"] .text-white-50 {
+            color: var(--light-muted) !important;
+        }
+
+        [data-theme="light"] .text-light {
+            color: var(--light-text) !important;
+        }
+
+        [data-theme="light"] .lead {
+            color: var(--light-muted) !important;
+        }
+
+        /* Section Badges Light Mode */
+        [data-theme="light"] .section-badge {
+            background: rgba(0, 212, 170, 0.15) !important;
+            border: 1px solid rgba(0, 212, 170, 0.3);
+            color: var(--primary) !important;
+            backdrop-filter: blur(10px);
+        }
+
+        /* Accordion Light Mode */
+        [data-theme="light"] .accordion-item {
+            background: var(--light-card) !important;
+            border: 1px solid var(--light-border) !important;
+        }
+
+        [data-theme="light"] .accordion-button {
+            background: var(--light-card) !important;
+            color: var(--light-text) !important;
+        }
+
+        [data-theme="light"] .accordion-button:not(.collapsed) {
+            background: rgba(0, 212, 170, 0.1) !important;
+            color: var(--primary) !important;
+        }
+
+        [data-theme="light"] .accordion-body {
+            color: var(--light-muted);
+        }
+
+        /* Buttons Light Mode */
+        [data-theme="light"] .btn-light {
+            background: rgba(255, 255, 255, 0.9);
+            border: 1px solid var(--light-border);
+            color: var(--light-text);
+            backdrop-filter: blur(10px);
+        }
+
+        [data-theme="light"] .btn-light:hover {
+            background: var(--light-card);
+            color: var(--light-text);
+        }
+
+        [data-theme="light"] .btn-dark {
+            background: rgba(33, 37, 41, 0.9);
+            border: 1px solid rgba(33, 37, 41, 0.2);
+            color: white;
+        }
+
+        [data-theme="light"] .btn-dark:hover {
+            background: rgba(33, 37, 41, 1);
+            color: white;
+        }
+
+        [data-theme="light"] .btn-outline-light {
+            border: 2px solid var(--light-border);
+            color: var(--light-text);
+        }
+
+        [data-theme="light"] .btn-outline-light:hover {
+            background: var(--light-text);
+            color: var(--light-bg);
+        }
+
+        /* Social Links Light Mode */
+        [data-theme="light"] .social-link {
+            background: rgba(33, 37, 41, 0.1);
+            color: var(--light-text);
+        }
+
+        [data-theme="light"] .social-link:hover {
+            background: var(--primary);
+            color: white;
+            transform: translateY(-2px);
+        }
+
+        /* App Features Light Mode */
+        [data-theme="light"] .app-features .d-flex {
+            background: var(--light-card);
+            border: 1px solid var(--light-border);
+        }
+
+        /* Feature Icon Wrapper Light Mode */
+        [data-theme="light"] .feature-icon-wrapper {
+            background: rgba(0, 212, 170, 0.15);
+        }
+
+        /* Popular Pricing Card Light Mode */
+        [data-theme="light"] .popular-pricing-card {
+            background: linear-gradient(135deg, var(--primary), var(--secondary)) !important;
+            border: none !important;
+        }
+
+        /* Grayscale Logos Light Mode */
+        [data-theme="light"] .grayscale {
+            background: linear-gradient(45deg, #e9ecef, #dee2e6);
+            opacity: 0.8;
+        }
+
+        /* Floating Cards in Integration Light Mode */
+        [data-theme="light"] .floating-api-card,
+        [data-theme="light"] .floating-webhook-card {
+            background: var(--light-card);
+            border: 1px solid var(--light-border);
+            color: var(--light-text);
+        }
+
+        /* CTA Section Light Mode */
+        [data-theme="light"] .cta-section {
+            background: linear-gradient(135deg, var(--primary), var(--secondary)) !important;
+        }
+
+        /* Badges Light Mode */
+        [data-theme="light"] .badge.bg-primary {
+            background: rgba(0, 212, 170, 0.15) !important;
+            color: var(--primary) !important;
+            border: 1px solid rgba(0, 212, 170, 0.3);
+        }
+
+        [data-theme="light"] .badge.bg-success {
+            background: rgba(40, 167, 69, 0.15) !important;
+            color: #28a745 !important;
+            border: 1px solid rgba(40, 167, 69, 0.3);
+        }
+
+        [data-theme="light"] .badge.bg-warning {
+            background: rgba(255, 193, 7, 0.15) !important;
+            color: #ffc107 !important;
+            border: 1px solid rgba(255, 193, 7, 0.3);
+        }
+
+        [data-theme="light"] .badge.bg-info {
+            background: rgba(23, 162, 184, 0.15) !important;
+            color: #17a2b8 !important;
+            border: 1px solid rgba(23, 162, 184, 0.3);
+        }
+
+        /* Integration Partners Badges Light Mode */
+        [data-theme="light"] .integration-partners .badge {
+            background: rgba(0, 212, 170, 0.1) !important;
+            border: 1px solid rgba(0, 212, 170, 0.2);
+        }
+
+        /* Hero visual elements light mode */
+        [data-theme="light"] .hero-image::before {
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><circle cx="50" cy="50" r="2" fill="%23000" opacity="0.05"/></svg>') repeat;
+        }
+
+        /* Testimonial author light mode */
+        [data-theme="light"] .testimonial-author h6 {
+            color: var(--light-text) !important;
+        }
+
+        [data-theme="light"] .testimonial-author p {
+            color: var(--light-muted) !important;
+        }
+
+        /* Platform features light mode */
+        [data-theme="light"] .platform-features h5 {
+            color: var(--light-text) !important;
+        }
+
+        [data-theme="light"] .platform-features p {
+            color: var(--light-muted) !important;
+        }
+
+        /* Results in case studies light mode */
+        [data-theme="light"] .results .text-white {
+            color: var(--light-text) !important;
+        }
+
+        /* Team section light mode */
+        [data-theme="light"] .team-card h4 {
+            color: var(--light-text) !important;
+        }
+
+        [data-theme="light"] .impact-label {
+            color: var(--light-text) !important;
+        }
+
+        /* Integration features light mode */
+        [data-theme="light"] .integration-features h5 {
+            color: var(--light-text) !important;
+        }
+
+        /* Mobile app features light mode */
+        [data-theme="light"] .app-features .text-white {
+            color: var(--light-text) !important;
+        }
+
+        /* Remove the old minimal light mode adjustments */
+        /* All new comprehensive light mode styles above */
 
         /* Hero Section */
         .hero-section {
@@ -31,16 +326,22 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background: 
-                radial-gradient(circle at 20% 80%, rgba(0, 212, 170, 0.15) 0%, transparent 50%),
-                radial-gradient(circle at 80% 20%, rgba(9, 132, 227, 0.15) 0%, transparent 50%);
+            background: radial-gradient(circle at 20% 80%, rgba(0, 212, 170, 0.15) 0%, transparent 50%), radial-gradient(circle at 80% 20%, rgba(9, 132, 227, 0.15) 0%, transparent 50%);
             animation: float 8s ease-in-out infinite;
         }
 
         @keyframes float {
-            0%, 100% { transform: translateY(0px) rotate(0deg); }
-            33% { transform: translateY(-20px) rotate(1deg); }
-            66% { transform: translateY(10px) rotate(-1deg); }
+            0%, 100% {
+                transform: translateY(0px) rotate(0deg);
+            }
+
+            33% {
+                transform: translateY(-20px) rotate(1deg);
+            }
+
+            66% {
+                transform: translateY(10px) rotate(-1deg);
+            }
         }
 
         .hero-badge .badge {
@@ -76,10 +377,10 @@
             transition: all 0.3s ease;
         }
 
-        .btn-hero:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 15px 30px rgba(0, 212, 170, 0.4);
-        }
+            .btn-hero:hover {
+                transform: translateY(-3px);
+                box-shadow: 0 15px 30px rgba(0, 212, 170, 0.4);
+            }
 
         .btn-outline-hero {
             border: 2px solid var(--primary);
@@ -91,11 +392,11 @@
             transition: all 0.3s ease;
         }
 
-        .btn-outline-hero:hover {
-            background: var(--primary);
-            color: white;
-            transform: translateY(-3px);
-        }
+            .btn-outline-hero:hover {
+                background: var(--primary);
+                color: white;
+                transform: translateY(-3px);
+            }
 
         .floating-card {
             position: absolute;
@@ -131,8 +432,13 @@
         }
 
         @keyframes floatCard {
-            0%, 100% { transform: translateY(0px) rotate(0deg); }
-            50% { transform: translateY(-20px) rotate(5deg); }
+            0%, 100% {
+                transform: translateY(0px) rotate(0deg);
+            }
+
+            50% {
+                transform: translateY(-20px) rotate(5deg);
+            }
         }
 
         .hero-image {
@@ -144,16 +450,16 @@
             overflow: hidden;
         }
 
-        .hero-image::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><circle cx="50" cy="50" r="2" fill="white" opacity="0.1"/></svg>') repeat;
-            animation: sparkle 4s linear infinite;
-        }
+            .hero-image::before {
+                content: '';
+                position: absolute;
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><circle cx="50" cy="50" r="2" fill="white" opacity="0.1"/></svg>') repeat;
+                animation: sparkle 4s linear infinite;
+            }
 
         /* Stats Section */
         .stats-section {
@@ -171,11 +477,11 @@
             backdrop-filter: blur(10px);
         }
 
-        .stat-card:hover {
-            transform: translateY(-10px);
-            border-color: var(--primary);
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
-        }
+            .stat-card:hover {
+                transform: translateY(-10px);
+                border-color: var(--primary);
+                box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+            }
 
         .stat-number {
             font-size: 3rem;
@@ -205,11 +511,11 @@
             height: 100%;
         }
 
-        .feature-card:hover {
-            transform: translateY(-10px);
-            border-color: var(--primary);
-            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.3);
-        }
+            .feature-card:hover {
+                transform: translateY(-10px);
+                border-color: var(--primary);
+                box-shadow: 0 25px 50px rgba(0, 0, 0, 0.3);
+            }
 
         .feature-icon {
             font-size: 3rem;
@@ -232,10 +538,10 @@
             height: 100%;
         }
 
-        .step-card:hover {
-            transform: translateY(-5px);
-            border-color: var(--primary);
-        }
+            .step-card:hover {
+                transform: translateY(-5px);
+                border-color: var(--primary);
+            }
 
         .step-number {
             position: absolute;
@@ -272,10 +578,10 @@
             transition: all 0.3s ease;
         }
 
-        .feature-item:hover {
-            border-color: var(--primary);
-            transform: translateX(10px);
-        }
+            .feature-item:hover {
+                border-color: var(--primary);
+                transform: translateX(10px);
+            }
 
         .feature-icon-wrapper {
             width: 50px;
@@ -311,11 +617,11 @@
             position: relative;
         }
 
-        .testimonial-card:hover {
-            transform: translateY(-10px);
-            border-color: var(--primary);
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
-        }
+            .testimonial-card:hover {
+                transform: translateY(-10px);
+                border-color: var(--primary);
+                box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+            }
 
         .rating {
             color: var(--primary);
@@ -369,10 +675,10 @@
             height: 100%;
         }
 
-        .pricing-card:hover {
-            transform: translateY(-10px);
-            border-color: var(--primary);
-        }
+            .pricing-card:hover {
+                transform: translateY(-10px);
+                border-color: var(--primary);
+            }
 
         .popular-pricing-card {
             background: linear-gradient(135deg, var(--primary), var(--secondary)) !important;
@@ -404,10 +710,10 @@
             transition: all 0.3s ease;
         }
 
-        .partner-logo:hover {
-            transform: translateY(-5px);
-            border-color: var(--primary);
-        }
+            .partner-logo:hover {
+                transform: translateY(-5px);
+                border-color: var(--primary);
+            }
 
         .grayscale {
             background: linear-gradient(45deg, var(--primary), var(--secondary));
@@ -432,10 +738,10 @@
             font-weight: 600;
         }
 
-        .accordion-button:not(.collapsed) {
-            background: rgba(0, 212, 170, 0.1) !important;
-            color: var(--primary) !important;
-        }
+            .accordion-button:not(.collapsed) {
+                background: rgba(0, 212, 170, 0.1) !important;
+                color: var(--primary) !important;
+            }
 
         .accordion-body {
             color: rgba(255, 255, 255, 0.8);
@@ -447,18 +753,46 @@
         }
 
         /* Text Colors */
-        .text-primary { color: var(--primary) !important; }
-        .text-success { color: var(--primary) !important; }
-        .text-warning { color: var(--accent) !important; }
-        .text-info { color: var(--secondary) !important; }
-        .text-muted { color: rgba(255, 255, 255, 0.6) !important; }
-        .text-dark { color: white !important; }
-        .text-white-50 { color: rgba(255, 255, 255, 0.7) !important; }
+        .text-primary {
+            color: var(--primary) !important;
+        }
+
+        .text-success {
+            color: var(--primary) !important;
+        }
+
+        .text-warning {
+            color: var(--accent) !important;
+        }
+
+        .text-info {
+            color: var(--secondary) !important;
+        }
+
+        .text-muted {
+            color: rgba(255, 255, 255, 0.6) !important;
+        }
+
+        .text-dark {
+            color: white !important;
+        }
+
+        .text-white-50 {
+            color: rgba(255, 255, 255, 0.7) !important;
+        }
 
         /* Background Colors */
-        .bg-white { background: var(--card-bg) !important; }
-        .bg-light { background: rgba(255, 255, 255, 0.03) !important; }
-        .bg-dark { background: rgba(255, 255, 255, 0.05) !important; }
+        .bg-white {
+            background: var(--card-bg) !important;
+        }
+
+        .bg-light {
+            background: rgba(255, 255, 255, 0.03) !important;
+        }
+
+        .bg-dark {
+            background: rgba(255, 255, 255, 0.05) !important;
+        }
 
         /* Button Styles */
         .btn-light {
@@ -468,20 +802,20 @@
             backdrop-filter: blur(10px);
         }
 
-        .btn-light:hover {
-            background: rgba(255, 255, 255, 0.2);
-            color: white;
-        }
+            .btn-light:hover {
+                background: rgba(255, 255, 255, 0.2);
+                color: white;
+            }
 
         .btn-outline-light {
             border: 2px solid rgba(255, 255, 255, 0.3);
             color: white;
         }
 
-        .btn-outline-light:hover {
-            background: white;
-            color: var(--dark);
-        }
+            .btn-outline-light:hover {
+                background: white;
+                color: var(--dark);
+            }
 
         .btn-primary {
             background: var(--primary);
@@ -493,10 +827,10 @@
             color: var(--primary);
         }
 
-        .btn-outline-primary:hover {
-            background: var(--primary);
-            color: white;
-        }
+            .btn-outline-primary:hover {
+                background: var(--primary);
+                color: white;
+            }
 
         .btn-dark {
             background: rgba(255, 255, 255, 0.1);
@@ -504,22 +838,22 @@
             color: white;
         }
 
-        .btn-dark:hover {
-            background: rgba(255, 255, 255, 0.2);
-            color: white;
-        }
+            .btn-dark:hover {
+                background: rgba(255, 255, 255, 0.2);
+                color: white;
+            }
 
         /* Responsive */
         @media (max-width: 768px) {
             .hero-title {
                 font-size: 2.5rem;
             }
-            
+
             .floating-card {
                 position: relative;
                 margin: 1rem 0;
             }
-            
+
             .card-1, .card-2, .card-3 {
                 position: relative;
                 top: auto;
@@ -528,18 +862,19 @@
                 bottom: auto;
             }
         }
+
         .tech-card {
-        background: var(--card-bg);
-        border: 1px solid var(--card-border);
-        transition: all 0.3s ease;
-        backdrop-filter: blur(10px);
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
         }
 
-        .tech-card:hover {
-            transform: translateY(-10px);
-            border-color: var(--primary);
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
-        }
+            .tech-card:hover {
+                transform: translateY(-10px);
+                border-color: var(--primary);
+                box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+            }
 
         /* Impact Metrics */
         .impact-card {
@@ -549,10 +884,10 @@
             backdrop-filter: blur(10px);
         }
 
-        .impact-card:hover {
-            transform: translateY(-5px);
-            border-color: var(--primary);
-        }
+            .impact-card:hover {
+                transform: translateY(-5px);
+                border-color: var(--primary);
+            }
 
         /* Case Studies */
         .case-study-card {
@@ -562,10 +897,10 @@
             backdrop-filter: blur(10px);
         }
 
-        .case-study-card:hover {
-            transform: translateY(-5px);
-            border-color: var(--primary);
-        }
+            .case-study-card:hover {
+                transform: translateY(-5px);
+                border-color: var(--primary);
+            }
 
         /* Team Section */
         .team-card {
@@ -575,10 +910,10 @@
             backdrop-filter: blur(10px);
         }
 
-        .team-card:hover {
-            transform: translateY(-5px);
-            border-color: var(--primary);
-        }
+            .team-card:hover {
+                transform: translateY(-5px);
+                border-color: var(--primary);
+            }
 
         .social-link {
             width: 35px;
@@ -593,10 +928,10 @@
             transition: all 0.3s ease;
         }
 
-        .social-link:hover {
-            background: var(--primary);
-            transform: translateY(-2px);
-        }
+            .social-link:hover {
+                background: var(--primary);
+                transform: translateY(-2px);
+            }
 
         /* Awards Section */
         .award-card {
@@ -606,10 +941,10 @@
             backdrop-filter: blur(10px);
         }
 
-        .award-card:hover {
-            transform: translateY(-5px);
-            border-color: var(--primary);
-        }
+            .award-card:hover {
+                transform: translateY(-5px);
+                border-color: var(--primary);
+            }
 
         /* Integration Section */
         .integration-dashboard {
@@ -622,8 +957,13 @@
         }
 
         @keyframes float {
-            0%, 100% { transform: translateY(0px); }
-            50% { transform: translateY(-10px); }
+            0%, 100% {
+                transform: translateY(0px);
+            }
+
+            50% {
+                transform: translateY(-10px);
+            }
         }
     </style>
 
@@ -742,8 +1082,7 @@
                         </div>
                         <h4 class="fw-bold mb-3 text-white">Mobile First Design</h4>
                         <p class="text-muted mb-3">Access our platform from any device with our responsive design and dedicated mobile applications for iOS and Android.</p>
-                        <a href="#" class="btn btn-link text-primary text-decoration-none p-0">
-                            Learn More <i class="fas fa-arrow-right ms-1"></i>
+                        <a href="#" class="btn btn-link text-primary text-decoration-none p-0">Learn More <i class="fas fa-arrow-right ms-1"></i>
                         </a>
                     </div>
                 </div>
@@ -754,8 +1093,7 @@
                         </div>
                         <h4 class="fw-bold mb-3 text-white">Real-time Analytics</h4>
                         <p class="text-muted mb-3">Monitor waste collection metrics, optimize routes, and make data-driven decisions with live insights and comprehensive dashboards.</p>
-                        <a href="#" class="btn btn-link text-primary text-decoration-none p-0">
-                            Learn More <i class="fas fa-arrow-right ms-1"></i>
+                        <a href="#" class="btn btn-link text-primary text-decoration-none p-0">Learn More <i class="fas fa-arrow-right ms-1"></i>
                         </a>
                     </div>
                 </div>
@@ -766,8 +1104,7 @@
                         </div>
                         <h4 class="fw-bold mb-3 text-white">Smart Reward System</h4>
                         <p class="text-muted mb-3">Earn credits for sustainable practices and redeem them for discounts, rewards, and exclusive benefits in our partner network.</p>
-                        <a href="#" class="btn btn-link text-primary text-decoration-none p-0">
-                            Learn More <i class="fas fa-arrow-right ms-1"></i>
+                        <a href="#" class="btn btn-link text-primary text-decoration-none p-0">Learn More <i class="fas fa-arrow-right ms-1"></i>
                         </a>
                     </div>
                 </div>
@@ -838,7 +1175,7 @@
                     <span class="section-badge bg-warning bg-opacity-20 text-warning px-3 py-2 rounded-pill mb-3">Our Platform</span>
                     <h2 class="fw-bold display-5 mb-4 text-white">All-in-One Waste Management Solution</h2>
                     <p class="lead mb-4 text-muted">Experience the power of our integrated platform designed for citizens, businesses, and municipalities.</p>
-                    
+
                     <div class="platform-features">
                         <div class="feature-item d-flex align-items-start mb-4">
                             <div class="feature-icon-wrapper me-4">
@@ -963,7 +1300,7 @@
                     <span class="section-badge bg-primary bg-opacity-10 text-primary px-3 py-2 rounded-pill mb-3">Mobile App</span>
                     <h2 class="fw-bold display-5 mb-4 text-white">Manage Waste On The Go</h2>
                     <p class="lead mb-4 text-muted">Download our mobile app for iOS and Android to schedule pickups, track rewards, and stay connected with your waste management needs.</p>
-                    
+
                     <div class="app-features mb-4">
                         <div class="row g-3">
                             <div class="col-6">
@@ -992,7 +1329,7 @@
                             </div>
                         </div>
                     </div>
-                    
+
                     <div class="app-download-buttons d-flex gap-3">
                         <a href="#" class="btn btn-dark btn-lg px-4">
                             <i class="fab fa-apple me-2"></i>App Store
@@ -1025,11 +1362,11 @@
                             <p class="text-muted">Forever free</p>
                         </div>
                         <ul class="list-unstyled mb-4">
-                            <li class="mb-2"><i class="fas fa-check text-success me-2"></i> Basic waste scheduling</li>
-                            <li class="mb-2"><i class="fas fa-check text-success me-2"></i> Community access</li>
-                            <li class="mb-2"><i class="fas fa-check text-success me-2"></i> Email support</li>
-                            <li class="mb-2 text-muted"><i class="fas fa-times me-2"></i> Advanced analytics</li>
-                            <li class="mb-2 text-muted"><i class="fas fa-times me-2"></i> Priority support</li>
+                            <li class="mb-2"><i class="fas fa-check text-success me-2"></i>Basic waste scheduling</li>
+                            <li class="mb-2"><i class="fas fa-check text-success me-2"></i>Community access</li>
+                            <li class="mb-2"><i class="fas fa-check text-success me-2"></i>Email support</li>
+                            <li class="mb-2 text-muted"><i class="fas fa-times me-2"></i>Advanced analytics</li>
+                            <li class="mb-2 text-muted"><i class="fas fa-times me-2"></i>Priority support</li>
                         </ul>
                         <a href="#" class="btn btn-outline-primary w-100">Get Started</a>
                     </div>
@@ -1043,11 +1380,11 @@
                             <p class="text-white">per month</p>
                         </div>
                         <ul class="list-unstyled mb-4 text-white">
-                            <li class="mb-2"><i class="fas fa-check me-2"></i> All Basic features</li>
-                            <li class="mb-2"><i class="fas fa-check me-2"></i> Advanced analytics</li>
-                            <li class="mb-2"><i class="fas fa-check me-2"></i> Priority support</li>
-                            <li class="mb-2"><i class="fas fa-check me-2"></i> Custom reporting</li>
-                            <li class="mb-2"><i class="fas fa-check me-2"></i> API access</li>
+                            <li class="mb-2"><i class="fas fa-check me-2"></i>All Basic features</li>
+                            <li class="mb-2"><i class="fas fa-check me-2"></i>Advanced analytics</li>
+                            <li class="mb-2"><i class="fas fa-check me-2"></i>Priority support</li>
+                            <li class="mb-2"><i class="fas fa-check me-2"></i>Custom reporting</li>
+                            <li class="mb-2"><i class="fas fa-check me-2"></i>API access</li>
                         </ul>
                         <a href="#" class="btn btn-light w-100 fw-bold">Get Started</a>
                     </div>
@@ -1060,11 +1397,11 @@
                             <p class="text-muted">per month</p>
                         </div>
                         <ul class="list-unstyled mb-4">
-                            <li class="mb-2"><i class="fas fa-check text-success me-2"></i> All Pro features</li>
-                            <li class="mb-2"><i class="fas fa-check text-success me-2"></i> White-label solution</li>
-                            <li class="mb-2"><i class="fas fa-check text-success me-2"></i> Dedicated account manager</li>
-                            <li class="mb-2"><i class="fas fa-check text-success me-2"></i> Custom integrations</li>
-                            <li class="mb-2"><i class="fas fa-check text-success me-2"></i> SLA guarantee</li>
+                            <li class="mb-2"><i class="fas fa-check text-success me-2"></i>All Pro features</li>
+                            <li class="mb-2"><i class="fas fa-check text-success me-2"></i>White-label solution</li>
+                            <li class="mb-2"><i class="fas fa-check text-success me-2"></i>Dedicated account manager</li>
+                            <li class="mb-2"><i class="fas fa-check text-success me-2"></i>Custom integrations</li>
+                            <li class="mb-2"><i class="fas fa-check text-success me-2"></i>SLA guarantee</li>
                         </ul>
                         <a href="#" class="btn btn-outline-primary w-100">Contact Sales</a>
                     </div>
@@ -1363,59 +1700,32 @@
                 </div>
             </div>
             <div class="row g-4">
-                <div class="col-lg-3 col-md-6">
+
+                <!-- Team Member 1 -->
+                <div class="col-lg-4 col-md-6">
                     <div class="team-card text-center p-4 rounded-3">
                         <div class="team-avatar mx-auto mb-3">
-                            <div class="avatar-placeholder bg-primary rounded-circle d-flex align-items-center justify-content-center text-white fw-bold" style="width: 100px; height: 100px;">SJ</div>
+                            <div class="avatar-placeholder bg-primary rounded-circle d-flex align-items-center justify-content-center text-white fw-bold" style="width: 100px; height: 100px;">ZO</div>
                         </div>
-                        <h4 class="fw-bold text-white mb-1">Sarah Johnson</h4>
-                        <p class="text-primary mb-2">CEO & Founder</p>
-                        <p class="text-muted small mb-3">Environmental engineer with 10+ years in sustainable technology.</p>
+                        <h4 class="fw-bold text-white mb-1">ZACKI ABDULKADIR OMER</h4>
+                        <p class="text-primary mb-2">Project Lead</p>
+                        <p class="text-muted small mb-3">Innovative strategist passionate about modernizing waste management systems.</p>
                         <div class="social-links d-flex justify-content-center gap-2">
                             <a href="#" class="social-link"><i class="fab fa-linkedin"></i></a>
-                            <a href="#" class="social-link"><i class="fab fa-twitter"></i></a>
                             <a href="#" class="social-link"><i class="fas fa-envelope"></i></a>
                         </div>
                     </div>
                 </div>
-                <div class="col-lg-3 col-md-6">
+
+                <!-- Team Member 2 -->
+                <div class="col-lg-4 col-md-6">
                     <div class="team-card text-center p-4 rounded-3">
                         <div class="team-avatar mx-auto mb-3">
-                            <div class="avatar-placeholder bg-success rounded-circle d-flex align-items-center justify-content-center text-white fw-bold" style="width: 100px; height: 100px;">MC</div>
+                            <div class="avatar-placeholder bg-success rounded-circle d-flex align-items-center justify-content-center text-white fw-bold" style="width: 100px; height: 100px;">AO</div>
                         </div>
-                        <h4 class="fw-bold text-white mb-1">Mike Chen</h4>
-                        <p class="text-primary mb-2">CTO</p>
-                        <p class="text-muted small mb-3">Software architect specializing in scalable cloud systems and IoT.</p>
-                        <div class="social-links d-flex justify-content-center gap-2">
-                            <a href="#" class="social-link"><i class="fab fa-linkedin"></i></a>
-                            <a href="#" class="social-link"><i class="fab fa-github"></i></a>
-                            <a href="#" class="social-link"><i class="fas fa-envelope"></i></a>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-lg-3 col-md-6">
-                    <div class="team-card text-center p-4 rounded-3">
-                        <div class="team-avatar mx-auto mb-3">
-                            <div class="avatar-placeholder bg-info rounded-circle d-flex align-items-center justify-content-center text-white fw-bold" style="width: 100px; height: 100px;">AR</div>
-                        </div>
-                        <h4 class="fw-bold text-white mb-1">Amira Rahman</h4>
-                        <p class="text-primary mb-2">Head of Operations</p>
-                        <p class="text-muted small mb-3">Operations expert with background in municipal waste management.</p>
-                        <div class="social-links d-flex justify-content-center gap-2">
-                            <a href="#" class="social-link"><i class="fab fa-linkedin"></i></a>
-                            <a href="#" class="social-link"><i class="fab fa-twitter"></i></a>
-                            <a href="#" class="social-link"><i class="fas fa-envelope"></i></a>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-lg-3 col-md-6">
-                    <div class="team-card text-center p-4 rounded-3">
-                        <div class="team-avatar mx-auto mb-3">
-                            <div class="avatar-placeholder bg-warning rounded-circle d-flex align-items-center justify-content-center text-white fw-bold" style="width: 100px; height: 100px;">DJ</div>
-                        </div>
-                        <h4 class="fw-bold text-white mb-1">David Johnson</h4>
+                        <h4 class="fw-bold text-white mb-1">ARAFAT OSMAN ADEN</h4>
                         <p class="text-primary mb-2">Lead Developer</p>
-                        <p class="text-muted small mb-3">Full-stack developer passionate about sustainable tech solutions.</p>
+                        <p class="text-muted small mb-3">Full-stack developer building efficient and scalable smart-waste applications.</p>
                         <div class="social-links d-flex justify-content-center gap-2">
                             <a href="#" class="social-link"><i class="fab fa-linkedin"></i></a>
                             <a href="#" class="social-link"><i class="fab fa-github"></i></a>
@@ -1423,9 +1733,27 @@
                         </div>
                     </div>
                 </div>
+
+                <!-- Team Member 3 -->
+                <div class="col-lg-4 col-md-6">
+                    <div class="team-card text-center p-4 rounded-3">
+                        <div class="team-avatar mx-auto mb-3">
+                            <div class="avatar-placeholder bg-info rounded-circle d-flex align-items-center justify-content-center text-white fw-bold" style="width: 100px; height: 100px;">AD</div>
+                        </div>
+                        <h4 class="fw-bold text-white mb-1">ARFAT</h4>
+                        <p class="text-primary mb-2">System Engineer</p>
+                        <p class="text-muted small mb-3">Focused on IoT and automation solutions that improve data accuracy and efficiency.</p>
+                        <div class="social-links d-flex justify-content-center gap-2">
+                            <a href="#" class="social-link"><i class="fab fa-linkedin"></i></a>
+                            <a href="#" class="social-link"><i class="fas fa-envelope"></i></a>
+                        </div>
+                    </div>
+                </div>
+
             </div>
         </div>
     </section>
+
     <!-- Awards Section -->
     <section class="awards-section py-5">
         <div class="container">
@@ -1488,7 +1816,7 @@
                     <span class="section-badge bg-success bg-opacity-10 text-success px-3 py-2 rounded-pill mb-3">Integrations</span>
                     <h2 class="fw-bold display-5 mb-4 text-white">Seamless Integration with Your Systems</h2>
                     <p class="lead mb-4 text-muted">Connect SoorGreen with your existing tools and platforms for a unified waste management experience.</p>
-                
+
                     <div class="integration-features">
                         <div class="feature-item d-flex align-items-start mb-4">
                             <div class="feature-icon-wrapper me-4">
@@ -1518,7 +1846,7 @@
                             </div>
                         </div>
                     </div>
-                
+
                     <div class="integration-partners mt-5">
                         <h6 class="text-white fw-semibold mb-3">Compatible with:</h6>
                         <div class="d-flex flex-wrap gap-3">

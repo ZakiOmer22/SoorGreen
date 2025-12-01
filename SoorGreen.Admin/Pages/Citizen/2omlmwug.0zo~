@@ -1,0 +1,474 @@
+﻿<%@ Page Title="Feedback" Language="C#" MasterPageFile="~/Pages/Citizen/Site.Master" AutoEventWireup="true" CodeFile="Feedback.aspx.cs" Inherits="SoorGreen.Citizen.Feedback" %>
+
+<asp:Content ID="Content1" ContentPlaceHolderID="TitleContent" runat="server">
+    Feedback - SoorGreen Citizen
+</asp:Content>
+
+<asp:Content ID="Content2" ContentPlaceHolderID="MainContent" runat="server">
+    <style>
+        .feedback-container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+        
+        /* GLASS MORPHISM CARD */
+        .feedback-card {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 20px;
+            padding: 2.5rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .feedback-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, #00d4aa, #0dcaf0, #0d6efd);
+        }
+        
+        .form-group {
+            margin-bottom: 2rem;
+        }
+        
+        .form-label {
+            color: rgba(255, 255, 255, 0.9);
+            font-weight: 700;
+            margin-bottom: 0.75rem;
+            display: block;
+            font-size: 1.1rem;
+        }
+        
+        .form-control {
+            background: rgba(255, 255, 255, 0.08);
+            border: 2px solid rgba(255, 255, 255, 0.15);
+            border-radius: 12px;
+            color: white;
+            padding: 1rem;
+            width: 100%;
+            transition: all 0.3s ease;
+            font-size: 1rem;
+            font-family: inherit;
+        }
+        
+        .form-control:focus {
+            outline: none;
+            border-color: #00d4aa;
+            background: rgba(255, 255, 255, 0.12);
+            box-shadow: 0 0 0 4px rgba(0, 212, 170, 0.1);
+        }
+        
+        textarea.form-control {
+            min-height: 180px;
+            resize: vertical;
+            line-height: 1.6;
+        }
+        
+        /* NEON GLOW BUTTON */
+        .btn-primary {
+            background: linear-gradient(135deg, #00d4aa, #0dcaf0);
+            border: none;
+            color: white;
+            padding: 1rem 2.5rem;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 700;
+            font-size: 1.1rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 4px 15px rgba(0, 212, 170, 0.3);
+        }
+        
+        .btn-primary:hover {
+            background: linear-gradient(135deg, #00c29a, #0baccc);
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(0, 212, 170, 0.4);
+        }
+        
+        .btn-primary:active {
+            transform: translateY(-1px);
+        }
+        
+        .btn-primary::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            transition: 0.5s;
+        }
+        
+        .btn-primary:hover::before {
+            left: 100%;
+        }
+        
+        /* FEEDBACK HISTORY SECTION */
+        .feedback-history {
+            margin-top: 3rem;
+        }
+        
+        .section-title {
+            font-size: 1.8rem;
+            font-weight: 800;
+            color: #ffffff;
+            margin-bottom: 1.5rem;
+            position: relative;
+            display: inline-block;
+        }
+        
+        .section-title::after {
+            content: '';
+            position: absolute;
+            bottom: -8px;
+            left: 0;
+            width: 60px;
+            height: 4px;
+            background: linear-gradient(90deg, #00d4aa, #0dcaf0);
+            border-radius: 2px;
+        }
+        
+        .feedback-item {
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 16px;
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .feedback-item::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 4px;
+            height: 100%;
+            background: linear-gradient(180deg, #00d4aa, #0dcaf0);
+        }
+        
+        .feedback-item:hover {
+            background: rgba(255, 255, 255, 0.12);
+            border-color: rgba(0, 212, 170, 0.3);
+            transform: translateX(8px);
+        }
+        
+        .feedback-message {
+            color: rgba(255, 255, 255, 0.95);
+            line-height: 1.7;
+            margin-bottom: 0.75rem;
+            font-size: 1.05rem;
+        }
+        
+        .feedback-meta {
+            color: rgba(255, 255, 255, 0.6);
+            font-size: 0.85rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .feedback-meta i {
+            color: #00d4aa;
+        }
+        
+        .empty-state {
+            text-align: center;
+            padding: 4rem 2rem;
+            color: rgba(255, 255, 255, 0.7);
+        }
+        
+        .empty-state-icon {
+            font-size: 5rem;
+            margin-bottom: 1.5rem;
+            color: rgba(255, 255, 255, 0.2);
+            background: linear-gradient(135deg, #00d4aa, #0dcaf0);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .empty-state-title {
+            font-size: 1.8rem;
+            margin-bottom: 0.75rem;
+            color: rgba(255, 255, 255, 0.9);
+            font-weight: 700;
+        }
+        
+        .empty-state-description {
+            font-size: 1.1rem;
+            margin-bottom: 2rem;
+            line-height: 1.6;
+        }
+        
+        /* TOASTER NOTIFICATIONS */
+        .toast-container {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 10000;
+            max-width: 400px;
+        }
+        
+        .toast {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border: none;
+            border-radius: 12px;
+            padding: 1rem 1.5rem;
+            margin-bottom: 1rem;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+            border-left: 4px solid #ccc;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            animation: slideInRight 0.3s ease, fadeOut 0.3s ease 4.7s forwards;
+            transform: translateX(400px);
+            opacity: 0;
+        }
+        
+        .toast.show {
+            transform: translateX(0);
+            opacity: 1;
+        }
+        
+        .toast-success {
+            border-left-color: #00d4aa;
+        }
+        
+        .toast-error {
+            border-left-color: #ff6b6b;
+        }
+        
+        .toast-info {
+            border-left-color: #0dcaf0;
+        }
+        
+        .toast-icon {
+            font-size: 1.5rem;
+        }
+        
+        .toast-success .toast-icon {
+            color: #00d4aa;
+        }
+        
+        .toast-error .toast-icon {
+            color: #ff6b6b;
+        }
+        
+        .toast-info .toast-icon {
+            color: #0dcaf0;
+        }
+        
+        .toast-content {
+            flex: 1;
+        }
+        
+        .toast-title {
+            font-weight: 700;
+            color: #2c3e50;
+            margin-bottom: 0.25rem;
+        }
+        
+        .toast-message {
+            color: #5a6c7d;
+            font-size: 0.9rem;
+        }
+        
+        .toast-close {
+            background: none;
+            border: none;
+            font-size: 1.2rem;
+            color: #a0a0a0;
+            cursor: pointer;
+            padding: 0;
+            width: 24px;
+            height: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            transition: all 0.2s ease;
+        }
+        
+        .toast-close:hover {
+            background: rgba(0, 0, 0, 0.1);
+            color: #666;
+        }
+        
+        @keyframes slideInRight {
+            from {
+                transform: translateX(400px);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+        
+        @keyframes fadeOut {
+            from {
+                transform: translateX(0);
+                opacity: 1;
+            }
+            to {
+                transform: translateX(400px);
+                opacity: 0;
+            }
+        }
+        
+        h1, h2, h3, h4, h5, h6 {
+            color: #ffffff;
+        }
+        
+        .text-muted {
+            color: rgba(255, 255, 255, 0.7) !important;
+        }
+        
+        /* RESPONSIVE */
+        @media (max-width: 768px) {
+            .feedback-container {
+                padding: 1rem;
+            }
+            
+            .feedback-card {
+                padding: 1.5rem;
+            }
+            
+            .toast-container {
+                left: 20px;
+                right: 20px;
+                max-width: none;
+            }
+        }
+    </style>
+
+    <!-- Toaster Container -->
+    <div class="toast-container" id="toastContainer"></div>
+
+    <div class="feedback-container">
+        <br />
+        <br />
+        <br />
+        
+        <h1 style="font-size: 2.5rem; font-weight: 800; margin-bottom: 0.5rem;">Share Your Feedback</h1>
+        <p class="text-muted" style="font-size: 1.2rem; margin-bottom: 2rem;">We value your suggestions and ideas to improve our eco-friendly community. Your voice matters! 🌟</p>
+        
+        <div class="feedback-card">
+            <div class="form-group">
+                <label class="form-label">
+                    <i class="fas fa-comment-dots me-2"></i>Your Feedback Message
+                </label>
+                <asp:TextBox ID="txtFeedback" runat="server" CssClass="form-control" TextMode="MultiLine" 
+                    Rows="6" placeholder="💡 What do you love about SoorGreen? 
+🚀 What can we improve? 
+🌟 Any new features you'd like to see?
+
+Share your thoughts..."></asp:TextBox>
+            </div>
+            
+            <asp:Button ID="btnSubmit" runat="server" Text="🚀 Submit Feedback" CssClass="btn-primary" 
+                OnClick="btnSubmit_Click" OnClientClick="return validateFeedback();" />
+        </div>
+        
+        <div class="feedback-history">
+            <h3 class="section-title">
+                <i class="fas fa-history me-2"></i>Your Feedback History
+            </h3>
+            <div id="feedbackList" runat="server">
+                <!-- Feedback items will be populated here -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Toaster Notification System
+        function showToast(title, message, type) {
+            const toastContainer = document.getElementById('toastContainer');
+            const toastId = 'toast-' + Date.now();
+            
+            const toast = document.createElement('div');
+            toast.className = `toast toast-${type} show`;
+            toast.id = toastId;
+            
+            const icon = type === 'success' ? 'fa-check-circle' : 
+                        type === 'error' ? 'fa-exclamation-circle' : 'fa-info-circle';
+            
+            toast.innerHTML = `
+                <div class="toast-icon">
+                    <i class="fas ${icon}"></i>
+                </div>
+                <div class="toast-content">
+                    <div class="toast-title">${title}</div>
+                    <div class="toast-message">${message}</div>
+                </div>
+                <button class="toast-close" onclick="closeToast('${toastId}')">
+                    <i class="fas fa-times"></i>
+                </button>
+            `;
+            
+            toastContainer.appendChild(toast);
+            
+            // Auto remove after 5 seconds
+            setTimeout(() => {
+                closeToast(toastId);
+            }, 5000);
+        }
+        
+        function closeToast(toastId) {
+            const toast = document.getElementById(toastId);
+            if (toast) {
+                toast.style.animation = 'fadeOut 0.3s ease forwards';
+                setTimeout(() => {
+                    if (toast.parentNode) {
+                        toast.parentNode.removeChild(toast);
+                    }
+                }, 300);
+            }
+        }
+        
+        // Form validation
+        function validateFeedback() {
+            const feedback = document.getElementById('<%= txtFeedback.ClientID %>').value;
+            if (!feedback || feedback.trim() === '') {
+                showToast('Oops!', 'Please enter your feedback before submitting.', 'error');
+                return false;
+            }
+            if (feedback.length < 10) {
+                showToast('Too Short', 'Please provide more detailed feedback (at least 10 characters).', 'error');
+                return false;
+            }
+            return true;
+        }
+        
+        // Page load animations
+        document.addEventListener('DOMContentLoaded', function() {
+            // Animate cards on load
+            const cards = document.querySelectorAll('.feedback-card, .feedback-item');
+            cards.forEach((card, index) => {
+                card.style.opacity = '0';
+                card.style.transform = 'translateY(20px)';
+                setTimeout(() => {
+                    card.style.transition = 'all 0.6s ease';
+                    card.style.opacity = '1';
+                    card.style.transform = 'translateY(0)';
+                }, index * 100);
+            });
+        });
+    </script>
+</asp:Content>

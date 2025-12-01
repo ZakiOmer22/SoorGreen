@@ -13,6 +13,10 @@
             padding-top: 100px;
         }
 
+        [data-theme="light"] .contact-hero-section {
+            background: radial-gradient(ellipse at center, rgba(0, 212, 170, 0.05) 0%, transparent 70%);
+        }
+
         .contact-card {
             background: var(--card-bg);
             border: 1px solid var(--card-border);
@@ -32,6 +36,10 @@
             box-shadow: 0 25px 50px rgba(0, 0, 0, 0.3);
         }
 
+        [data-theme="light"] .contact-card:hover {
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.1);
+        }
+
         .contact-icon {
             font-size: 3rem;
             color: var(--primary);
@@ -49,25 +57,39 @@
         .form-control {
             background: rgba(255, 255, 255, 0.05);
             border: 1px solid var(--card-border);
-            color: white;
+            color: var(--light);
             padding: 1rem;
             border-radius: 10px;
             transition: all 0.3s ease;
         }
 
+        [data-theme="light"] .form-control {
+            background: rgba(33, 37, 41, 0.05);
+            color: var(--light);
+            border-color: var(--card-border);
+        }
+
         .form-control:focus {
             background: rgba(255, 255, 255, 0.1);
             border-color: var(--primary);
-            color: white;
+            color: var(--light);
             box-shadow: 0 0 0 0.2rem rgba(0, 212, 170, 0.25);
+        }
+
+        [data-theme="light"] .form-control:focus {
+            background: rgba(33, 37, 41, 0.1);
         }
 
         .form-control::placeholder {
             color: rgba(255, 255, 255, 0.5);
         }
 
+        [data-theme="light"] .form-control::placeholder {
+            color: rgba(33, 37, 41, 0.5);
+        }
+
         .form-label {
-            color: white;
+            color: var(--light);
             font-weight: 600;
             margin-bottom: 0.5rem;
         }
@@ -169,6 +191,11 @@
             transition: all 0.3s ease;
         }
 
+        [data-theme="light"] .social-link {
+            background: rgba(33, 37, 41, 0.1);
+            color: var(--light);
+        }
+
         .social-link:hover {
             background: var(--primary);
             transform: translateY(-2px);
@@ -186,7 +213,7 @@
         .faq-question {
             padding: 1.5rem;
             font-weight: 600;
-            color: white;
+            color: var(--light);
             cursor: pointer;
             display: flex;
             justify-content: space-between;
@@ -198,12 +225,17 @@
             background: rgba(255, 255, 255, 0.05);
         }
 
+        [data-theme="light"] .faq-question:hover {
+            background: rgba(33, 37, 41, 0.05);
+        }
+
         .faq-answer {
             padding: 0 1.5rem;
             max-height: 0;
             overflow: hidden;
             transition: all 0.3s ease;
-            color: rgba(255, 255, 255, 0.9);
+            color: var(--light);
+            opacity: 0.9;
         }
 
         .faq-item.active .faq-answer {
@@ -223,6 +255,10 @@
         .text-muted {
             color: rgba(255, 255, 255, 0.8) !important;
             opacity: 1 !important;
+        }
+
+        [data-theme="light"] .text-muted {
+            color: rgba(33, 37, 41, 0.8) !important;
         }
 
         .hero-title, .hero-subtitle {
@@ -247,7 +283,7 @@
         .small {
             opacity: 1 !important;
             visibility: visible !important;
-            color: rgba(255, 255, 255, 0.9) !important;
+            color: var(--light) !important;
         }
 
         /* Specific text color fixes */
@@ -260,7 +296,8 @@
         .contact-info-item p,
         .office-card p,
         .team-contact .small {
-            color: rgba(255, 255, 255, 0.8) !important;
+            color: var(--light) !important;
+            opacity: 0.8 !important;
         }
 
         /* Button Styles */
@@ -336,6 +373,10 @@
             backdrop-filter: blur(10px);
         }
 
+        [data-theme="light"] .section-badge {
+            background: rgba(0, 212, 170, 0.15) !important;
+        }
+
         /* Hero Text Styles */
         .hero-title {
             font-size: 3.5rem;
@@ -347,10 +388,45 @@
             text-shadow: 0 0 30px rgba(255, 255, 255, 0.1);
         }
 
+        [data-theme="light"] .hero-title {
+            text-shadow: 0 0 30px rgba(33, 37, 41, 0.1);
+        }
+
         .hero-subtitle {
             font-size: 1.2rem;
-            color: rgba(255, 255, 255, 0.9) !important;
+            color: var(--light) !important;
+            opacity: 0.9 !important;
             line-height: 1.6;
+        }
+
+        /* Form Check Styles */
+        .form-check-input {
+            background-color: var(--card-bg);
+            border: 1px solid var(--card-border);
+        }
+
+        .form-check-input:checked {
+            background-color: var(--primary);
+            border-color: var(--primary);
+        }
+
+        .form-check-label {
+            color: var(--light) !important;
+            opacity: 0.9 !important;
+        }
+
+        /* Contact Hero Visual */
+        .contact-hero-visual {
+            position: relative;
+        }
+
+        .contact-hero-image {
+            background: linear-gradient(45deg, var(--primary), var(--secondary));
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+        }
+
+        [data-theme="light"] .contact-hero-image {
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
         }
 
         /* Responsive */
@@ -370,6 +446,59 @@
             .hero-title {
                 font-size: 2.5rem;
             }
+        }
+
+        /* Additional Light Mode Specific Styles */
+        [data-theme="light"] .contact-card,
+        [data-theme="light"] .contact-form,
+        [data-theme="light"] .contact-info-item,
+        [data-theme="light"] .office-card,
+        [data-theme="light"] .team-contact,
+        [data-theme="light"] .faq-item {
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+        }
+
+        [data-theme="light"] .contact-card:hover,
+        [data-theme="light"] .contact-info-item:hover,
+        [data-theme="light"] .office-card:hover,
+        [data-theme="light"] .team-contact:hover {
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Ensure proper contrast in light mode */
+        [data-theme="light"] .form-control,
+        [data-theme="light"] .form-select {
+            color: var(--light) !important;
+        }
+
+        [data-theme="light"] .form-control:focus,
+        [data-theme="light"] .form-select:focus {
+            color: var(--light) !important;
+        }
+
+        /* Select dropdown styles */
+        .form-select {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--card-border);
+            color: var(--light);
+            padding: 1rem;
+            border-radius: 10px;
+            transition: all 0.3s ease;
+        }
+
+        [data-theme="light"] .form-select {
+            background: rgba(33, 37, 41, 0.05);
+        }
+
+        .form-select:focus {
+            background: rgba(255, 255, 255, 0.1);
+            border-color: var(--primary);
+            color: var(--light);
+            box-shadow: 0 0 0 0.2rem rgba(0, 212, 170, 0.25);
+        }
+
+        [data-theme="light"] .form-select:focus {
+            background: rgba(33, 37, 41, 0.1);
         }
     </style>
 
@@ -392,7 +521,7 @@
                 </div>
                 <div class="col-lg-6 text-center">
                     <div class="contact-hero-visual">
-                        <div class="contact-hero-image rounded-3 shadow-lg" style="background: linear-gradient(45deg, var(--primary), var(--secondary)); height: 400px; width: 100%;"></div>
+                        <div class="contact-hero-image rounded-3 shadow-lg" style="height: 400px; width: 100%;"></div>
                     </div>
                 </div>
             </div>
@@ -404,9 +533,9 @@
         <div class="container">
             <div class="row text-center mb-5">
                 <div class="col-lg-8 mx-auto">
-                    <span class="section-badge bg-primary bg-opacity-10 text-primary px-3 py-2 rounded-pill mb-3">Get In Touch</span>
-                    <h2 class="fw-bold display-5 mb-3 text-white">Multiple Ways to Connect</h2>
-                    <p class="lead text-muted fs-6">Choose the communication method that works best for you.</p>
+                    <span class="section-badge px-3 py-2 rounded-pill mb-3">Get In Touch</span>
+                    <h2 class="fw-bold display-5 mb-3">Multiple Ways to Connect</h2>
+                    <p class="lead fs-6">Choose the communication method that works best for you.</p>
                 </div>
             </div>
             <div class="row g-4">
@@ -415,11 +544,11 @@
                         <div class="contact-icon">
                             <i class="fas fa-phone"></i>
                         </div>
-                        <h3 class="fw-bold mb-3 text-white">Phone Support</h3>
-                        <p class="text-muted mb-4">Speak directly with our support team for immediate assistance.</p>
+                        <h3 class="fw-bold mb-3">Phone Support</h3>
+                        <p class="mb-4">Speak directly with our support team for immediate assistance.</p>
                         <div class="contact-details">
-                            <h4 class="text-primary fw-bold">+1 (555) 123-4567</h4>
-                            <p class="text-muted small">Mon-Fri: 8AM-6PM EST</p>
+                            <h4 class="fw-bold">+1 (555) 123-4567</h4>
+                            <p class="small">Mon-Fri: 8AM-6PM EST</p>
                         </div>
                         <a href="tel:+15551234567" class="btn btn-outline-primary w-100 mt-3">
                             <i class="fas fa-phone me-2"></i>Call Now
@@ -432,11 +561,11 @@
                         <div class="contact-icon">
                             <i class="fas fa-envelope"></i>
                         </div>
-                        <h3 class="fw-bold mb-3 text-white">Email Support</h3>
-                        <p class="text-muted mb-4">Send us a detailed message and we'll respond within 24 hours.</p>
+                        <h3 class="fw-bold mb-3">Email Support</h3>
+                        <p class="mb-4">Send us a detailed message and we'll respond within 24 hours.</p>
                         <div class="contact-details">
-                            <h4 class="text-primary fw-bold">support@soorgreen.com</h4>
-                            <p class="text-muted small">Average response: 4 hours</p>
+                            <h4 class="fw-bold">support@soorgreen.com</h4>
+                            <p class="small">Average response: 4 hours</p>
                         </div>
                         <a href="mailto:support@soorgreen.com" class="btn btn-outline-primary w-100 mt-3">
                             <i class="fas fa-envelope me-2"></i>Send Email
@@ -449,11 +578,11 @@
                         <div class="contact-icon">
                             <i class="fas fa-comments"></i>
                         </div>
-                        <h3 class="fw-bold mb-3 text-white">Live Chat</h3>
-                        <p class="text-muted mb-4">Get instant answers from our AI assistant or connect with a human agent.</p>
+                        <h3 class="fw-bold mb-3">Live Chat</h3>
+                        <p class="mb-4">Get instant answers from our AI assistant or connect with a human agent.</p>
                         <div class="contact-details">
-                            <h4 class="text-primary fw-bold">24/7 Available</h4>
-                            <p class="text-muted small">Instant connection</p>
+                            <h4 class="fw-bold">24/7 Available</h4>
+                            <p class="small">Instant connection</p>
                         </div>
                         <button class="btn btn-outline-primary w-100 mt-3" onclick="openChat()">
                             <i class="fas fa-comment me-2"></i>Start Chat
@@ -471,8 +600,8 @@
                 <!-- Contact Form -->
                 <div class="col-lg-8">
                     <div class="contact-form">
-                        <h3 class="fw-bold mb-4 text-white">Send Us a Message</h3>
-                        <p class="text-muted mb-4">Fill out the form below and our team will get back to you as soon as possible.</p>
+                        <h3 class="fw-bold mb-4">Send Us a Message</h3>
+                        <p class="mb-4">Fill out the form below and our team will get back to you as soon as possible.</p>
                         
                         <div class="row g-3">
                             <div class="col-md-6">
@@ -489,7 +618,7 @@
                             </div>
                             <div class="col-md-6">
                                 <label class="form-label">Subject *</label>
-                                <select class="form-control" required>
+                                <select class="form-select" required>
                                     <option value="">Select a subject</option>
                                     <option value="general">General Inquiry</option>
                                     <option value="support">Technical Support</option>
@@ -506,7 +635,7 @@
                             <div class="col-12">
                                 <div class="form-check">
                                     <input class="form-check-input" type="checkbox" id="newsletter">
-                                    <label class="form-check-label text-muted" for="newsletter">
+                                    <label class="form-check-label" for="newsletter">
                                         Subscribe to our newsletter for updates and sustainability tips
                                     </label>
                                 </div>
@@ -522,15 +651,15 @@
 
                 <!-- Contact Information -->
                 <div class="col-lg-4">
-                    <h3 class="fw-bold mb-4 text-white">Contact Information</h3>
+                    <h3 class="fw-bold mb-4">Contact Information</h3>
                     
                     <div class="contact-info-item">
                         <div class="contact-info-icon">
                             <i class="fas fa-map-marker-alt"></i>
                         </div>
                         <div>
-                            <h5 class="fw-bold text-white mb-2">Headquarters</h5>
-                            <p class="text-muted mb-0">123 Green Street<br>Eco City, EC 12345<br>United States</p>
+                            <h5 class="fw-bold mb-2">Headquarters</h5>
+                            <p class="mb-0">123 Green Street<br>Eco City, EC 12345<br>United States</p>
                         </div>
                     </div>
 
@@ -539,8 +668,8 @@
                             <i class="fas fa-clock"></i>
                         </div>
                         <div>
-                            <h5 class="fw-bold text-white mb-2">Business Hours</h5>
-                            <p class="text-muted mb-0">
+                            <h5 class="fw-bold mb-2">Business Hours</h5>
+                            <p class="mb-0">
                                 Monday - Friday: 8:00 AM - 6:00 PM<br>
                                 Saturday: 9:00 AM - 2:00 PM<br>
                                 Sunday: Closed
@@ -553,8 +682,8 @@
                             <i class="fas fa-phone"></i>
                         </div>
                         <div>
-                            <h5 class="fw-bold text-white mb-2">Phone Numbers</h5>
-                            <p class="text-muted mb-0">
+                            <h5 class="fw-bold mb-2">Phone Numbers</h5>
+                            <p class="mb-0">
                                 General: +1 (555) 123-4567<br>
                                 Support: +1 (555) 123-4568<br>
                                 Sales: +1 (555) 123-4569
@@ -567,8 +696,8 @@
                             <i class="fas fa-envelope"></i>
                         </div>
                         <div>
-                            <h5 class="fw-bold text-white mb-2">Email Addresses</h5>
-                            <p class="text-muted mb-0">
+                            <h5 class="fw-bold mb-2">Email Addresses</h5>
+                            <p class="mb-0">
                                 General: info@soorgreen.com<br>
                                 Support: support@soorgreen.com<br>
                                 Sales: sales@soorgreen.com
@@ -577,7 +706,7 @@
                     </div>
 
                     <div class="mt-4">
-                        <h5 class="fw-bold text-white mb-3">Follow Us</h5>
+                        <h5 class="fw-bold mb-3">Follow Us</h5>
                         <div class="social-links">
                             <a href="#" class="social-link"><i class="fab fa-facebook-f"></i></a>
                             <a href="#" class="social-link"><i class="fab fa-twitter"></i></a>
@@ -591,8 +720,61 @@
         </div>
     </section>
 
-    <!-- Rest of your content remains exactly the same -->
-    <!-- [Include all the remaining sections from your original code] -->
+    <!-- FAQ Section -->
+    <section class="faq-section py-5">
+        <div class="container">
+            <div class="row text-center mb-5">
+                <div class="col-lg-8 mx-auto">
+                    <span class="section-badge px-3 py-2 rounded-pill mb-3">FAQ</span>
+                    <h2 class="fw-bold display-5 mb-3">Frequently Asked Questions</h2>
+                    <p class="lead fs-6">Find quick answers to common questions about our services and support.</p>
+                </div>
+            </div>
+            <div class="row justify-content-center">
+                <div class="col-lg-8">
+                    <div class="faq-item">
+                        <div class="faq-question">
+                            <span>How quickly do you respond to contact form submissions?</span>
+                            <i class="fas fa-chevron-down faq-icon"></i>
+                        </div>
+                        <div class="faq-answer">
+                            <p>We typically respond to all contact form submissions within 4-6 hours during business hours. For urgent matters, we recommend calling our support line for immediate assistance.</p>
+                        </div>
+                    </div>
+
+                    <div class="faq-item">
+                        <div class="faq-question">
+                            <span>Do you offer emergency waste management services?</span>
+                            <i class="fas fa-chevron-down faq-icon"></i>
+                        </div>
+                        <div class="faq-answer">
+                            <p>Yes, we offer 24/7 emergency waste management services for municipalities and businesses. Contact our emergency hotline at +1 (555) 123-EMER for immediate assistance.</p>
+                        </div>
+                    </div>
+
+                    <div class="faq-item">
+                        <div class="faq-question">
+                            <span>Can I schedule a consultation for my business?</span>
+                            <i class="fas fa-chevron-down faq-icon"></i>
+                        </div>
+                        <div class="faq-answer">
+                            <p>Absolutely! We offer free consultations for businesses looking to improve their waste management systems. You can schedule a consultation through our contact form or by calling our business solutions department.</p>
+                        </div>
+                    </div>
+
+                    <div class="faq-item">
+                        <div class="faq-question">
+                            <span>What areas do you currently serve?</span>
+                            <i class="fas fa-chevron-down faq-icon"></i>
+                        </div>
+                        <div class="faq-answer">
+                            <p>We currently serve municipalities and businesses across North America, with expanding operations in Europe and Asia. Contact us to see if we operate in your area.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
 
     <script>
         // FAQ Toggle Functionality

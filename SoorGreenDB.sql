@@ -36,6 +36,14 @@ CREATE TABLE Users (
     IsVerified BIT DEFAULT 0,
     CONSTRAINT FK_Users_Roles FOREIGN KEY(RoleId) REFERENCES Roles(RoleId)
 );
+-- Add Password column to Users table while keeping Phone column
+ALTER TABLE Users 
+ADD Password NVARCHAR(100) NULL;
+
+-- Update existing users with a default password based on their phone
+UPDATE Users SET Password = Phone WHERE Password IS NULL;
+
+PRINT 'Password column added successfully! Existing users updated.';
 
 -- MUNICIPALITIES: Defines city or zone
 CREATE TABLE Municipalities (
@@ -125,11 +133,16 @@ CREATE TABLE AuditLogs (
 CREATE TABLE Feedbacks (
     FeedbackId CHAR(4) PRIMARY KEY,
     UserId CHAR(4) NOT NULL,
+	Category NVARCHAR(50) DEFAULT 'General',
+	Priority NVARCHAR(20) DEFAULT 'Medium',
+	Subject NVARCHAR(200),
+	Rating INT DEFAULT 0,
+	FollowUp BIT DEFAULT 0;
     Message NVARCHAR(1000),
     CreatedAt DATETIME DEFAULT GETDATE(),
     CONSTRAINT FK_Feedbacks_User FOREIGN KEY(UserId) REFERENCES Users(UserId)
 );
-
+WHERE Category IS NULL;
 CREATE TABLE PickupVerifications (
     VerificationId CHAR(4) PRIMARY KEY,
     PickupId CHAR(4) NOT NULL,
@@ -140,6 +153,42 @@ CREATE TABLE PickupVerifications (
     CONSTRAINT FK_PickupVerifications_Pickup FOREIGN KEY(PickupId) REFERENCES PickupRequests(PickupId)
 );
 
+-- Create UserActivities table for recent activity feed
+CREATE TABLE UserActivities (
+    ActivityId INT IDENTITY(1,1) PRIMARY KEY,
+    UserId CHAR(4) NOT NULL,
+    ActivityType NVARCHAR(50) NOT NULL,
+    Description NVARCHAR(255) NOT NULL,
+    Points DECIMAL(10,2) DEFAULT 0,
+    Timestamp DATETIME DEFAULT GETDATE(),
+    CONSTRAINT FK_UserActivities_Users FOREIGN KEY(UserId) REFERENCES Users(UserId)
+);
+
+-- Error Log for analytics
+CREATE TABLE ErrorLogs (
+    ErrorId INT IDENTITY(1,1) PRIMARY KEY,
+    ErrorType NVARCHAR(50) NOT NULL,
+    Url NVARCHAR(500) NOT NULL,
+    UserIP NVARCHAR(50),
+    UserAgent NVARCHAR(500),
+    Referrer NVARCHAR(500),
+    CreatedAt DATETIME DEFAULT GETDATE()
+);
+
+-- Support Tickets for User Related Issues
+CREATE TABLE SupportTickets (
+    TicketId NVARCHAR(50) PRIMARY KEY,
+    UserId NVARCHAR(50) NULL,
+    FullName NVARCHAR(100) NOT NULL,
+    Email NVARCHAR(100) NOT NULL,
+    IssueType NVARCHAR(50) NOT NULL,
+    Priority NVARCHAR(20) NOT NULL,
+    Description NVARCHAR(MAX) NOT NULL,
+    AttachScreenshot BIT NOT NULL DEFAULT 0,
+    Status NVARCHAR(20) NOT NULL DEFAULT 'Open',
+    CreatedDate DATETIME NOT NULL DEFAULT GETDATE(),
+    ResolvedDate DATETIME NULL
+);
 -- ========================================
 -- 3. INDEXES
 -- ========================================
@@ -148,7 +197,8 @@ CREATE INDEX IX_WasteReports_Date ON WasteReports(CreatedAt);
 CREATE INDEX IX_PickupRequests_Status ON PickupRequests(Status);
 CREATE INDEX IX_RewardPoints_UserId ON RewardPoints(UserId);
 CREATE INDEX IX_Notifications_IsRead ON Notifications(IsRead);
-
+CREATE INDEX IX_ErrorLogs_CreatedAt ON ErrorLogs(CreatedAt);
+CREATE INDEX IX_ErrorLogs_ErrorType ON ErrorLogs(ErrorType);
 -- ========================================
 -- 4. VIEWS
 -- ========================================
@@ -273,5 +323,223 @@ END
 GO
 
 -- ========================================
--- 7. SEED DATA (SEED FILE)
+-- 7. ADDITIONAL TRIGGERS FOR USER ACTIVITIES
+-- ========================================
+
+-- Trigger for new waste reports
+IF NOT EXISTS (SELECT * FROM sys.triggers WHERE name = 'trg_AfterWasteReport')
+BEGIN
+    EXEC('CREATE TRIGGER trg_AfterWasteReport
+    ON WasteReports
+    AFTER INSERT
+    AS
+    BEGIN
+        DECLARE @UserId CHAR(4), @ReportId CHAR(4), @WasteType NVARCHAR(50)
+        
+        SELECT @UserId = UserId, @ReportId = ReportId FROM inserted
+        SELECT @WasteType = Name FROM WasteTypes wt 
+        JOIN inserted i ON wt.WasteTypeId = i.WasteTypeId
+        
+        INSERT INTO UserActivities (UserId, ActivityType, Description, Points, Timestamp)
+        VALUES (@UserId, ''WasteReport'', 
+                ''Reported '' + @WasteType + '' for collection'', 
+                5, GETDATE())
+    END')
+END
+GO
+
+-- Trigger for completed pickups
+IF NOT EXISTS (SELECT * FROM sys.triggers WHERE name = 'trg_AfterPickupComplete')
+BEGIN
+    EXEC('CREATE TRIGGER trg_AfterPickupComplete
+    ON PickupRequests
+    AFTER UPDATE
+    AS
+    BEGIN
+        IF UPDATE(Status) AND EXISTS(SELECT 1 FROM inserted WHERE Status = ''Collected'')
+        BEGIN
+            DECLARE @UserId CHAR(4), @PickupId CHAR(4), @Points DECIMAL(10,2)
+            
+            SELECT @PickupId = PickupId FROM inserted
+            SELECT @UserId = wr.UserId, @Points = pv.VerifiedKg * wt.CreditPerKg
+            FROM PickupRequests pr
+            JOIN WasteReports wr ON pr.ReportId = wr.ReportId
+            JOIN PickupVerifications pv ON pr.PickupId = pv.PickupId
+            JOIN WasteTypes wt ON wr.WasteTypeId = wt.WasteTypeId
+            WHERE pr.PickupId = @PickupId
+            
+            INSERT INTO UserActivities (UserId, ActivityType, Description, Points, Timestamp)
+            VALUES (@UserId, ''PickupComplete'', 
+                    ''Pickup completed - '' + CAST(@Points AS NVARCHAR(10)) + '' credits earned'', 
+                    @Points, GETDATE())
+        END
+    END')
+END
+GO
+
+-- Trigger for reward points
+IF NOT EXISTS (SELECT * FROM sys.triggers WHERE name = 'trg_AfterRewardPoints')
+BEGIN
+    EXEC('CREATE TRIGGER trg_AfterRewardPoints
+    ON RewardPoints
+    AFTER INSERT
+    AS
+    BEGIN
+        DECLARE @UserId CHAR(4), @Amount DECIMAL(10,2), @Type NVARCHAR(50)
+        
+        SELECT @UserId = UserId, @Amount = Amount, @Type = Type FROM inserted
+        
+        UPDATE Users 
+        SET XP_Credits = XP_Credits + @Amount 
+        WHERE UserId = @UserId
+    END')
+END
+GO
+
+-- ========================================
+-- ADDITIONAL STORED PROCEDURES FOR CITIZEN ACTIVITIES
+-- ========================================
+
+-- Procedure to get citizen dashboard data
+IF NOT EXISTS (SELECT * FROM sys.procedures WHERE name = 'sp_GetCitizenDashboard')
+BEGIN
+    EXEC('CREATE PROCEDURE sp_GetCitizenDashboard
+        @UserId CHAR(4)
+    AS
+    BEGIN
+        -- Total credits
+        SELECT ISNULL(SUM(Amount), 0) AS TotalCredits 
+        FROM RewardPoints 
+        WHERE UserId = @UserId
+        
+        -- Recent activities
+        SELECT TOP 5 ActivityType, Description, Points, Timestamp
+        FROM UserActivities 
+        WHERE UserId = @UserId 
+        ORDER BY Timestamp DESC
+        
+        -- Pending pickups
+        SELECT COUNT(*) AS PendingPickups
+        FROM PickupRequests pr
+        JOIN WasteReports wr ON pr.ReportId = wr.ReportId
+        WHERE wr.UserId = @UserId AND pr.Status IN (''Requested'', ''Assigned'')
+        
+        -- Monthly stats
+        SELECT 
+            DATENAME(MONTH, CreatedAt) AS MonthName,
+            COUNT(*) AS ReportsCount,
+            ISNULL(SUM(EstimatedKg), 0) AS TotalKg
+        FROM WasteReports 
+        WHERE UserId = @UserId AND YEAR(CreatedAt) = YEAR(GETDATE())
+        GROUP BY DATENAME(MONTH, CreatedAt), MONTH(CreatedAt)
+        ORDER BY MONTH(CreatedAt)
+    END')
+END
+GO
+
+-- Procedure for waste reporting with activity tracking
+IF NOT EXISTS (SELECT * FROM sys.procedures WHERE name = 'sp_SubmitWasteReport')
+BEGIN
+    EXEC('CREATE PROCEDURE sp_SubmitWasteReport
+        @UserId CHAR(4),
+        @WasteTypeId CHAR(4),
+        @EstimatedKg DECIMAL(6,2),
+        @Address NVARCHAR(300),
+        @Lat DECIMAL(10,6) = NULL,
+        @Lng DECIMAL(10,6) = NULL,
+        @PhotoUrl NVARCHAR(512) = NULL
+    AS
+    BEGIN
+        DECLARE @ReportId CHAR(4)
+        
+        -- Generate ReportId
+        SELECT @ReportId = ''WR'' + RIGHT(''00'' + CAST(ISNULL(MAX(CAST(SUBSTRING(ReportId, 3, 2) AS INT)), 0) + 1 AS VARCHAR(2)), 2)
+        FROM WasteReports
+        
+        -- Insert waste report
+        INSERT INTO WasteReports (ReportId, UserId, WasteTypeId, EstimatedKg, Address, Lat, Lng, PhotoUrl)
+        VALUES (@ReportId, @UserId, @WasteTypeId, @EstimatedKg, @Address, @Lat, @Lng, @PhotoUrl)
+        
+        -- Create pickup request
+        DECLARE @PickupId CHAR(4)
+        SELECT @PickupId = ''PK'' + RIGHT(''00'' + CAST(ISNULL(MAX(CAST(SUBSTRING(PickupId, 3, 2) AS INT)), 0) + 1 AS VARCHAR(2)), 2)
+        FROM PickupRequests
+        
+        INSERT INTO PickupRequests (PickupId, ReportId, Status)
+        VALUES (@PickupId, @ReportId, ''Requested'')
+    END')
+END
+GO
+
+-- ========================================
+-- ADDITIONAL INDEXES FOR PERFORMANCE
+-- ========================================
+
+IF NOT EXISTS (SELECT * FROM sys.indexes WHERE name = 'IX_UserActivities_UserId')
+BEGIN
+    CREATE INDEX IX_UserActivities_UserId ON UserActivities(UserId);
+END
+
+IF NOT EXISTS (SELECT * FROM sys.indexes WHERE name = 'IX_UserActivities_Timestamp')
+BEGIN
+    CREATE INDEX IX_UserActivities_Timestamp ON UserActivities(Timestamp DESC);
+END
+
+IF NOT EXISTS (SELECT * FROM sys.indexes WHERE name = 'IX_PickupVerifications_PickupId')
+BEGIN
+    CREATE INDEX IX_PickupVerifications_PickupId ON PickupVerifications(PickupId);
+END
+
+IF NOT EXISTS (SELECT * FROM sys.indexes WHERE name = 'IX_RewardPoints_CreatedAt')
+BEGIN
+    CREATE INDEX IX_RewardPoints_CreatedAt ON RewardPoints(CreatedAt DESC);
+END
+GO
+
+-- ========================================
+-- ADDITIONAL VIEWS FOR REPORTING
+-- ========================================
+
+IF NOT EXISTS (SELECT * FROM sys.views WHERE name = 'vw_CitizenActivitySummary')
+BEGIN
+    EXEC('CREATE VIEW vw_CitizenActivitySummary AS
+    SELECT 
+        u.UserId,
+        u.FullName,
+        u.Phone,
+        ISNULL(SUM(rp.Amount), 0) AS TotalCredits,
+        COUNT(DISTINCT wr.ReportId) AS TotalReports,
+        COUNT(DISTINCT pr.PickupId) AS TotalPickups,
+        ISNULL(SUM(pv.VerifiedKg), 0) AS TotalKgRecycled,
+        MAX(ua.Timestamp) AS LastActivity
+    FROM Users u
+    LEFT JOIN WasteReports wr ON u.UserId = wr.UserId
+    LEFT JOIN PickupRequests pr ON wr.ReportId = pr.ReportId
+    LEFT JOIN PickupVerifications pv ON pr.PickupId = pv.PickupId
+    LEFT JOIN RewardPoints rp ON u.UserId = rp.UserId
+    LEFT JOIN UserActivities ua ON u.UserId = ua.UserId
+    WHERE u.RoleId IN (''CITZ'', ''R001'')
+    GROUP BY u.UserId, u.FullName, u.Phone')
+END
+GO
+
+IF NOT EXISTS (SELECT * FROM sys.views WHERE name = 'vw_RecentUserActivities')
+BEGIN
+    EXEC('CREATE VIEW vw_RecentUserActivities AS
+    SELECT 
+        ua.ActivityId,
+        ua.UserId,
+        u.FullName,
+        ua.ActivityType,
+        ua.Description,
+        ua.Points,
+        ua.Timestamp
+    FROM UserActivities ua
+    JOIN Users u ON ua.UserId = u.UserId
+    WHERE ua.Timestamp >= DATEADD(DAY, -30, GETDATE())')
+END
+GO
+
+-- ========================================
+-- 8. SEED DATA (SEED FILE)
 -- ========================================

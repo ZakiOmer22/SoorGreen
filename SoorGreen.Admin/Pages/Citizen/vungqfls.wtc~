@@ -1,0 +1,663 @@
+﻿<%@ Page Title="Leaderboard" Language="C#" MasterPageFile="~/Pages/Citizen/Site.Master" AutoEventWireup="true" CodeFile="Leaderboard.aspx.cs" Inherits="SoorGreen.Citizen.Leaderboard" %>
+
+<asp:Content ID="Content1" ContentPlaceHolderID="TitleContent" runat="server">
+    Leaderboard - SoorGreen Citizen
+</asp:Content>
+
+<asp:Content ID="Content2" ContentPlaceHolderID="MainContent" runat="server">
+    <style>
+        .leaderboard-container {
+            margin-bottom: 2rem;
+        }
+        
+        .stats-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+        
+        .stat-card {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 1.5rem;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+        
+        .stat-card:hover {
+            transform: translateY(-3px);
+            border-color: rgba(0, 212, 170, 0.3);
+        }
+        
+        .stat-value {
+            font-size: 2rem;
+            font-weight: 800;
+            color: #ffffff !important;
+            margin-bottom: 0.5rem;
+        }
+        
+        .stat-label {
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 0.9rem;
+            font-weight: 600;
+        }
+        
+        .tabs-container {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(20px);
+            border-radius: 15px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .tabs {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 1.5rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            padding-bottom: 0.5rem;
+            flex-wrap: wrap;
+        }
+        
+        .tab {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: rgba(255, 255, 255, 0.7) !important;
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px 8px 0 0;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 600;
+        }
+        
+        .tab.active {
+            background: rgba(255, 255, 255, 0.1);
+            border-color: var(--primary);
+            color: #ffffff !important;
+        }
+        
+        .tab-content {
+            display: none;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
+        .leaderboard-card {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+        
+        .leaderboard-card:hover {
+            transform: translateY(-2px);
+            border-color: rgba(0, 212, 170, 0.3);
+        }
+        
+        .rank-badge {
+            position: absolute;
+            top: -10px;
+            left: -10px;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 800;
+            font-size: 1.1rem;
+            color: white !important;
+            z-index: 2;
+        }
+        
+        .rank-1 {
+            background: linear-gradient(135deg, #FFD700, #FFA500);
+        }
+        
+        .rank-2 {
+            background: linear-gradient(135deg, #C0C0C0, #A0A0A0);
+        }
+        
+        .rank-3 {
+            background: linear-gradient(135deg, #CD7F32, #A66C2A);
+        }
+        
+        .rank-other {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+        }
+        
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+        
+        .user-avatar {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: white !important;
+            border: 3px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .current-user .user-avatar {
+            border-color: #00d4aa;
+        }
+        
+        .user-details {
+            flex: 1;
+        }
+        
+        .user-name {
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: #ffffff !important;
+            margin-bottom: 0.25rem;
+        }
+        
+        .current-user .user-name {
+            color: #00d4aa !important;
+        }
+        
+        .user-level {
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .level-badge {
+            background: rgba(0, 212, 170, 0.2);
+            color: #00d4aa;
+            padding: 0.2rem 0.6rem;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            border: 1px solid rgba(0, 212, 170, 0.3);
+        }
+        
+        .user-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+            gap: 1rem;
+            padding: 1rem;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+        }
+        
+        .stat-item {
+            text-align: center;
+        }
+        
+        .stat-number {
+            font-size: 1.5rem;
+            font-weight: 800;
+            color: #ffffff !important;
+            margin-bottom: 0.25rem;
+        }
+        
+        .stat-label-small {
+            color: rgba(255, 255, 255, 0.6);
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+        
+        .xp-badge {
+            background: linear-gradient(135deg, #FFD700, #FFA500);
+            color: #000 !important;
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-weight: 700;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .time-filters {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 1.5rem;
+            flex-wrap: wrap;
+        }
+        
+        .time-filter {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: rgba(255, 255, 255, 0.7);
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+        
+        .time-filter.active {
+            background: rgba(0, 212, 170, 0.2);
+            border-color: rgba(0, 212, 170, 0.5);
+            color: #00d4aa !important;
+        }
+        
+        .empty-state {
+            text-align: center;
+            padding: 3rem 2rem;
+            color: rgba(255, 255, 255, 0.7);
+        }
+        
+        .empty-state-icon {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+            color: rgba(255, 255, 255, 0.3);
+        }
+        
+        .empty-state-title {
+            font-size: 1.5rem;
+            margin-bottom: 0.5rem;
+            color: rgba(255, 255, 255, 0.8);
+        }
+        
+        .empty-state-description {
+            font-size: 1rem;
+            margin-bottom: 1.5rem;
+        }
+        
+        .progress-bar {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            height: 8px;
+            margin: 0.5rem 0;
+            overflow: hidden;
+        }
+        
+        .progress-fill {
+            background: linear-gradient(135deg, #00d4aa, #00b894);
+            height: 100%;
+            border-radius: 10px;
+            transition: width 0.5s ease;
+        }
+        
+        .progress-text {
+            color: rgba(255, 255, 255, 0.6);
+            font-size: 0.8rem;
+            display: flex;
+            justify-content: space-between;
+        }
+        
+        .custom-notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: rgba(255, 255, 255, 0.95);
+            color: #000000 !important;
+            padding: 1rem 1.5rem;
+            border-radius: 8px;
+            border-left: 4px solid #ccc;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            z-index: 10000;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            max-width: 400px;
+            animation: slideInRight 0.3s ease;
+        }
+        
+        .notification-error {
+            border-left-color: #dc3545;
+        }
+        
+        .notification-success {
+            border-left-color: #198754;
+        }
+        
+        .notification-info {
+            border-left-color: #0dcaf0;
+        }
+        
+        .custom-notification button {
+            background: none;
+            border: none;
+            font-size: 1.2rem;
+            cursor: pointer;
+            color: #666 !important;
+        }
+        
+        @keyframes slideInRight {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+        
+        .text-light, h1, h2, h3, h4, h5, h6 {
+            color: #ffffff !important;
+        }
+        
+        .text-muted {
+            color: rgba(255, 255, 255, 0.7) !important;
+        }
+        
+        .section-header {
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .section-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #ffffff !important;
+            margin-bottom: 0.5rem;
+        }
+        
+        .section-description {
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 1rem;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #0d6efd, #0dcaf0);
+            border: none;
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 600;
+        }
+        
+        .btn-primary:hover {
+            background: linear-gradient(135deg, #0b5ed7, #0baccc);
+            transform: translateY(-2px);
+        }
+        
+        @media (max-width: 768px) {
+            .stats-cards {
+                grid-template-columns: 1fr;
+            }
+            
+            .tabs {
+                flex-direction: column;
+            }
+            
+            .user-stats {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            .time-filters {
+                justify-content: center;
+            }
+        }
+    </style>
+
+    <div class="leaderboard-container">
+        <br />
+        <br />
+        <br />
+
+        <div class="stats-cards">
+            <div class="stat-card">
+                <div class="stat-value" id="totalUsers">1,247</div>
+                <div class="stat-label">Active Users</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="totalXP">2.5M</div>
+                <div class="stat-label">Total XP Earned</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="totalPickups">18.4K</div>
+                <div class="stat-label">Waste Pickups</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="co2Reduced">156T</div>
+                <div class="stat-label">CO₂ Reduced</div>
+            </div>
+        </div>
+
+        <div class="section-header">
+            <h1 class="section-title">Eco Leaderboard</h1>
+            <p class="section-description">Compete with fellow eco-warriors and climb the ranks</p>
+        </div>
+
+        <div class="tabs-container">
+            <div class="tabs">
+                <asp:Button ID="btnGlobal" runat="server" Text="Global Leaderboard" CssClass="tab active" CommandArgument="global" OnClick="btnTab_Click" />
+                <asp:Button ID="btnMonthly" runat="server" Text="Monthly Champions" CssClass="tab" CommandArgument="monthly" OnClick="btnTab_Click" />
+                <asp:Button ID="btnFriends" runat="server" Text="Friends Ranking" CssClass="tab" CommandArgument="friends" OnClick="btnTab_Click" />
+                <asp:Button ID="btnAchievements" runat="server" Text="Top Achievers" CssClass="tab" CommandArgument="achievements" OnClick="btnTab_Click" />
+            </div>
+
+            <div class="time-filters">
+                <asp:Button ID="btnAllTime" runat="server" Text="All Time" CssClass="time-filter active" CommandArgument="all" OnClick="btnPeriod_Click" />
+                <asp:Button ID="btnThisMonth" runat="server" Text="This Month" CssClass="time-filter" CommandArgument="month" OnClick="btnPeriod_Click" />
+                <asp:Button ID="btnThisWeek" runat="server" Text="This Week" CssClass="time-filter" CommandArgument="week" OnClick="btnPeriod_Click" />
+                <asp:Button ID="btnToday" runat="server" Text="Today" CssClass="time-filter" CommandArgument="today" OnClick="btnPeriod_Click" />
+            </div>
+
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <div class="text-muted" id="resultsInfo">
+                    Showing top 10 users
+                </div>
+                <div>
+                    <asp:Button ID="btnRefresh" runat="server" Text="Refresh" CssClass="btn-primary" OnClick="btnRefresh_Click" />
+                </div>
+            </div>
+
+            <!-- Global Leaderboard Tab -->
+            <div id="globalTab" class="tab-content active" runat="server">
+                <div id="globalLeaderboard">
+                    <!-- Leaderboard cards will be loaded here -->
+                </div>
+            </div>
+
+            <!-- Monthly Leaderboard Tab -->
+            <div id="monthlyTab" class="tab-content" runat="server">
+                <div id="monthlyLeaderboard">
+                    <div class="empty-state">
+                        <div class="empty-state-icon">
+                            <i class="fas fa-calendar-alt"></i>
+                        </div>
+                        <h3 class="empty-state-title">Monthly Rankings</h3>
+                        <p class="empty-state-description">Monthly leaderboard will be available at the end of the month</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Friends Leaderboard Tab -->
+            <div id="friendsTab" class="tab-content" runat="server">
+                <div id="friendsLeaderboard">
+                    <div class="empty-state">
+                        <div class="empty-state-icon">
+                            <i class="fas fa-users"></i>
+                        </div>
+                        <h3 class="empty-state-title">Connect with Friends</h3>
+                        <p class="empty-state-description">Add friends to compete and see their rankings</p>
+                        <asp:Button ID="btnInviteFriends" runat="server" Text="Invite Friends" CssClass="btn-primary" OnClick="btnInviteFriends_Click" />
+                    </div>
+                </div>
+            </div>
+
+            <!-- Achievements Leaderboard Tab -->
+            <div id="achievementsTab" class="tab-content" runat="server">
+                <div id="achievementsLeaderboard">
+                    <div class="empty-state">
+                        <div class="empty-state-icon">
+                            <i class="fas fa-medal"></i>
+                        </div>
+                        <h3 class="empty-state-title">Achievement Masters</h3>
+                        <p class="empty-state-description">Top users with the most achievements unlocked</p>
+                        <asp:Button ID="btnLoadAchievements" runat="server" Text="Load Achievements" CssClass="btn-primary" OnClick="btnLoadAchievements_Click" />
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Hidden fields for data storage -->
+    <asp:HiddenField ID="hfLeaderboardData" runat="server" Value="[]" />
+    <asp:HiddenField ID="hfCurrentTab" runat="server" Value="global" />
+    <asp:HiddenField ID="hfCurrentPeriod" runat="server" Value="all" />
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const leaderboardData = JSON.parse(document.getElementById('<%= hfLeaderboardData.ClientID %>').value);
+            const currentTab = document.getElementById('<%= hfCurrentTab.ClientID %>').value;
+            const currentPeriod = document.getElementById('<%= hfCurrentPeriod.ClientID %>').value;
+
+            updateLeaderboardDisplay(leaderboardData, currentTab);
+            updateActiveFilters(currentTab, currentPeriod);
+        });
+
+        function updateLeaderboardDisplay(data, tab) {
+            const container = document.getElementById(tab + 'Leaderboard');
+
+            if (!data || data.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-state-icon">
+                            <i class="fas fa-trophy"></i>
+                        </div>
+                        <h3 class="empty-state-title">No Data Available</h3>
+                        <p class="empty-state-description">Start earning XP to appear on the leaderboard!</p>
+                    </div>
+                `;
+                return;
+            }
+
+            let html = '';
+
+            data.forEach(user => {
+                const rankClass = user.rank <= 3 ? `rank-${user.rank}` : 'rank-other';
+                const userClass = user.isCurrentUser ? 'current-user' : '';
+
+                html += `
+                    <div class="leaderboard-card ${userClass}">
+                        <div class="rank-badge ${rankClass}">#${user.rank}</div>
+                        
+                        <div class="user-info">
+                            <div class="user-avatar">${user.avatar}</div>
+                            <div class="user-details">
+                                <div class="user-name">${user.name}</div>
+                                <div class="user-level">
+                                    <span class="level-badge">Level ${user.level}</span>
+                                    <span>${user.xp.toLocaleString()} XP</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="user-stats">
+                            <div class="stat-item">
+                                <div class="stat-number">${user.pickups}</div>
+                                <div class="stat-label-small">Pickups</div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="stat-number">${user.achievements}</div>
+                                <div class="stat-label-small">Achievements</div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="stat-number">${user.co2Reduced}T</div>
+                                <div class="stat-label-small">CO₂ Reduced</div>
+                            </div>
+                        </div>
+                        
+                        ${user.isCurrentUser ? `
+                            <div class="progress-section" style="margin-top: 1rem;">
+                                <div class="progress-text">
+                                    <span>Progress to Next Rank</span>
+                                    <span>${user.xp % 1000}/1000 XP</span>
+                                </div>
+                                <div class="progress-bar">
+                                    <div class="progress-fill" style="width: ${(user.xp % 1000) / 10}%"></div>
+                                </div>
+                            </div>
+                        ` : ''}
+                    </div>
+                `;
+            });
+
+            container.innerHTML = html;
+
+            // Update user rank display
+            const currentUser = data.find(user => user.isCurrentUser);
+            if (currentUser) {
+                document.getElementById('userRank').textContent = `#${currentUser.rank}`;
+            }
+
+            // Update results info
+            document.getElementById('resultsInfo').textContent = `Showing top ${data.length} users`;
+        }
+
+        function updateActiveFilters(tab, period) {
+            // Update active tab
+            document.querySelectorAll('.tab').forEach(tabElement => {
+                tabElement.classList.remove('active');
+            });
+            document.querySelector(`[data-tab="${tab}"]`).classList.add('active');
+
+            // Update active period filter
+            document.querySelectorAll('.time-filter').forEach(filter => {
+                filter.classList.remove('active');
+            });
+            document.querySelector(`[data-period="${period}"]`).classList.add('active');
+
+            // Update active tab content
+            document.querySelectorAll('.tab-content').forEach(content => {
+                content.classList.remove('active');
+            });
+            document.getElementById(tab + 'Tab').classList.add('active');
+        }
+
+        function showNotification(message, type) {
+            const existingNotifications = document.querySelectorAll('.custom-notification');
+            existingNotifications.forEach(notification => notification.remove());
+
+            const notification = document.createElement('div');
+            notification.className = `custom-notification notification-${type}`;
+            notification.innerHTML = `
+                <i class="fas ${type === 'success' ? 'fa-check-circle' : type === 'error' ? 'fa-exclamation-circle' : 'fa-info-circle'}"></i>
+                <span>${message}</span>
+                <button onclick="this.parentElement.remove()">&times;</button>
+            `;
+
+            document.body.appendChild(notification);
+
+            setTimeout(() => {
+                if (notification.parentElement) {
+                    notification.remove();
+                }
+            }, 5000);
+        }
+
+        // Simulate real-time updates
+        function simulateRealTimeUpdate() {
+            setInterval(() => {
+                // This would typically call a server method to get updated data
+                console.log('Checking for leaderboard updates...');
+            }, 30000);
+        }
+
+        // Start real-time updates
+        simulateRealTimeUpdate();
+    </script>
+</asp:Content>

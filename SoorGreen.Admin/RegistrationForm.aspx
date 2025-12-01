@@ -12,57 +12,78 @@
             padding: 100px 0;
         }
 
+        [data-theme="light"] .registration-section {
+            background: radial-gradient(ellipse at center, rgba(0, 212, 170, 0.05) 0%, transparent 70%);
+        }
+
         .registration-card {
-            background: rgba(255, 255, 255, 0.05);
-            border: 1px solid rgba(255, 255, 255, 0.2);
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
             border-radius: 20px;
             padding: 3rem;
             transition: all 0.3s ease;
             backdrop-filter: blur(10px);
-            color: white;
+            color: var(--light);
         }
 
         .form-control {
             background: rgba(255, 255, 255, 0.05);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            color: white;
+            border: 1px solid var(--card-border);
+            color: var(--light);
             padding: 1rem;
             border-radius: 10px;
             transition: all 0.3s ease;
         }
 
+        [data-theme="light"] .form-control {
+            background: rgba(33, 37, 41, 0.05);
+            color: var(--light);
+        }
+
         .form-control:focus {
             background: rgba(255, 255, 255, 0.1);
-            border-color: #00d4aa;
-            color: white;
+            border-color: var(--primary);
+            color: var(--light);
             box-shadow: 0 0 0 0.2rem rgba(0, 212, 170, 0.25);
+        }
+
+        [data-theme="light"] .form-control:focus {
+            background: rgba(33, 37, 41, 0.1);
         }
 
         .form-control::placeholder {
             color: rgba(255, 255, 255, 0.5);
         }
 
+        [data-theme="light"] .form-control::placeholder {
+            color: rgba(33, 37, 41, 0.5);
+        }
+
         .form-label {
-            color: white !important;
+            color: var(--light) !important;
             font-weight: 600;
             margin-bottom: 0.5rem;
         }
 
         .role-badge {
-            background: rgba(0, 212, 170, 0.1);
+            background: rgba(0, 212, 170, 0.1) !important;
             border: 1px solid rgba(0, 212, 170, 0.3);
-            color: #00d4aa !important;
+            color: var(--primary) !important;
             backdrop-filter: blur(10px);
         }
 
+        [data-theme="light"] .role-badge {
+            background: rgba(0, 212, 170, 0.15) !important;
+        }
+
         .btn-primary {
-            background: #00d4aa;
+            background: var(--primary);
             border: none;
             padding: 1rem 2rem;
             border-radius: 10px;
             font-weight: 600;
             transition: all 0.3s ease;
-            color: white;
+            color: white !important;
         }
 
         .btn-primary:hover {
@@ -71,8 +92,8 @@
         }
 
         .btn-outline-hero {
-            border: 2px solid #00d4aa;
-            color: #00d4aa;
+            border: 2px solid var(--primary);
+            color: var(--primary);
             background: transparent;
             padding: 1rem 2rem;
             border-radius: 50px;
@@ -81,7 +102,7 @@
         }
 
         .btn-outline-hero:hover {
-            background: #00d4aa;
+            background: var(--primary);
             color: white;
             transform: translateY(-3px);
         }
@@ -96,35 +117,40 @@
             width: 40px;
             height: 40px;
             border-radius: 50%;
-            background: rgba(255, 255, 255, 0.1);
-            border: 2px solid rgba(255, 255, 255, 0.3);
+            background: var(--card-bg);
+            border: 2px solid var(--card-border);
             display: flex;
             align-items: center;
             justify-content: center;
             margin: 0 10px;
-            color: rgba(255, 255, 255, 0.5);
+            color: var(--light);
+            opacity: 0.5;
             font-weight: 600;
+            transition: all 0.3s ease;
         }
 
         .step.active {
-            background: #00d4aa;
-            border-color: #00d4aa;
+            background: var(--primary);
+            border-color: var(--primary);
             color: white;
+            opacity: 1;
         }
 
         .step-line {
             flex: 1;
             height: 2px;
-            background: rgba(255, 255, 255, 0.2);
+            background: var(--card-border);
             margin: 0 10px;
             align-self: center;
+            opacity: 0.5;
         }
 
         .step-label {
             text-align: center;
             margin-top: 0.5rem;
             font-size: 0.875rem;
-            color: rgba(255, 255, 255, 0.7) !important;
+            color: var(--light) !important;
+            opacity: 0.7;
         }
 
         .step-container {
@@ -137,7 +163,7 @@
 
         .password-strength {
             height: 4px;
-            background: rgba(255, 255, 255, 0.2);
+            background: var(--card-border);
             border-radius: 2px;
             margin-top: 0.5rem;
             overflow: hidden;
@@ -153,7 +179,7 @@
         .weak { background: #ef4444; width: 25%; }
         .fair { background: #f59e0b; width: 50%; }
         .good { background: #10b981; width: 75%; }
-        .strong { background: #00d4aa; width: 100%; }
+        .strong { background: var(--primary); width: 100%; }
 
         .error-message {
             color: #ef4444 !important;
@@ -176,12 +202,18 @@
             padding: 1rem 1.5rem;
             margin-bottom: 1rem;
             box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
-            border-left: 4px solid #00d4aa;
+            border-left: 4px solid var(--primary);
             color: #333;
             font-weight: 500;
             max-width: 350px;
             transform: translateX(400px);
             transition: all 0.3s ease;
+        }
+
+        [data-theme="light"] .toast {
+            background: rgba(33, 37, 41, 0.95);
+            color: white;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
         }
 
         .toast.show {
@@ -202,15 +234,95 @@
 
         /* Text visibility fixes */
         .text-muted {
-            color: rgba(255, 255, 255, 0.8) !important;
+            color: var(--light) !important;
+            opacity: 0.8 !important;
         }
 
         .form-check-label {
-            color: rgba(255, 255, 255, 0.9) !important;
+            color: var(--light) !important;
+            opacity: 0.9 !important;
         }
 
         .text-primary {
-            color: #00d4aa !important;
+            color: var(--primary) !important;
+        }
+
+        /* Form Check Styles */
+        .form-check-input {
+            background-color: var(--card-bg);
+            border: 1px solid var(--card-border);
+        }
+
+        .form-check-input:checked {
+            background-color: var(--primary);
+            border-color: var(--primary);
+        }
+
+        /* Dropdown Styles */
+        .form-select {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--card-border);
+            color: var(--light);
+            padding: 1rem;
+            border-radius: 10px;
+            transition: all 0.3s ease;
+        }
+
+        [data-theme="light"] .form-select {
+            background: rgba(33, 37, 41, 0.05);
+        }
+
+        .form-select:focus {
+            background: rgba(255, 255, 255, 0.1);
+            border-color: var(--primary);
+            color: var(--light);
+            box-shadow: 0 0 0 0.2rem rgba(0, 212, 170, 0.25);
+        }
+
+        [data-theme="light"] .form-select:focus {
+            background: rgba(33, 37, 41, 0.1);
+        }
+
+        /* Success Step Styles */
+        .success-icon {
+            font-size: 4rem;
+            color: #10b981;
+            margin-bottom: 1.5rem;
+        }
+
+        /* Additional Light Mode Specific Styles */
+        [data-theme="light"] .registration-card {
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        }
+
+        [data-theme="light"] .form-control,
+        [data-theme="light"] .form-select {
+            color: var(--light) !important;
+        }
+
+        /* Link styles in form check */
+        .form-check-label a {
+            color: var(--primary) !important;
+            text-decoration: none;
+        }
+
+        .form-check-label a:hover {
+            text-decoration: underline;
+        }
+
+        /* Headings and text */
+        h2, h3, h4, h5, h6 {
+            color: var(--light) !important;
+        }
+
+        p, span {
+            color: var(--light) !important;
+            opacity: 0.9 !important;
+        }
+
+        strong {
+            color: var(--light) !important;
+            opacity: 1 !important;
         }
 
         @media (max-width: 768px) {
@@ -227,6 +339,56 @@
             .toast {
                 max-width: none;
             }
+            
+            .step {
+                width: 35px;
+                height: 35px;
+                margin: 0 5px;
+            }
+            
+            .step-line {
+                margin: 0 5px;
+            }
+        }
+
+        /* Password visibility toggle */
+        .password-toggle {
+            position: absolute;
+            right: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            color: var(--light);
+            opacity: 0.7;
+            cursor: pointer;
+        }
+
+        .password-toggle:hover {
+            opacity: 1;
+        }
+
+        .password-input-container {
+            position: relative;
+        }
+
+        /* Form group spacing */
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        /* Button container spacing */
+        .btn-container {
+            margin-top: 2rem;
+        }
+
+        /* Role-specific panel styling */
+        .role-panel {
+            margin-top: 1rem;
+            padding: 1.5rem;
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 10px;
         }
     </style>
 
@@ -266,12 +428,12 @@
                             </span>
                         </div>
 
-                        <h2 class="text-center mb-4" style="color: white !important;">Create Your Account</h2>
-                        <p class="text-center mb-5" style="color: rgba(255, 255, 255, 0.8) !important;">Join SoorGreen as a <strong style="color: white !important;"><asp:Label ID="lblRoleName" runat="server" Text="Citizen"></asp:Label></strong> and start your sustainability journey</p>
+                        <h2 class="text-center mb-4">Create Your Account</h2>
+                        <p class="text-center mb-5">Join SoorGreen as a <strong><asp:Label ID="lblRoleName" runat="server" Text="Citizen"></asp:Label></strong> and start your sustainability journey</p>
 
                         <!-- Step 1: Personal Information -->
                         <div id="step1" class="step-container active">
-                            <h4 class="mb-4" style="color: white !important;">Personal Information</h4>
+                            <h4 class="mb-4">Personal Information</h4>
                             
                             <div class="row g-3">
                                 <div class="col-md-6">
@@ -296,26 +458,30 @@
                                 </div>
 
                                 <!-- Citizen Specific Fields -->
-                                <asp:Panel ID="pnlCitizenFields" runat="server" Visible="false">
-                                    <div class="col-md-6">
-                                        <label class="form-label">Address</label>
-                                        <asp:TextBox ID="txtAddress" runat="server" CssClass="form-control" 
-                                            placeholder="Enter your address" TextMode="MultiLine" Rows="2"></asp:TextBox>
-                                    </div>
-                                    <div class="col-md-6">
-                                        <label class="form-label">Municipality</label>
-                                        <asp:DropDownList ID="ddlMunicipality" runat="server" CssClass="form-control">
-                                            <asp:ListItem Value="">Select Municipality</asp:ListItem>
-                                            <asp:ListItem Value="M001">Central City</asp:ListItem>
-                                            <asp:ListItem Value="M002">Green Valley</asp:ListItem>
-                                            <asp:ListItem Value="M003">Eco Town</asp:ListItem>
-                                            <asp:ListItem Value="M004">Sustainable City</asp:ListItem>
-                                        </asp:DropDownList>
+                                <asp:Panel ID="pnlCitizenFields" runat="server" Visible="false" CssClass="role-panel">
+                                    <h5 class="mb-3">Citizen Information</h5>
+                                    <div class="row g-3">
+                                        <div class="col-md-6">
+                                            <label class="form-label">Address</label>
+                                            <asp:TextBox ID="txtAddress" runat="server" CssClass="form-control" 
+                                                placeholder="Enter your address" TextMode="MultiLine" Rows="2"></asp:TextBox>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label class="form-label">Municipality</label>
+                                            <asp:DropDownList ID="ddlMunicipality" runat="server" CssClass="form-select">
+                                                <asp:ListItem Value="">Select Municipality</asp:ListItem>
+                                                <asp:ListItem Value="M001">Central City</asp:ListItem>
+                                                <asp:ListItem Value="M002">Green Valley</asp:ListItem>
+                                                <asp:ListItem Value="M003">Eco Town</asp:ListItem>
+                                                <asp:ListItem Value="M004">Sustainable City</asp:ListItem>
+                                            </asp:DropDownList>
+                                        </div>
                                     </div>
                                 </asp:Panel>
 
                                 <!-- Collector Specific Fields -->
-                                <asp:Panel ID="pnlCollectorFields" runat="server" Visible="false">
+                                <asp:Panel ID="pnlCollectorFields" runat="server" Visible="false" CssClass="role-panel">
+                                    <h5 class="mb-3">Collector Information</h5>
                                     <div class="col-12">
                                         <label class="form-label">Company/Organization</label>
                                         <asp:TextBox ID="txtCompany" runat="server" CssClass="form-control" 
@@ -333,13 +499,18 @@
 
                         <!-- Step 2: Account Details -->
                         <div id="step2" class="step-container">
-                            <h4 class="mb-4" style="color: white !important;">Account Security</h4>
+                            <h4 class="mb-4">Account Security</h4>
                             
                             <div class="row g-3">
                                 <div class="col-md-6">
-                                    <label class="form-label">Password *</label>
-                                    <asp:TextBox ID="txtPassword" runat="server" CssClass="form-control" 
-                                        placeholder="Create a password" TextMode="Password"></asp:TextBox>
+                                    <div class="password-input-container">
+                                        <label class="form-label">Password *</label>
+                                        <asp:TextBox ID="txtPassword" runat="server" CssClass="form-control" 
+                                            placeholder="Create a password" TextMode="Password"></asp:TextBox>
+                                        <button type="button" class="password-toggle" onclick="togglePassword('txtPassword')">
+                                            <i class="fas fa-eye"></i>
+                                        </button>
+                                    </div>
                                     <div class="password-strength">
                                         <div id="passwordStrengthBar" class="password-strength-bar"></div>
                                     </div>
@@ -347,9 +518,14 @@
                                 </div>
 
                                 <div class="col-md-6">
-                                    <label class="form-label">Confirm Password *</label>
-                                    <asp:TextBox ID="txtConfirmPassword" runat="server" CssClass="form-control" 
-                                        placeholder="Confirm your password" TextMode="Password"></asp:TextBox>
+                                    <div class="password-input-container">
+                                        <label class="form-label">Confirm Password *</label>
+                                        <asp:TextBox ID="txtConfirmPassword" runat="server" CssClass="form-control" 
+                                            placeholder="Confirm your password" TextMode="Password"></asp:TextBox>
+                                        <button type="button" class="password-toggle" onclick="togglePassword('txtConfirmPassword')">
+                                            <i class="fas fa-eye"></i>
+                                        </button>
+                                    </div>
                                     <div id="errorConfirmPassword" class="error-message">Passwords do not match</div>
                                 </div>
 
@@ -392,10 +568,10 @@
                         <!-- Step 3: Success -->
                         <div id="step3" class="step-container text-center">
                             <div class="mb-4">
-                                <i class="fas fa-check-circle text-success" style="font-size: 4rem;"></i>
+                                <i class="fas fa-check-circle success-icon"></i>
                             </div>
-                            <h3 class="mb-3" style="color: white !important;">Registration Successful!</h3>
-                            <p class="mb-4" style="color: rgba(255, 255, 255, 0.8) !important;">Welcome to SoorGreen! Your account has been created successfully.</p>
+                            <h3 class="mb-3">Registration Successful!</h3>
+                            <p class="mb-4">Welcome to SoorGreen! Your account has been created successfully.</p>
                             <div class="row g-3">
                                 <div class="col-md-6">
                                     <a href="Login.aspx" class="btn btn-outline-hero w-100">
@@ -583,6 +759,21 @@
                 strengthBar.classList.add('strong');
             }
         });
+
+        // Password visibility toggle
+        function togglePassword(fieldId) {
+            const field = document.getElementById(fieldId);
+            const toggle = field.nextElementSibling;
+            const icon = toggle.querySelector('i');
+
+            if (field.type === 'password') {
+                field.type = 'text';
+                icon.className = 'fas fa-eye-slash';
+            } else {
+                field.type = 'password';
+                icon.className = 'fas fa-eye';
+            }
+        }
 
         // Initialize on page load
         document.addEventListener('DOMContentLoaded', function () {

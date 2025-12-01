@@ -1,5 +1,5 @@
 ﻿@{
-    ViewBag.Title = "Access Denied - SoorGreen";
+    ViewBag.Title = "Coming Soon - SoorGreen";
     Layout = null;
 }
 
@@ -23,7 +23,6 @@
             --primary-dark: #00b894;
             --secondary: #0984e3;
             --accent: #fd79a8;
-            --danger: #ff4757;
             --dark: #0a192f;
             --darker: #051122;
             --light: #ffffff;
@@ -51,14 +50,44 @@
             padding: 2rem;
         }
 
-        .access-denied-container {
-            max-width: 600px;
+        .coming-soon-container {
+            max-width: 800px;
             width: 100%;
             text-align: center;
         }
 
+        /* Video Container */
+        .video-container {
+            position: relative;
+            width: 100%;
+            max-width: 600px;
+            margin: 0 auto 2rem;
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.5);
+        }
+
+        .coming-soon-video {
+            width: 100%;
+            height: auto;
+            border-radius: 20px;
+            display: block;
+        }
+
+        .video-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, rgba(5, 17, 34, 0.7) 0%, rgba(10, 25, 47, 0.5) 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
         /* Main Card */
-        .access-denied-card {
+        .coming-soon-card {
             background: rgba(255, 255, 255, 0.05);
             backdrop-filter: blur(20px);
             border: 1px solid rgba(255, 255, 255, 0.1);
@@ -70,68 +99,100 @@
             animation: fadeInUp 0.8s ease-out;
         }
 
-            .access-denied-card::before {
+            .coming-soon-card::before {
                 content: '';
                 position: absolute;
                 top: 0;
                 left: 0;
                 right: 0;
                 height: 4px;
-                background: linear-gradient(90deg, var(--danger), var(--accent), var(--danger));
+                background: linear-gradient(90deg, var(--primary), var(--secondary), var(--accent));
                 background-size: 200% 200%;
                 animation: gradientShift 3s ease infinite;
             }
 
         /* Icon */
-        .denied-icon {
-            width: 120px;
-            height: 120px;
-            margin: 0 auto 2rem;
-            background: linear-gradient(135deg, var(--danger), var(--accent));
+        .coming-soon-icon {
+            width: 100px;
+            height: 100px;
+            margin: 0 auto 1.5rem;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 3.5rem;
+            font-size: 2.5rem;
             color: white;
-            box-shadow: 0 15px 35px rgba(255, 71, 87, 0.4);
+            box-shadow: 0 15px 35px rgba(0, 212, 170, 0.4);
             animation: bounce 2s ease-in-out infinite;
             position: relative;
         }
 
-            .denied-icon::after {
+            .coming-soon-icon::after {
                 content: '';
                 position: absolute;
-                width: 140px;
-                height: 140px;
-                border: 2px solid rgba(255, 71, 87, 0.3);
+                width: 120px;
+                height: 120px;
+                border: 2px solid rgba(0, 212, 170, 0.3);
                 border-radius: 50%;
                 animation: pulse 2s ease-out infinite;
             }
 
         /* Text Content */
-        .denied-title {
-            font-size: 3rem;
+        .coming-soon-title {
+            font-size: 3.5rem;
             font-weight: 900;
             margin-bottom: 1rem;
-            background: linear-gradient(135deg, var(--light), var(--danger));
+            background: linear-gradient(135deg, var(--primary), var(--accent));
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             letter-spacing: -1px;
         }
 
-        .denied-subtitle {
-            font-size: 1.3rem;
-            color: rgba(255, 255, 255, 0.8);
-            margin-bottom: 1.5rem;
-            font-weight: 500;
+        .coming-soon-subtitle {
+            font-size: 1.5rem;
+            color: rgba(255, 255, 255, 0.9);
+            margin-bottom: 1rem;
+            font-weight: 600;
         }
 
-        .denied-message {
-            color: rgba(255, 255, 255, 0.7);
+        .coming-soon-message {
+            color: rgba(255, 255, 255, 0.8);
             font-size: 1.1rem;
             margin-bottom: 2.5rem;
             line-height: 1.8;
+        }
+
+        /* Countdown Timer */
+        .countdown-container {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            margin: 2rem 0;
+            flex-wrap: wrap;
+        }
+
+        .countdown-item {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 12px;
+            padding: 1rem;
+            min-width: 80px;
+            backdrop-filter: blur(10px);
+        }
+
+        .countdown-number {
+            font-size: 2rem;
+            font-weight: 800;
+            color: var(--primary);
+            display: block;
+        }
+
+        .countdown-label {
+            font-size: 0.8rem;
+            color: rgba(255, 255, 255, 0.7);
+            text-transform: uppercase;
+            letter-spacing: 1px;
         }
 
         /* Action Buttons */
@@ -198,18 +259,18 @@
                 color: var(--light);
             }
 
-        /* Maintenance Info */
-        .maintenance-info {
+        /* Progress Info */
+        .progress-info {
             margin-top: 2rem;
             padding: 1.5rem;
-            background: rgba(255, 71, 87, 0.1);
-            border: 1px solid rgba(255, 71, 87, 0.3);
+            background: rgba(0, 212, 170, 0.1);
+            border: 1px solid rgba(0, 212, 170, 0.3);
             border-radius: 16px;
             text-align: left;
         }
 
-        .maintenance-title {
-            color: var(--danger);
+        .progress-title {
+            color: var(--primary);
             font-weight: 700;
             margin-bottom: 0.5rem;
             display: flex;
@@ -217,10 +278,27 @@
             gap: 0.5rem;
         }
 
-        .maintenance-text {
+        .progress-text {
             color: rgba(255, 255, 255, 0.8);
             font-size: 0.95rem;
             line-height: 1.6;
+        }
+
+        /* Progress Bar */
+        .progress-container {
+            width: 100%;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            overflow: hidden;
+            margin: 1rem 0;
+        }
+
+        .progress-bar {
+            height: 8px;
+            background: linear-gradient(90deg, var(--primary), var(--secondary));
+            border-radius: 10px;
+            width: 75%;
+            animation: progressFill 2s ease-in-out;
         }
 
         /* Animations */
@@ -282,34 +360,53 @@
             }
         }
 
+        @@keyframes progressFill {
+            from {
+                width: 0%;
+            }
+
+            to {
+                width: 75%;
+            }
+        }
+
         /* Responsive Design */
         @@media (max-width: 768px) {
             body {
                 padding: 1rem;
             }
 
-            .access-denied-card {
+            .coming-soon-card {
                 padding: 2rem 1.5rem;
             }
 
-            .denied-title {
+            .coming-soon-title {
                 font-size: 2.5rem;
             }
 
-            .denied-subtitle {
-                font-size: 1.1rem;
+            .coming-soon-subtitle {
+                font-size: 1.2rem;
             }
 
-            .denied-icon {
-                width: 100px;
-                height: 100px;
-                font-size: 2.5rem;
+            .coming-soon-icon {
+                width: 80px;
+                height: 80px;
+                font-size: 2rem;
             }
 
-                .denied-icon::after {
-                    width: 120px;
-                    height: 120px;
+                .coming-soon-icon::after {
+                    width: 100px;
+                    height: 100px;
                 }
+
+            .countdown-item {
+                min-width: 70px;
+                padding: 0.8rem;
+            }
+
+            .countdown-number {
+                font-size: 1.5rem;
+            }
 
             .action-buttons {
                 flex-direction: column;
@@ -324,16 +421,29 @@
         }
 
         @@media (max-width: 480px) {
-            .denied-title {
+            .coming-soon-title {
                 font-size: 2rem;
             }
 
-            .denied-subtitle {
+            .coming-soon-subtitle {
                 font-size: 1rem;
             }
 
-            .access-denied-card {
+            .coming-soon-card {
                 padding: 1.5rem 1rem;
+            }
+
+            .countdown-container {
+                gap: 0.5rem;
+            }
+
+            .countdown-item {
+                min-width: 60px;
+                padding: 0.6rem;
+            }
+
+            .countdown-number {
+                font-size: 1.2rem;
             }
         }
 
@@ -358,20 +468,52 @@
     </style>
 </head>
 <body>
-    <div class="access-denied-container">
-        <div class="access-denied-card">
+    <div class="coming-soon-container">
+        <!-- Video Section -->
+        <div class="video-container">
+            <video class="coming-soon-video" autoplay muted loop playsinline>
+                <source src="Videos/demo.mp4" type="video/mp4">
+                Your browser does not support the video tag.
+            </video>
+            <div class="video-overlay">
+                <h2 style="color: white; font-size: 2rem; font-weight: 700;">MVC Citizen Portal</h2>
+            </div>
+        </div>
+
+        <!-- Main Content Card -->
+        <div class="coming-soon-card">
             <!-- Icon -->
-            <div class="denied-icon">
-                <i class="fas fa-ban"></i>
+            <div class="coming-soon-icon">
+                <i class="fas fa-rocket"></i>
             </div>
 
             <!-- Main Content -->
-            <h1 class="denied-title">Access Denied</h1>
-            <div class="denied-subtitle">MVC Citizen Portal</div>
-            <p class="denied-message">
-                You don't have permission to access this resource. <br />
-                Please contact your administrator or try the maintenance URL.
+            <h1 class="coming-soon-title">Coming Soon</h1>
+            <div class="coming-soon-subtitle">MVC Citizen Portal</div>
+            <p class="coming-soon-message">
+                We're working hard to bring you an amazing experience! <br />
+                The MVC Citizen Portal will be launching soon with exciting new features.
             </p>
+
+            <!-- Countdown Timer -->
+            <div class="countdown-container">
+                <div class="countdown-item">
+                    <span class="countdown-number" id="days">00</span>
+                    <span class="countdown-label">Days</span>
+                </div>
+                <div class="countdown-item">
+                    <span class="countdown-number" id="hours">00</span>
+                    <span class="countdown-label">Hours</span>
+                </div>
+                <div class="countdown-item">
+                    <span class="countdown-number" id="minutes">00</span>
+                    <span class="countdown-label">Minutes</span>
+                </div>
+                <div class="countdown-item">
+                    <span class="countdown-number" id="seconds">00</span>
+                    <span class="countdown-label">Seconds</span>
+                </div>
+            </div>
 
             <!-- Action Buttons -->
             <div class="action-buttons">
@@ -379,26 +521,28 @@
                     <i class="fas fa-home"></i>
                     Go Home
                 </a>
-                <a href="/Maintenance" class="btn-custom btn-secondary-custom">
-                    <i class="fas fa-tools"></i>
-                    Maintenance Page
+                <a href="mailto:support@soorgreen.com" class="btn-custom btn-secondary-custom">
+                    <i class="fas fa-envelope"></i>
+                    Get Notified
                 </a>
                 <a href="@Url.Action("Contact", "Home")" class="btn-custom btn-secondary-custom">
-                    <i class="fas fa-envelope"></i>
-                    Contact Support
+                    <i class="fas fa-info-circle"></i>
+                    Learn More
                 </a>
             </div>
 
-            <!-- Maintenance Information -->
-            <div class="maintenance-info">
-                <div class="maintenance-title">
-                    <i class="fas fa-exclamation-triangle"></i>
-                    Maintenance Required
+            <!-- Progress Information -->
+            <div class="progress-info">
+                <div class="progress-title">
+                    <i class="fas fa-tasks"></i>
+                    Development Progress
                 </div>
-                <p class="maintenance-text">
-                    The MVC Citizen Portal is currently undergoing maintenance or your account
-                    doesn't have the required permissions. Please use the maintenance URL
-                    provided by your administrator or try again later.
+                <div class="progress-container">
+                    <div class="progress-bar"></div>
+                </div>
+                <p class="progress-text">
+                    We're currently at 75% completion. Our team is working diligently to ensure
+                    the MVC Citizen Portal meets all your needs with the highest quality standards.
                 </p>
             </div>
         </div>
@@ -410,10 +554,36 @@
     <!-- Scripts -->
     <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
     <script>
+        // Set launch date (30 days from now)
+        const launchDate = new Date();
+        launchDate.setDate(launchDate.getDate() + 30);
+
+        // Countdown timer
+        function updateCountdown() {
+            const now = new Date().getTime();
+            const distance = launchDate - now;
+
+            const days = Math.floor(distance / (1000 * 60 * 60 * 24));
+            const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+            const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+            const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+
+            document.getElementById('days').textContent = days.toString().padStart(2, '0');
+            document.getElementById('hours').textContent = hours.toString().padStart(2, '0');
+            document.getElementById('minutes').textContent = minutes.toString().padStart(2, '0');
+            document.getElementById('seconds').textContent = seconds.toString().padStart(2, '0');
+
+            if (distance < 0) {
+                clearInterval(countdownTimer);
+                document.querySelector('.coming-soon-title').textContent = 'We\'re Live!';
+                document.querySelector('.coming-soon-message').textContent = 'The MVC Citizen Portal is now available. Thank you for your patience!';
+            }
+        }
+
         // Create floating particles
         function createParticles() {
             const particlesContainer = document.getElementById('particles');
-            const colors = ['#00d4aa', '#0984e3', '#fd79a8', '#ff4757'];
+            const colors = ['#00d4aa', '#0984e3', '#fd79a8', '#ffffff'];
 
             for (let i = 0; i < 15; i++) {
                 const particle = document.createElement('div');
@@ -439,12 +609,17 @@
             }
         }
 
-        // Add interactive hover effect
+        // Initialize
         $(document).ready(function () {
+            // Start countdown
+            updateCountdown();
+            const countdownTimer = setInterval(updateCountdown, 1000);
+
+            // Create particles
             createParticles();
 
             // Add hover effect to card
-            $('.access-denied-card').hover(
+            $('.coming-soon-card').hover(
                 function () {
                     $(this).css('transform', 'translateY(-5px)');
                 },
@@ -460,25 +635,19 @@
                     $(this).css('transform', 'scale(1)');
                 }, 150);
             });
-        });
 
-        // Add typewriter effect to title
-        document.addEventListener('DOMContentLoaded', function () {
-            const title = document.querySelector('.denied-title');
-            const originalText = title.textContent;
-            title.textContent = '';
-
-            let i = 0;
-            const typeWriter = () => {
-                if (i < originalText.length) {
-                    title.textContent += originalText.charAt(i);
-                    i++;
-                    setTimeout(typeWriter, 100);
-                }
-            };
-
-            // Start typewriter effect after a delay
-            setTimeout(typeWriter, 500);
+            // Video play handling
+            const video = document.querySelector('.coming-soon-video');
+            if (video) {
+                video.play().catch(function (error) {
+                    console.log('Video autoplay failed:', error);
+                    // Fallback: try playing with user interaction
+                    document.addEventListener('click', function playVideo() {
+                        video.play();
+                        document.removeEventListener('click', playVideo);
+                    });
+                });
+            }
         });
     </script>
 </body>
