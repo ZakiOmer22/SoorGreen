@@ -1,11 +1,13 @@
 ﻿<%@ Page Title="Dashboard" Language="C#" MasterPageFile="~/Pages/Admin/Site.master" AutoEventWireup="true" CodeFile="Dashboard.aspx.cs" Inherits="SoorGreen_Admin_Dashboard" %>
-<%@ Import Namespace="System.Web.Optimization" %>
-<asp:Content ID="Content1" ContentPlaceHolderID="HeadContent" runat="server">
-    <%: Styles.Render("~/Content/admindashboard") %>
+<asp:Content ID="Content3" ContentPlaceHolderID="HeadContent" runat="server">
+    <link href='<%= ResolveUrl("~/Content/Pages/Citizen/admindashboard.css") %>' rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
 </asp:Content>
-<asp:Content ID="Content3" ContentPlaceHolderID="ScriptsContent" runat="server">
-    <%: Scripts.Render("~/bundles/admindashboard") %>
+
+<asp:Content ID="Content4" ContentPlaceHolderID="ScriptsContent" runat="server">
+    <script src='<%= ResolveUrl("~/Scripts/Pages/Citizen/admindashboard.js") %>'></script>
 </asp:Content>
+
 <asp:Content ID="MainContent" ContentPlaceHolderID="MainContent" runat="server">
     
 

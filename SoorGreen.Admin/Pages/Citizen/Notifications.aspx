@@ -1,10 +1,13 @@
 ﻿<%@ Page Title="Notifications" Language="C#" MasterPageFile="~/Pages/Citizen/Site.Master" AutoEventWireup="true" CodeFile="Notifications.aspx.cs" Inherits="SoorGreen.Citizen.Notifications" %>
-<%@ Import Namespace="System.Web.Optimization" %>
+
 <asp:Content ID="Content3" ContentPlaceHolderID="HeadContent" runat="server">
-    <%: Styles.Render("~/Content/citizennotifications") %>
+    <link href='<%= ResolveUrl("~/Content/Pages/Citizen/citizennotifications.css") %>' rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
 </asp:Content>
+
 <asp:Content ID="Content4" ContentPlaceHolderID="ScriptsContent" runat="server">
-    <%: Scripts.Render("~/bundles/citizennotifications") %>
+    <script src='<%= ResolveUrl("~/Scripts/Pages/Citizen/citizennotifications.js") %>'></script>
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
 </asp:Content>
 
 <asp:Content ID="Content1" ContentPlaceHolderID="TitleContent" runat="server">

@@ -1,302 +1,488 @@
-﻿<%@ Page Title="Rewards" Language="C#" MasterPageFile="~/Pages/Admin/Site.master" AutoEventWireup="true" CodeFile="Redemptions.aspx.cs" Inherits="SoorGreen.Admin.Admin.Redemptions" %>
-<%@ Register Assembly="System.Web.Extensions, Version=4.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35" Namespace="System.Web.UI" TagPrefix="asp" %>
-<%@ Import Namespace="System.Web.Optimization" %>
-<asp:Content ID="Content1" ContentPlaceHolderID="HeadContent" runat="server">
-    <%: Styles.Render("~/Content/adminredemptions") %>
+﻿<%@ Page Title="Redemptions" Language="C#" MasterPageFile="~/Pages/Admin/Site.master" AutoEventWireup="true" CodeFile="Redemptions.aspx.cs" Inherits="SoorGreen.Admin.Admin.Redemptions" %>
+
+<asp:Content ID="Content3" ContentPlaceHolderID="HeadContent" runat="server">
+    <link href='<%= ResolveUrl("~/Content/Pages/Admin/admincitizens.css") %>' rel="stylesheet" />
 </asp:Content>
-<asp:Content ID="Content3" ContentPlaceHolderID="ScriptsContent" runat="server">
-    <%: Scripts.Render("~/bundles/adminredemptions") %>
-</asp:Content>
+
 <asp:Content ID="PageTitle" ContentPlaceHolderID="PageTitle" runat="server">
-    Redemption & Credits Management
+    <div class="d-flex align-items-center">
+        <h1 class="h3 mb-0" style="color: var(--text-primary);">Redemptions Management</h1>
+    </div>
 </asp:Content>
 
 <asp:Content ID="MainContent" ContentPlaceHolderID="MainContent" runat="server">
-    <asp:ScriptManager ID="ScriptManager1" runat="server" EnablePageMethods="true"></asp:ScriptManager>
-    <div class="rewards-container">
-        <!-- Statistics Cards -->
-        <div class="stats-cards">
-            <div class="stat-card">
-                <div class="stat-value" id="totalCredits">0</div>
-                <div class="stat-label">Total Credits Issued</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-value" id="pendingRedemptions">0</div>
-                <div class="stat-label">Pending Redemptions</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-value" id="totalUsers">0</div>
-                <div class="stat-label">Active Users</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-value" id="avgCredits">0</div>
-                <div class="stat-label">Avg Credits Per User</div>
-            </div>
-        </div>
-
-        <!-- Action Buttons -->
-        <div class="d-flex justify-content-between align-items-center mb-4">
-            <h2 style="color: #ffffff !important; margin: 0;">Rewards & Credits</h2>
+    <!-- Message Panel -->
+    <asp:Panel ID="pnlMessage" runat="server" CssClass="message-panel" Visible="false">
+        <div class='message-alert' id="divMessage" runat="server">
+            <i class='fas' id="iconMessage" runat="server"></i>
             <div>
-                <button type="button" class="btn-primary me-2" id="generateReportBtn">
-                    <i class="fas fa-chart-bar me-2"></i>Generate Report
-                </button>
-                <button type="button" class="btn-primary" id="addCreditsBtn">
-                    <i class="fas fa-plus me-2"></i>Add Credits
-                </button>
+                <strong><asp:Literal ID="litMessageTitle" runat="server"></asp:Literal></strong>
+                <p class="mb-0"><asp:Literal ID="litMessageText" runat="server"></asp:Literal></p>
             </div>
         </div>
+    </asp:Panel>
 
-        <!-- Tabs -->
-        <div class="tabs">
-            <button type="button" class="tab active" data-tab="redemptions">Redemption Requests</button>
-            <button type="button" class="tab" data-tab="transactions">Credit Transactions</button>
-            <button type="button" class="tab" data-tab="users">User Balances</button>
-        </div>
-
-        <!-- Redemptions Tab -->
-        <div class="tab-content active" id="redemptionsTab">
-            <div class="filter-card" style="background: rgba(255, 255, 255, 0.05); backdrop-filter: blur(20px); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 15px; padding: 1.5rem; margin-bottom: 2rem;">
-                <h5 class="mb-3" style="color: #ffffff !important;"><i class="fas fa-filter me-2"></i>Filter Redemptions</h5>
-                <div class="filter-group">
-                    <div class="form-group search-box">
-                        <label class="form-label">Search Users</label>
-                        <div class="position-relative">
-                            <i class="fas fa-search search-icon"></i>
-                            <input type="text" class="form-control search-input" id="searchRedemptions" placeholder="Search by user name or phone...">
+    <!-- Process Redemption Modal -->
+    <div class="modal fade" id="processRedemptionModal" tabindex="-1" role="dialog" aria-hidden="true">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">
+                        <i class="fas fa-check-circle me-2"></i>Process Redemption Request
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <asp:HiddenField ID="hdnRedemptionId" runat="server" />
+                    
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h6 class="mb-3 border-bottom pb-2"><i class="fas fa-info-circle me-2"></i>Request Details</h6>
+                            
+                            <div class="mb-3">
+                                <label class="form-label"><i class="fas fa-hashtag me-2"></i>Redemption ID</label>
+                                <asp:TextBox ID="txtRedemptionId" runat="server" CssClass="form-control" ReadOnly="true"></asp:TextBox>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label class="form-label"><i class="fas fa-user me-2"></i>User Information</label>
+                                <asp:TextBox ID="txtUserInfo" runat="server" CssClass="form-control" ReadOnly="true" TextMode="MultiLine" Rows="2"></asp:TextBox>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label class="form-label"><i class="fas fa-money-bill-wave me-2"></i>Requested Amount</label>
+                                <div class="input-group">
+                                    <span class="input-group-text">$</span>
+                                    <asp:TextBox ID="txtAmount" runat="server" CssClass="form-control" ReadOnly="true"></asp:TextBox>
+                                </div>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label class="form-label"><i class="fas fa-calendar-alt me-2"></i>Request Date</label>
+                                <asp:TextBox ID="txtRequestDate" runat="server" CssClass="form-control" ReadOnly="true"></asp:TextBox>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-6">
+                            <h6 class="mb-3 border-bottom pb-2"><i class="fas fa-cog me-2"></i>Processing Details</h6>
+                            
+                            <div class="mb-3">
+                                <label class="form-label"><i class="fas fa-wallet me-2"></i>Payment Method</label>
+                                <asp:TextBox ID="txtPaymentMethod" runat="server" CssClass="form-control" ReadOnly="true"></asp:TextBox>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label class="form-label"><i class="fas fa-credit-card me-2"></i>Payment Details</label>
+                                <asp:TextBox ID="txtPaymentDetails" runat="server" CssClass="form-control" 
+                                    placeholder="Enter transaction ID, bank account details, mobile money number, etc." 
+                                    TextMode="MultiLine" Rows="4"></asp:TextBox>
+                                <small class="form-text text-muted">Provide complete payment information for this redemption</small>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label class="form-label"><i class="fas fa-sticky-note me-2"></i>Admin Notes</label>
+                                <asp:TextBox ID="txtAdminNotes" runat="server" CssClass="form-control" 
+                                    placeholder="Any additional notes about this redemption processing..." 
+                                    TextMode="MultiLine" Rows="3"></asp:TextBox>
+                            </div>
+                            
+                            <div class="alert alert-info">
+                                <i class="fas fa-exclamation-circle me-2"></i>
+                                <strong>Important:</strong> Ensure payment details are accurate before approving. Once approved, the user's credits will be deducted.
+                            </div>
                         </div>
                     </div>
-                    
-                    <div class="form-group">
-                        <label class="form-label">Status</label>
-                        <select class="form-control" id="statusFilter">
-                            <option value="all">All Status</option>
-                            <option value="pending">Pending</option>
-                            <option value="approved">Approved</option>
-                            <option value="rejected">Rejected</option>
-                            <option value="completed">Completed</option>
-                        </select>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label class="form-label">Date Range</label>
-                        <select class="form-control" id="dateFilter">
-                            <option value="all">All Time</option>
-                            <option value="today">Today</option>
-                            <option value="week">This Week</option>
-                            <option value="month">This Month</option>
-                        </select>
-                    </div>
-                    
-                    <div class="form-group">
-                        <button type="button" class="btn-primary" id="applyFiltersBtn" style="margin-top: 1.7rem;">
-                            <i class="fas fa-filter me-2"></i>Apply Filters
-                        </button>
-                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <asp:Button ID="btnApproveRedemption" runat="server" CssClass="btn btn-success" 
+                        Text="Approve & Process Payment" OnClick="btnApproveRedemption_Click" />
+                    <asp:Button ID="btnRejectRedemption" runat="server" CssClass="btn btn-danger" 
+                        Text="Reject Request" OnClick="btnRejectRedemption_Click" 
+                        OnClientClick="return confirm('Are you sure you want to reject this redemption request?');" />
                 </div>
             </div>
+        </div>
+    </div>
 
-            <div class="table-responsive">
-                <table class="rewards-table" id="redemptionsTable">
-                    <thead>
-                        <tr>
-                            <th>Request ID</th>
-                            <th>User</th>
-                            <th>Amount</th>
-                            <th>Method</th>
-                            <th>Status</th>
-                            <th>Requested</th>
-                            <th>Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody id="redemptionsTableBody">
-                        <!-- Redemption rows will be loaded here -->
-                    </tbody>
-                </table>
-            </div>
-            
-            <!-- Empty State for Redemptions -->
-            <div id="redemptionsEmptyState" class="empty-state" style="display: none;">
-                <div class="empty-state-icon">
-                    <i class="fas fa-exchange-alt"></i>
+    <div class="users-container">
+        <!-- Filter Card -->
+        <div class="filter-card">
+            <h5 class="mb-4"><i class="fas fa-sliders-h me-2"></i>Filter Redemption Requests</h5>
+            <div class="filter-group">
+                <div class="form-group search-box">
+                    <label class="form-label"><i class="fas fa-search me-2"></i>Search Redemptions</label>
+                    <div class="position-relative">
+                        <i class="fas fa-search search-icon"></i>
+                        <asp:TextBox ID="txtSearch" runat="server" CssClass="form-control search-input" 
+                            placeholder="Search by ID, user name, phone, payment method..."></asp:TextBox>
+                    </div>
                 </div>
-                <h3 class="empty-state-title">No Redemption Requests</h3>
-                <p class="empty-state-description">There are no redemption requests to display at the moment.</p>
-                <button type="button" class="btn-primary" onclick="showAddCreditsModal()">
-                    <i class="fas fa-plus me-2"></i>Add Credits to Users
-                </button>
+                <div class="form-group">
+                    <label class="form-label"><i class="fas fa-info-circle me-2"></i>Status</label>
+                    <div class="select-with-icon">
+                        <asp:DropDownList ID="ddlStatus" runat="server" CssClass="form-control">
+                            <asp:ListItem Value="all">All Status</asp:ListItem>
+                            <asp:ListItem Value="Pending">Pending</asp:ListItem>
+                            <asp:ListItem Value="Approved">Approved</asp:ListItem>
+                            <asp:ListItem Value="Rejected">Rejected</asp:ListItem>
+                            <asp:ListItem Value="Processing">Processing</asp:ListItem>
+                            <asp:ListItem Value="Completed">Completed</asp:ListItem>
+                        </asp:DropDownList>
+                        <i class="fas fa-chevron-down select-arrow"></i>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="form-label"><i class="fas fa-calendar-alt me-2"></i>Date Range</label>
+                    <div class="select-with-icon">
+                        <asp:DropDownList ID="ddlDateFilter" runat="server" CssClass="form-control">
+                            <asp:ListItem Value="all">All Time</asp:ListItem>
+                            <asp:ListItem Value="today">Today</asp:ListItem>
+                            <asp:ListItem Value="week">This Week</asp:ListItem>
+                            <asp:ListItem Value="month">This Month</asp:ListItem>
+                            <asp:ListItem Value="year">This Year</asp:ListItem>
+                        </asp:DropDownList>
+                        <i class="fas fa-chevron-down select-arrow"></i>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="form-label" style="visibility: hidden;">Action</label>
+                    <button type="button" class="btn btn-primary btn-with-icon" onclick="__doPostBack('ctl00$MainContent$btnApplyFilters', '')">
+                        <i class="fas fa-filter me-2"></i>Apply Filters
+                    </button>
+                    <asp:Button ID="btnApplyFilters" runat="server" style="display:none;" OnClick="btnApplyFilters_Click" />
+                </div>
             </div>
         </div>
 
-        <!-- Transactions Tab -->
-        <div class="tab-content" id="transactionsTab">
-            <div class="table-responsive">
-                <table class="rewards-table" id="transactionsTable">
-                    <thead>
-                        <tr>
-                            <th>Transaction ID</th>
-                            <th>User</th>
-                            <th>Amount</th>
-                            <th>Type</th>
-                            <th>Reference</th>
-                            <th>Date</th>
-                        </tr>
-                    </thead>
-                    <tbody id="transactionsTableBody">
-                        <!-- Transaction rows will be loaded here -->
-                    </tbody>
-                </table>
+        <!-- Stats Cards -->
+        <div class="d-flex gap-3 mb-4 flex-wrap">
+            <div class="stats-card users" style="flex: 1; min-width: 200px;">
+                <div class="stats-icon">
+                    <i class="fas fa-money-check-alt"></i>
+                </div>
+                <div class="stats-number" id="statTotal" runat="server">0</div>
+                <div class="stats-label">Total Requests</div>
             </div>
-            
-            <!-- Empty State for Transactions -->
-            <div id="transactionsEmptyState" class="empty-state" style="display: none;">
-                <div class="empty-state-icon">
+            <div class="stats-card active" style="flex: 1; min-width: 200px;">
+                <div class="stats-icon">
+                    <i class="fas fa-clock"></i>
+                </div>
+                <div class="stats-number text-warning" id="statPending" runat="server">0</div>
+                <div class="stats-label">Pending</div>
+            </div>
+            <div class="stats-card pickups" style="flex: 1; min-width: 200px;">
+                <div class="stats-icon">
+                    <i class="fas fa-check-circle"></i>
+                </div>
+                <div class="stats-number text-success" id="statApproved" runat="server">0</div>
+                <div class="stats-label">Approved</div>
+            </div>
+            <div class="stats-card waste" style="flex: 1; min-width: 200px;">
+                <div class="stats-icon">
                     <i class="fas fa-coins"></i>
                 </div>
-                <h3 class="empty-state-title">No Credit Transactions</h3>
-                <p class="empty-state-description">No credit transactions found.</p>
+                <div class="stats-number text-primary" id="statTotalAmount" runat="server">$0.00</div>
+                <div class="stats-label">Total Amount</div>
             </div>
         </div>
 
-        <!-- Users Tab -->
-        <div class="tab-content" id="usersTab">
-            <div class="table-responsive">
-                <table class="rewards-table" id="usersTable">
-                    <thead>
-                        <tr>
-                            <th>User</th>
-                            <th>Phone</th>
-                            <th>Email</th>
-                            <th>Total Credits</th>
-                            <th>Joined</th>
-                            <th>Status</th>
-                        </tr>
-                    </thead>
-                    <tbody id="usersTableBody">
-                        <!-- User rows will be loaded here -->
-                    </tbody>
-                </table>
+        <!-- Quick Actions -->
+        <div class="filter-card mb-4">
+            <h5 class="mb-4"><i class="fas fa-bolt me-2"></i>Quick Actions</h5>
+            <div class="d-flex flex-wrap gap-3">
+                <button type="button" class="btn btn-warning btn-with-icon" onclick="showPendingRedemptions()">
+                    <i class="fas fa-list me-2"></i>View Pending Requests
+                </button>
+                <button type="button" class="btn btn-success btn-with-icon" onclick="showTodayRedemptions()">
+                    <i class="fas fa-calendar-day me-2"></i>Today's Requests
+                </button>
+                <button type="button" class="btn btn-info btn-with-icon" onclick="showLargeRedemptions()">
+                    <i class="fas fa-money-bill-wave me-2"></i>Large Amounts (>$100)
+                </button>
+                <button type="button" class="btn btn-primary btn-with-icon" onclick="__doPostBack('ctl00$MainContent$btnExportCSV', '')">
+                    <i class="fas fa-file-export me-2"></i>Export Report
+                </button>
+                <asp:Button ID="btnExportCSV" runat="server" style="display:none;" OnClick="btnExportCSV_Click" />
             </div>
-            
-            <!-- Empty State for Users -->
-            <div id="usersEmptyState" class="empty-state" style="display: none;">
-                <div class="empty-state-icon">
-                    <i class="fas fa-users"></i>
+        </div>
+
+        <!-- View Controls -->
+        <div class="view-controls">
+            <div class="d-flex align-items-center gap-3 flex-wrap">
+                <div class="view-options">
+                    <asp:LinkButton ID="btnGridView" runat="server" CssClass="view-btn active" 
+                        OnClick="btnGridView_Click" CausesValidation="false">
+                        <i class="fas fa-th-large me-2"></i>Grid View
+                    </asp:LinkButton>
+                    <asp:LinkButton ID="btnTableView" runat="server" CssClass="view-btn" 
+                        OnClick="btnTableView_Click" CausesValidation="false">
+                        <i class="fas fa-table me-2"></i>Table View
+                    </asp:LinkButton>
                 </div>
-                <h3 class="empty-state-title">No Users Found</h3>
-                <p class="empty-state-description">No users match the current search criteria.</p>
+                <div class="page-info">
+                    <i class="fas fa-money-check-alt me-2"></i>
+                    Showing <asp:Label ID="lblRedemptionCount" runat="server" Text="0"></asp:Label> redemption requests
+                </div>
+            </div>
+            <div class="d-flex gap-2">
+                <button type="button" class="btn btn-secondary btn-with-icon" onclick="__doPostBack('ctl00$MainContent$btnRefresh', '')">
+                    <i class="fas fa-sync-alt me-2"></i>Refresh
+                </button>
+                <asp:Button ID="btnRefresh" runat="server" style="display:none;" OnClick="btnRefresh_Click" />
+                
+                <button type="button" class="btn btn-secondary btn-with-icon" onclick="__doPostBack('ctl00$MainContent$btnClearFilters', '')">
+                    <i class="fas fa-times me-2"></i>Clear Filters
+                </button>
+                <asp:Button ID="btnClearFilters" runat="server" style="display:none;" OnClick="btnClearFilters_Click" />
             </div>
         </div>
-    </div>
 
-    <!-- View Redemption Details Modal -->
-    <div class="modal-overlay" id="viewRedemptionModal">
-        <div class="modal-content" style="max-width: 600px;">
-            <div class="modal-header">
-                <h3 class="modal-title">Redemption Request Details</h3>
-                <button type="button" class="close-modal">&times;</button>
-            </div>
-            <div class="modal-body">
-                <div class="info-grid">
-                    <div class="info-item">
-                        <label>Request ID:</label>
-                        <span id="viewRedemptionId">-</span>
-                    </div>
-                    <div class="info-item">
-                        <label>Status:</label>
-                        <span id="viewRedemptionStatus">-</span>
-                    </div>
-                    <div class="info-item">
-                        <label>User:</label>
-                        <div class="user-info">
-                            <div class="user-avatar" id="viewUserAvatar">U</div>
-                            <span id="viewUserName">-</span>
+        <!-- Grid View -->
+        <asp:Panel ID="pnlGridView" runat="server" CssClass="users-grid">
+            <asp:Repeater ID="rptRedemptionsGrid" runat="server" 
+                OnItemDataBound="rptRedemptionsGrid_ItemDataBound">
+                <ItemTemplate>
+                    <div class="user-card redemption-card">
+                        <div class="d-flex justify-content-between align-items-start mb-2">
+                            <h5>
+                                <i class="fas fa-money-check-alt me-2"></i>Redemption #<%# Eval("RedemptionId") %>
+                            </h5>
+                            <span class="badge status-badge <%# GetStatusBadgeClass(Eval("Status").ToString()) %>">
+                                <%# Eval("Status") %>
+                            </span>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <span class="text-muted small">
+                                <i class="fas fa-calendar me-1"></i>
+                                Requested: <%# Convert.ToDateTime(Eval("RequestedAt")).ToString("MMM dd, yyyy HH:mm") %>
+                                <%# Eval("ProcessedAt") != DBNull.Value ? " • Processed: " + Convert.ToDateTime(Eval("ProcessedAt")).ToString("MMM dd") : "" %>
+                            </span>
+                        </div>
+                        
+                        <div class="collection-info">
+                            <div class="info-row">
+                                <i class="fas fa-user"></i>
+                                <div>
+                                    <span class="label">User Information</span>
+                                    <span class="value">
+                                        <strong><%# Eval("UserName") %></strong><br>
+                                        <small class="text-muted"><%# Eval("UserPhone") %></small>
+                                    </span>
+                                </div>
+                            </div>
+                            
+                            <div class="info-row">
+                                <i class="fas fa-money-bill-wave"></i>
+                                <div>
+                                    <span class="label">Requested Amount</span>
+                                    <span class="value text-warning">
+                                        <strong>$<%# Eval("Amount", "{0:N2}") %></strong>
+                                    </span>
+                                </div>
+                            </div>
+                           
+                            <div class="info-row">
+                                <i class="fas fa-coins"></i>
+                                <div>
+                                    <span class="label">User Balance</span>
+                                    <span class="value">
+                                        $<%# Eval("UserBalance", "{0:N2}") %>
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="card-stats">
+                            <div class="stat-item">
+                                <span class="stat-value">
+                                    <%# Eval("TotalRedemptions") %>
+                                </span>
+                                <span class="stat-label">Total Redemptions</span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="stat-value">
+                                    $<%# Eval("TotalRedeemed", "{0:N2}") %>
+                                </span>
+                                <span class="stat-label">Total Redeemed</span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="stat-value">
+                                    <%# GetDaysSinceRequest(Eval("RequestedAt")) %> days
+                                </span>
+                                <span class="stat-label">Since Request</span>
+                            </div>
+                        </div>
+                        
+                        <div class="action-buttons">
+                            <%# GetActionButtons(Eval("Status").ToString(), Eval("RedemptionId").ToString()) %>
+                            <button type="button" class="btn btn-info" onclick='viewUserHistory("<%# Eval("UserId") %>")'>
+                                <i class="fas fa-history me-1"></i>User History
+                            </button>
+                            <button type="button" class="btn btn-secondary" onclick='viewRedemptionDetails("<%# Eval("RedemptionId") %>")'>
+                                <i class="fas fa-eye me-1"></i>Details
+                            </button>
                         </div>
                     </div>
-                    <div class="info-item">
-                        <label>Phone:</label>
-                        <span id="viewUserPhone">-</span>
+                </ItemTemplate>
+                <FooterTemplate>
+                    <asp:Label ID="lblEmptyGrid" runat="server" Text="No redemption requests found" 
+                        Visible='<%# rptRedemptionsGrid.Items.Count == 0 %>' CssClass="empty-state">
+                        <i class="fas fa-money-check-slash"></i>
+                        <p>No redemption requests found matching your criteria</p>
+                    </asp:Label>
+                </FooterTemplate>
+            </asp:Repeater>
+        </asp:Panel>
+
+        <!-- Table View -->
+        <asp:Panel ID="pnlTableView" runat="server" CssClass="table-container" Visible="false">
+            <asp:GridView ID="gvRedemptions" runat="server" AutoGenerateColumns="False" 
+                CssClass="users-table" 
+                EmptyDataText="No redemption requests found" ShowHeaderWhenEmpty="true">
+                <Columns>
+                    <asp:TemplateField HeaderText="Redemption ID">
+                        <ItemTemplate>
+                            <div class="d-flex align-items-center">
+                                <div class="role-icon redemption">
+                                    <i class='fas fa-money-check-alt'></i>
+                                </div>
+                                <div>
+                                    <strong><%# Eval("RedemptionId") %></strong><br>
+                                    <small class="text-muted"><%# Convert.ToDateTime(Eval("RequestedAt")).ToString("MM/dd/yy") %></small>
+                                </div>
+                            </div>
+                        </ItemTemplate>
+                    </asp:TemplateField>
+                    
+                    <asp:TemplateField HeaderText="User Information">
+                        <ItemTemplate>
+                            <div><strong><%# Eval("UserName") %></strong></div>
+                            <small class="text-muted"><%# Eval("UserPhone") %></small><br>
+                            <small class="text-muted">Balance: $<%# Eval("UserBalance", "{0:N2}") %></small>
+                        </ItemTemplate>
+                    </asp:TemplateField>
+                    
+                    <asp:TemplateField HeaderText="Amount & Method">
+                        <ItemTemplate>
+                            <div class="d-flex align-items-center gap-2">
+                                <i class="fas fa-money-bill-wave text-warning"></i>
+                                <div>
+                                    <strong>$<%# Eval("Amount", "{0:N2}") %></strong>
+                                    <div class="small text-muted"><%# Eval("Method") %></div>
+                                </div>
+                            </div>
+                        </ItemTemplate>
+                    </asp:TemplateField>
+                    
+                    <asp:TemplateField HeaderText="Status & Dates">
+                        <ItemTemplate>
+                            <div class="status-indicator">
+                                <span class='status-dot <%# GetStatusClass(Eval("Status").ToString()) %>'></span>
+                                <span class='<%# GetStatusColor(Eval("Status").ToString()) %>'>
+                                    <%# Eval("Status") %>
+                                </span>
+                            </div>
+                            <small class="text-muted">
+                                Requested: <%# Convert.ToDateTime(Eval("RequestedAt")).ToString("MM/dd/yy") %><br>
+                                <%# Eval("ProcessedAt") != DBNull.Value ? 
+                                    "Processed: " + Convert.ToDateTime(Eval("ProcessedAt")).ToString("MM/dd/yy") : 
+                                    "Awaiting processing" %>
+                            </small>
+                        </ItemTemplate>
+                    </asp:TemplateField>
+                    
+                    <asp:TemplateField HeaderText="Notes & Details">
+                        <ItemTemplate>
+                            
+                            <div class="small text-muted mt-1">
+                                Days since request: <%# GetDaysSinceRequest(Eval("RequestedAt")) %>
+                            </div>
+                        </ItemTemplate>
+                    </asp:TemplateField>
+                    
+                    <asp:TemplateField HeaderText="Actions">
+                        <ItemTemplate>
+                            <div class="d-flex flex-wrap gap-2">
+                                <%# GetActionButtons(Eval("Status").ToString(), Eval("RedemptionId").ToString()) %>
+                                <button type="button" class="btn btn-info" onclick='viewUserHistory("<%# Eval("UserId") %>")'>
+                                    <i class="fas fa-history"></i>
+                                </button>
+                                <button type="button" class="btn btn-secondary" onclick='viewRedemptionDetails("<%# Eval("RedemptionId") %>")'>
+                                    <i class="fas fa-eye"></i>
+                                </button>
+                            </div>
+                        </ItemTemplate>
+                    </asp:TemplateField>
+                </Columns>
+                <EmptyDataTemplate>
+                    <div class="empty-state" style="margin: 2rem;">
+                        <i class="fas fa-money-check-slash"></i>
+                        <p>No redemption requests found matching your criteria</p>
                     </div>
-                    <div class="info-item">
-                        <label>Amount:</label>
-                        <span id="viewRedemptionAmount">-</span>
-                    </div>
-                    <div class="info-item">
-                        <label>Method:</label>
-                        <span id="viewRedemptionMethod">-</span>
-                    </div>
-                    <div class="info-item">
-                        <label>Requested:</label>
-                        <span id="viewRequestedAt">-</span>
-                    </div>
-                </div>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn-action btn-approve" id="approveRedemptionBtn">
-                    <i class="fas fa-check me-2"></i>Approve
-                </button>
-                <button type="button" class="btn-action btn-reject" id="rejectRedemptionBtn">
-                    <i class="fas fa-times me-2"></i>Reject
-                </button>
-                <button type="button" class="btn-action" id="closeRedemptionModalBtn">Close</button>
-            </div>
-        </div>
+                </EmptyDataTemplate>
+            </asp:GridView>
+        </asp:Panel>
     </div>
 
-    <!-- Add Credits Modal -->
-    <div class="modal-overlay" id="addCreditsModal">
-        <div class="modal-content" style="max-width: 500px;">
-            <div class="modal-header">
-                <h3 class="modal-title">Add Credits to User</h3>
-                <button type="button" class="close-modal">&times;</button>
-            </div>
-            <div class="modal-body">
-                <div class="form-group">
-                    <label class="form-label">Select User</label>
-                    <select class="form-control" id="userSelect">
-                        <option value="">-- Select User --</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label class="form-label">Amount</label>
-                    <input type="number" class="form-control" id="creditAmount" step="0.01" min="0" placeholder="Enter credit amount">
-                </div>
-                <div class="form-group">
-                    <label class="form-label">Reference/Notes</label>
-                    <textarea class="form-control" id="creditNotes" rows="3" placeholder="Enter reference or notes..."></textarea>
-                </div>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn-action" id="cancelAddCreditsBtn">Cancel</button>
-                <button type="button" class="btn-primary" id="confirmAddCreditsBtn">Add Credits</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- Approve/Reject Confirmation Modal -->
-    <div class="modal-overlay" id="actionConfirmationModal">
-        <div class="modal-content" style="max-width: 500px;">
-            <div class="modal-header">
-                <h3 class="modal-title" id="actionModalTitle">Confirm Action</h3>
-                <button type="button" class="close-modal">&times;</button>
-            </div>
-            <div class="modal-body">
-                <p style="color: rgba(255, 255, 255, 0.8) !important;" id="actionModalMessage">Are you sure you want to perform this action?</p>
-                <div class="form-group" id="rejectionReasonContainer" style="display: none;">
-                    <label class="form-label">Rejection Reason</label>
-                    <textarea class="form-control" id="rejectionReason" rows="3" placeholder="Enter reason for rejection..."></textarea>
-                </div>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn-action" id="cancelActionBtn">Cancel</button>
-                <button type="button" class="btn-primary" id="confirmActionBtn">Confirm</button>
-            </div>
-        </div>
-    </div>
-
-    <asp:Button ID="btnLoadRewards" runat="server" OnClick="btnLoadRewards_Click" Style="display: none;" />
-    <asp:HiddenField ID="hfRedemptionsData" runat="server" />
-    <asp:HiddenField ID="hfTransactionsData" runat="server" />
-    <asp:HiddenField ID="hfUsersData" runat="server" />
-    <asp:HiddenField ID="hfStatsData" runat="server" />
+    <!-- Simple JavaScript functions -->
+    <script>
+    function processRedemption(redemptionId) {
+        // Set the redemption ID
+        document.getElementById('<%= hdnRedemptionId.ClientID %>').value = redemptionId;
+        
+        // Trigger server-side event to load data
+        __doPostBack('ctl00$MainContent$hdnRedemptionId', 'process_' + redemptionId);
+    }
+    
+    function viewRedemptionDetails(redemptionId) {
+        // Set the redemption ID
+        document.getElementById('<%= hdnRedemptionId.ClientID %>').value = redemptionId;
+        
+        // Trigger server-side event to load data for view
+        __doPostBack('ctl00$MainContent$hdnRedemptionId', 'view_' + redemptionId);
+    }
+    
+    function viewUserHistory(userId) {
+        // In a real application, you would redirect to user history
+        window.location.href = 'Rewards.aspx?view=credits&userId=' + userId;
+    }
+    
+    function showPendingRedemptions() {
+        document.getElementById('<%= ddlStatus.ClientID %>').value = 'Pending';
+        __doPostBack('ctl00$MainContent$btnApplyFilters', '');
+    }
+    
+    function showTodayRedemptions() {
+        document.getElementById('<%= ddlDateFilter.ClientID %>').value = 'today';
+        __doPostBack('ctl00$MainContent$btnApplyFilters', '');
+    }
+    
+    function showLargeRedemptions() {
+        // This would need custom filtering logic
+        alert('Filtering large redemptions...');
+        // In a real implementation, you would apply amount filter
+    }
+    
+    // Function to ensure text visibility on page load
+    function ensureTextVisibility() {
+        // Force all text elements to be visible
+        document.querySelectorAll('.redemption-card *').forEach(element => {
+            element.style.overflow = 'visible';
+            element.style.whiteSpace = 'normal';
+            element.style.wordWrap = 'break-word';
+        });
+        
+        // Ensure table cells are visible
+        document.querySelectorAll('.users-table td, .users-table th').forEach(cell => {
+            cell.style.whiteSpace = 'normal';
+            cell.style.wordWrap = 'break-word';
+            cell.style.maxWidth = 'none';
+        });
+    }
+    
+    // Run on page load and after any updates
+    document.addEventListener('DOMContentLoaded', ensureTextVisibility);
+    </script>
 </asp:Content>

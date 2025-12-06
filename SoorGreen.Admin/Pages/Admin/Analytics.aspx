@@ -1,12 +1,12 @@
 ﻿<%@ Page Title="Analytics" Language="C#" MasterPageFile="~/Pages/Admin/Site.master" AutoEventWireup="true" CodeFile="Analytics.aspx.cs" Inherits="SoorGreen.Admin.Admin.Analytics" %>
-<%@ Import Namespace="System.Web.Optimization" %>
-<asp:Content ID="Content1" ContentPlaceHolderID="HeadContent" runat="server">
-    <%: Styles.Render("~/Content/analytics") %>
-</asp:Content>
-<asp:Content ID="Content3" ContentPlaceHolderID="ScriptsContent" runat="server">
-    <%: Scripts.Render("~/bundles/analytics") %>
+<asp:Content ID="Content3" ContentPlaceHolderID="HeadContent" runat="server">
+    <link href='<%= ResolveUrl("~/Content/Pages/Citizen/analytics.css") %>' rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
 </asp:Content>
 
+<asp:Content ID="Content4" ContentPlaceHolderID="ScriptsContent" runat="server">
+    <script src='<%= ResolveUrl("~/Scripts/Pages/Citizen/analytics.js") %>'></script>
+</asp:Content>
 <asp:Content ID="PageTitle" ContentPlaceHolderID="PageTitle" runat="server">
     Analytics Dashboard
 </asp:Content>

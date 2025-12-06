@@ -1,13 +1,13 @@
 ﻿<%@ Page Title="Help & Support" Language="C#" MasterPageFile="~/Pages/Citizen/Site.Master" AutoEventWireup="true" CodeFile="Help.aspx.cs" Inherits="SoorGreen.Citizen.Help" %>
-<%@ Import Namespace="System.Web.Optimization" %>
+
 <asp:Content ID="Content3" ContentPlaceHolderID="HeadContent" runat="server">
-    <%: Styles.Render("~/Content/citizenhelp") %>
+    <link href='<%= ResolveUrl("~/Content/Pages/Citizen/citizenhelp.css") %>' rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
 </asp:Content>
+
 <asp:Content ID="Content4" ContentPlaceHolderID="ScriptsContent" runat="server">
-    <%: Scripts.Render("~/bundles/citizenhelp") %>
-</asp:Content>
-<asp:Content ID="Content1" ContentPlaceHolderID="TitleContent" runat="server">
-    Help & Support - SoorGreen Citizen
+    <script src='<%= ResolveUrl("~/Scripts/Pages/Citizen/citizenhelp.js") %>'></script>
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
 </asp:Content>
 
 <asp:Content ID="Content2" ContentPlaceHolderID="MainContent" runat="server">

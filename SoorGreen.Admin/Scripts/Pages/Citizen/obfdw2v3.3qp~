@@ -1,0 +1,218 @@
+﻿let currentStep = 1;
+let selectedWasteType = '';
+let selectedWasteTypeName = '';
+
+function initTheme() {
+    const savedTheme = localStorage.getItem('theme') ||
+        (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+
+    document.documentElement.setAttribute('data-theme', savedTheme);
+    updateThemeToggleButton(savedTheme);
+}
+
+function toggleTheme() {
+    const currentTheme = document.documentElement.getAttribute('data-theme');
+    const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+
+    document.documentElement.setAttribute('data-theme', newTheme);
+    localStorage.setItem('theme', newTheme);
+    updateThemeToggleButton(newTheme);
+}
+
+function updateThemeToggleButton(theme) {
+    const toggleBtn = document.getElementById('themeToggleBtn');
+    if (toggleBtn) {
+        toggleBtn.innerHTML = theme === 'dark' ?
+            '<i class="fas fa-sun"></i>' :
+            '<i class="fas fa-moon"></i>';
+    }
+}
+
+function addThemeToggleButton() {
+    if (document.getElementById('themeToggleBtn')) return;
+
+    const toggleBtn = document.createElement('button');
+    toggleBtn.id = 'themeToggleBtn';
+    toggleBtn.className = 'theme-toggle';
+    toggleBtn.setAttribute('type', 'button');
+    toggleBtn.innerHTML = '<i class="fas fa-moon"></i>';
+
+    toggleBtn.addEventListener('click', toggleTheme);
+    document.body.appendChild(toggleBtn);
+}
+
+document.addEventListener('DOMContentLoaded', function () {
+    initTheme();
+    addThemeToggleButton();
+
+    window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', e => {
+        if (!localStorage.getItem('theme')) {
+            const newTheme = e.matches ? 'dark' : 'light';
+            document.documentElement.setAttribute('data-theme', newTheme);
+            updateThemeToggleButton(newTheme);
+        }
+    });
+
+    document.querySelectorAll('.waste-type-card').forEach(card => {
+        card.addEventListener('click', function () {
+            document.querySelectorAll('.waste-type-card').forEach(c => {
+                c.classList.remove('selected');
+            });
+
+            this.classList.add('selected');
+            selectedWasteType = this.getAttribute('data-type');
+            selectedWasteTypeName = this.querySelector('h5').textContent;
+
+            document.getElementById('<%= hdnWasteType.ClientID %>').value = selectedWasteType;
+            document.getElementById('<%= hdnWasteTypeId.ClientID %>').value = selectedWasteType;
+        });
+    });
+});
+
+function nextStep(step) {
+    if (validateStep(currentStep)) {
+        document.getElementById('step' + currentStep + 'Form').classList.remove('active');
+        document.getElementById('step' + currentStep).classList.remove('active');
+
+        currentStep = step;
+
+        document.getElementById('step' + currentStep + 'Form').classList.add('active');
+        document.getElementById('step' + currentStep).classList.add('active');
+
+        if (currentStep === 4) {
+            updateReviewSection();
+        }
+    }
+}
+
+function prevStep(step) {
+    document.getElementById('step' + currentStep + 'Form').classList.remove('active');
+    document.getElementById('step' + currentStep).classList.remove('active');
+
+    currentStep = step;
+
+    document.getElementById('step' + currentStep + 'Form').classList.add('active');
+    document.getElementById('step' + currentStep).classList.add('active');
+}
+
+function validateStep(step) {
+    switch (step) {
+        case 1:
+            if (!selectedWasteType) {
+                showNotification('Please select a waste type', 'error');
+                return false;
+            }
+            return true;
+
+        case 2:
+            const weight = document.getElementById('<%= txtWeight.ClientID %>').value;
+            if (!weight || weight <= 0) {
+                showNotification('Please enter a valid weight', 'error');
+                return false;
+            }
+            return true;
+
+        case 3:
+            const address = document.getElementById('<%= txtAddress.ClientID %>').value;
+            if (!address) {
+                showNotification('Please enter collection address', 'error');
+                return false;
+            }
+            return true;
+
+        default:
+            return true;
+    }
+}
+
+function validateFinalSubmission() {
+    const address = document.getElementById('<%= txtAddress.ClientID %>').value;
+    if (!address) {
+        showNotification('Please enter collection address', 'error');
+        return false;
+    }
+    return true;
+}
+
+function previewPhoto(input) {
+    if (input.files && input.files[0]) {
+        const file = input.files[0];
+        const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif'];
+
+        if (!allowedTypes.includes(file.type)) {
+            showNotification('Please select a valid image file (JPG, PNG, GIF)', 'error');
+            input.value = '';
+            return;
+        }
+
+        if (file.size > 5 * 1024 * 1024) {
+            showNotification('File size must be less than 5MB', 'error');
+            input.value = '';
+            return;
+        }
+
+        const reader = new FileReader();
+        reader.onload = function (e) {
+            const preview = document.getElementById('photoPreview');
+            preview.src = e.target.result;
+            preview.style.display = 'block';
+        }
+        reader.readAsDataURL(file);
+    }
+}
+
+function simulateLocation() {
+    document.getElementById('<%= hdnLatitude.ClientID %>').value = '40.7128';
+    document.getElementById('<%= hdnLongitude.ClientID %>').value = '-74.0060';
+    document.getElementById('<%= chkUseCurrentLocation.ClientID %>').checked = true;
+    document.getElementById('<%= txtAddress.ClientID %>').value = '123 Main Street, New York, NY 10001';
+
+    showNotification('Location set successfully!', 'success');
+}
+
+function updateReviewSection() {
+    document.getElementById('reviewWasteType').textContent = selectedWasteTypeName;
+    document.getElementById('reviewWeight').textContent = document.getElementById('<%= txtWeight.ClientID %>').value + ' kg';
+    document.getElementById('reviewDescription').textContent = document.getElementById('<%= txtDescription.ClientID %>').value || 'No description provided';
+    document.getElementById('reviewAddress').textContent = document.getElementById('<%= txtAddress.ClientID %>').value;
+    document.getElementById('reviewLandmark').textContent = document.getElementById('<%= txtLandmark.ClientID %>').value || 'Not specified';
+    document.getElementById('reviewInstructions').textContent = document.getElementById('<%= txtInstructions.ClientID %>').value || 'No special instructions';
+
+    const lat = document.getElementById('<%= hdnLatitude.ClientID %>').value;
+    const lng = document.getElementById('<%= hdnLongitude.ClientID %>').value;
+    document.getElementById('reviewCoordinates').textContent = lat && lng ?
+        'Lat: ' + lat + ', Lng: ' + lng : 'Current location will be used';
+
+    const weight = parseFloat(document.getElementById('<%= txtWeight.ClientID %>').value) || 0;
+    const rewardRates = {
+        'plastic': 5,
+        'paper': 3,
+        'glass': 4,
+        'metal': 6,
+        'ewaste': 8,
+        'organic': 2
+    };
+    const reward = weight * (rewardRates[selectedWasteType] || 0);
+    document.getElementById('estimatedReward').textContent = Math.round(reward) + ' XP';
+}
+
+function showNotification(message, type) {
+    const existingNotifications = document.querySelectorAll('.custom-notification');
+    existingNotifications.forEach(notif => notif.remove());
+
+    const notification = document.createElement('div');
+    notification.className = `custom-notification notification-${type}`;
+    notification.innerHTML = `
+        <i class="fas ${type === 'success' ? 'fa-check-circle' : 'fa-exclamation-circle'}"></i>
+        <span>${message}</span>
+        <button onclick="this.parentElement.remove()">&times;</button>
+    `;
+
+    document.body.appendChild(notification);
+
+    setTimeout(() => {
+        if (notification.parentElement) {
+            notification.remove();
+        }
+    }, 5000);
+}

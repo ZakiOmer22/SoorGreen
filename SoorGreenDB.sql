@@ -29,6 +29,7 @@ CREATE TABLE Users (
     FullName NVARCHAR(150) NOT NULL,
     Phone NVARCHAR(20) UNIQUE NOT NULL,
     Email NVARCHAR(256),
+	Password NVARCHAR(100) NULL,
     RoleId CHAR(4) NOT NULL,
     XP_Credits DECIMAL(10,2) DEFAULT 0,
     CreatedAt DATETIME DEFAULT GETDATE(),
@@ -36,25 +37,30 @@ CREATE TABLE Users (
     IsVerified BIT DEFAULT 0,
     CONSTRAINT FK_Users_Roles FOREIGN KEY(RoleId) REFERENCES Roles(RoleId)
 );
--- Add Password column to Users table while keeping Phone column
-ALTER TABLE Users 
-ADD Password NVARCHAR(100) NULL;
-
--- Update existing users with a default password based on their phone
-UPDATE Users SET Password = Phone WHERE Password IS NULL;
-
-PRINT 'Password column added successfully! Existing users updated.';
 
 -- MUNICIPALITIES: Defines city or zone
 CREATE TABLE Municipalities (
     MunicipalityId CHAR(4) PRIMARY KEY,
-    Name NVARCHAR(100) NOT NULL
+    Name NVARCHAR(100) NOT NULL,
+	Region NVARCHAR(100) NULL,
+    Status NVARCHAR(20) DEFAULT 'Active',
+    Population BIGINT DEFAULT 0,
+    Area DECIMAL(10,2) DEFAULT 0,
+    ContactPerson NVARCHAR(100) NULL,
+    ContactNumber NVARCHAR(20) NULL,
+    Email NVARCHAR(100) NULL,
+    Address NVARCHAR(300) NULL,
+    EstablishedDate DATETIME NULL,
+    Description NVARCHAR(500) NULL
 );
 
 -- WASTE TYPES: Categories of waste
 CREATE TABLE WasteTypes (
     WasteTypeId CHAR(4) PRIMARY KEY,
     Name NVARCHAR(50) NOT NULL,
+	ColorCode NVARCHAR(7) NULL,
+    Description NVARCHAR(500) NULL,
+    Category NVARCHAR(50) DEFAULT 'Other',
     CreditPerKg DECIMAL(5,2) NOT NULL
 );
 

@@ -5,9 +5,11 @@ namespace SoorGreen.Admin
 {
     public class BundleConfig
     {
-        // For more information on Bundling, visit https://go.microsoft.com/fwlink/?LinkID=303951
         public static void RegisterBundles(BundleCollection bundles)
         {
+            // IMPORTANT: Clear all bundles first
+            bundles.Clear();
+
             RegisterJQueryScriptManager();
 
             bundles.Add(new ScriptBundle("~/bundles/WebFormsJs").Include(
@@ -20,113 +22,135 @@ namespace SoorGreen.Admin
                             "~/Scripts/WebForms/TreeView.js",
                             "~/Scripts/WebForms/WebParts.js"));
 
-            // Order is very important for these files to work, they have explicit dependencies
             bundles.Add(new ScriptBundle("~/bundles/MsAjaxJs").Include(
                     "~/Scripts/WebForms/MsAjax/MicrosoftAjax.js",
                     "~/Scripts/WebForms/MsAjax/MicrosoftAjaxApplicationServices.js",
                     "~/Scripts/WebForms/MsAjax/MicrosoftAjaxTimer.js",
                     "~/Scripts/WebForms/MsAjax/MicrosoftAjaxWebForms.js"));
 
-            // Use the Development version of Modernizr to develop with and learn from. Then, when you’re
-            // ready for production, use the build tool at https://modernizr.com to pick only the tests you need
             bundles.Add(new ScriptBundle("~/bundles/modernizr").Include(
                             "~/Scripts/modernizr-*"));
 
             // ==========================================
-            //   GENERAL PAGES BUNDLES (Root Level)
+            //   GENERAL PAGES BUNDLES
             // ==========================================
 
-            // Default/Home Page
-            bundles.Add(new StyleBundle("~/Content/default").Include(
+            bundles.Add(new StyleBundle("~/bundles/Content/default").Include(
                 "~/Content/bootstrap.css",
                 "~/Content/Site.css",
                 "~/Styles/main.css",
-                "~/Styles/Style.css",
-                "~/Content/Pages/Default.css"));
+                "~/Styles/Style.css"));
 
-            bundles.Add(new ScriptBundle("~/bundles/default").Include(
+            bundles.Add(new ScriptBundle("~/bundles/Scripts/default").Include(
                 "~/Scripts/jquery-3.7.0.js",
                 "~/Scripts/bootstrap.js",
-                "~/Scripts/modernizr-2.8.3.js",
-                "~/Scripts/Pages/Default.js"));
+                "~/Scripts/modernizr-2.8.3.js"));
 
             // About Page
-            bundles.Add(new StyleBundle("~/Content/about").Include(
+            bundles.Add(new StyleBundle("~/bundles/Content/about").Include(
                 "~/Styles/About.css",
-                "~/Content/Pages/About.css"));
+                "~/Content/Pages/about.css"));
 
-            bundles.Add(new ScriptBundle("~/bundles/about").Include(
-                "~/Scripts/Pages/About.js"));
-
-            // Contact Page
-            bundles.Add(new StyleBundle("~/Content/contact").Include(
-                "~/Content/Pages/Contact.css"));
-
-            bundles.Add(new ScriptBundle("~/bundles/contact").Include(
-                "~/Scripts/Pages/Contact.js"));
-
-            // Services Page
-            bundles.Add(new StyleBundle("~/Content/services").Include(
-                "~/Content/Pages/Services.css"));
-
-            bundles.Add(new ScriptBundle("~/bundles/services").Include(
-                "~/Scripts/Pages/Services.js"));
-
-            // How It Works Page
-            bundles.Add(new StyleBundle("~/Content/howitworks").Include(
-                "~/Content/Pages/HowITWorks.css"));
-
-            bundles.Add(new ScriptBundle("~/bundles/howitworks").Include(
-                "~/Scripts/Pages/HowITWorks.js"));
-
-            // Waste Collection Page
-            bundles.Add(new StyleBundle("~/Content/wastecollection").Include(
-                "~/Content/Pages/WasteCollection.css"));
-
-            bundles.Add(new ScriptBundle("~/bundles/wastecollection").Include(
-                "~/Scripts/Pages/WasteCollection.js"));
-
-            // 404 Error Page
-            bundles.Add(new StyleBundle("~/Content/404").Include(
-                "~/Content/Pages/404.css"));
-
-            bundles.Add(new ScriptBundle("~/bundles/404").Include(
-                "~/Scripts/Pages/404.js"));
+            bundles.Add(new ScriptBundle("~/bundles/Scripts/about").Include(
+                "~/Scripts/Pages/about.js"));
 
             // ==========================================
-            //   AUTHENTICATION PAGES BUNDLES
+            //   CITIZEN PAGES BUNDLES - CORRECT PATHS
             // ==========================================
 
-            // Login Page
-            bundles.Add(new StyleBundle("~/Content/login").Include(
-                "~/Content/Pages/Login.css"));
+            // Citizen Report Waste - THIS IS THE IMPORTANT ONE
+            bundles.Add(new StyleBundle("~/Content/citizenreportwaste").Include(
+                "~/Content/Pages/Citizen/citizenreportwaste.css"));
 
-            bundles.Add(new ScriptBundle("~/bundles/login").Include(
-                "~/Scripts/Pages/Login.js"));
+            bundles.Add(new ScriptBundle("~/bundles/citizenreportwaste").Include(
+                "~/Scripts/Pages/Citizen/citizenreportwaste.js"));
 
-            // Register Page
-            bundles.Add(new StyleBundle("~/Content/register").Include(
-                "~/Content/Pages/Register.css"));
+            // Citizen Dashboard
+            bundles.Add(new StyleBundle("~/Content/citizendashboard").Include(
+                "~/Content/Pages/Citizen/citizendashboard.css"));
 
-            bundles.Add(new ScriptBundle("~/bundles/register").Include(
-                "~/Scripts/Pages/Register.js"));
+            bundles.Add(new ScriptBundle("~/bundles/citizendashboard").Include(
+                "~/Scripts/Pages/Citizen/citizendashboard.js"));
 
-            // Registration Form Page
-            bundles.Add(new StyleBundle("~/Content/registrationform").Include(
-                "~/Content/Pages/RegistrationForm.css"));
+            // Citizen Community
+            bundles.Add(new StyleBundle("~/Content/citizencommunity").Include(
+                "~/Content/Pages/Citizen/citizencommunity.css"));
 
-            bundles.Add(new ScriptBundle("~/bundles/registrationform").Include(
-                "~/Scripts/Pages/RegistrationForm.js"));
+            bundles.Add(new ScriptBundle("~/bundles/citizencommunity").Include(
+                "~/Scripts/Pages/Citizen/citizencommunity.js"));
 
-            // Forgot Password Page
-            bundles.Add(new StyleBundle("~/Content/forgotpassword").Include(
-                "~/Content/Pages/ForgotPassword.css"));
+            // Citizen Feedback
+            bundles.Add(new StyleBundle("~/Content/citizenfeedback").Include(
+                "~/Content/Pages/Citizen/citizenfeedback.css"));
 
-            bundles.Add(new ScriptBundle("~/bundles/forgotpassword").Include(
-                "~/Scripts/Pages/ForgotPassword.js"));
+            bundles.Add(new ScriptBundle("~/bundles/citizenfeedback").Include(
+                "~/Scripts/Pages/Citizen/citizenfeedback.js"));
+
+            // Citizen Help
+            bundles.Add(new StyleBundle("~/Content/citizenhelp").Include(
+                "~/Content/Pages/Citizen/citizenhelp.css"));
+
+            bundles.Add(new ScriptBundle("~/bundles/citizenhelp").Include(
+                "~/Scripts/Pages/Citizen/citizenhelp.js"));
+
+            // Citizen Leaderboard
+            bundles.Add(new StyleBundle("~/Content/citizenleaderboard").Include(
+                "~/Content/Pages/Citizen/citizenleaderboard.css"));
+
+            bundles.Add(new ScriptBundle("~/bundles/citizenleaderboard").Include(
+                "~/Scripts/Pages/Citizen/citizenleaderboard.js"));
+
+            // Citizen My Reports
+            bundles.Add(new StyleBundle("~/Content/citizenmyreports").Include(
+                "~/Content/Pages/Citizen/citizenmyreports.css"));
+
+            bundles.Add(new ScriptBundle("~/bundles/citizenmyreports").Include(
+                "~/Scripts/Pages/Citizen/citizenmyreports.js"));
+
+            // Citizen My Rewards
+            bundles.Add(new StyleBundle("~/Content/citizenmyrewards").Include(
+                "~/Content/Pages/Citizen/citizenmyrewards.css"));
+
+            bundles.Add(new ScriptBundle("~/bundles/citizenmyrewards").Include(
+                "~/Scripts/Pages/Citizen/citizenmyrewards.js"));
+
+            // Citizen Notifications
+            bundles.Add(new StyleBundle("~/Content/citizennotifications").Include(
+                "~/Content/Pages/Citizen/citizennotifications.css"));
+
+            bundles.Add(new ScriptBundle("~/bundles/citizennotifications").Include(
+                "~/Scripts/Pages/Citizen/citizennotifications.js"));
+
+            // Citizen Pickup Status
+            bundles.Add(new StyleBundle("~/Content/citizenpickupstatus").Include(
+                "~/Content/Pages/Citizen/citizenpickupstatus.css"));
+
+            bundles.Add(new ScriptBundle("~/bundles/citizenpickupstatus").Include(
+                "~/Scripts/Pages/Citizen/citizenpickupstatus.js"));
+
+            // Citizen Redemption History
+            bundles.Add(new StyleBundle("~/Content/citizenredemptionhistory").Include(
+                "~/Content/Pages/Citizen/citizenredemptionhistory.css"));
+
+            bundles.Add(new ScriptBundle("~/bundles/citizenredemptionhistory").Include(
+                "~/Scripts/Pages/Citizen/citizenredemptionhistory.js"));
+
+            // Citizen Schedule Pickup
+            bundles.Add(new StyleBundle("~/Content/citizenschedulepickup").Include(
+                "~/Content/Pages/Citizen/citizenschedulepickup.css"));
+
+            bundles.Add(new ScriptBundle("~/bundles/citizenschedulepickup").Include(
+                "~/Scripts/Pages/Citizen/citizenschedulepickup.js"));
+
+            // Citizen User Profile
+            bundles.Add(new StyleBundle("~/Content/citizenuserprofile").Include(
+                "~/Content/Pages/Citizen/citizenuserprofile.css"));
+
+            bundles.Add(new ScriptBundle("~/bundles/citizenuserprofile").Include(
+                "~/Scripts/Pages/Citizen/citizenuserprofile.js"));
 
             // ==========================================
-            //   ADMIN DASHBOARD PAGES BUNDLES
+            //   ADMIN PAGES BUNDLES
             // ==========================================
 
             // Admin Dashboard
@@ -145,225 +169,129 @@ namespace SoorGreen.Admin
 
             // Admin Users
             bundles.Add(new StyleBundle("~/Content/adminusers").Include(
-                "~/Content/Pages/Admin/Users.css"));
+                "~/Content/Pages/Admin/adminusers.css"));
 
             bundles.Add(new ScriptBundle("~/bundles/adminusers").Include(
-                "~/Scripts/Pages/Admin/Users.js"));
+                "~/Scripts/Pages/Admin/adminusers.js"));
 
             // Admin Citizens
             bundles.Add(new StyleBundle("~/Content/admincitizens").Include(
-                "~/Content/Pages/Admin/Citizens.css"));
+                "~/Content/Pages/Admin/admincitizens.css"));
 
             bundles.Add(new ScriptBundle("~/bundles/admincitizens").Include(
-                "~/Scripts/Pages/Admin/Citizens.js"));
+                "~/Scripts/Pages/Admin/admincitizens.js"));
 
             // Admin Audit Logs
             bundles.Add(new StyleBundle("~/Content/adminauditlogs").Include(
-                "~/Content/Pages/Admin/AuditLogs.css"));
+                "~/Content/Pages/Admin/adminauditlogs.css"));
 
             bundles.Add(new ScriptBundle("~/bundles/adminauditlogs").Include(
-                "~/Scripts/Pages/Admin/AuditLogs.js"));
+                "~/Scripts/Pages/Admin/adminauditlogs.js"));
 
             // Admin Collections
             bundles.Add(new StyleBundle("~/Content/admincollections").Include(
-                "~/Content/Pages/Admin/Collections.css"));
+                "~/Content/Pages/Admin/admincollections.css"));
 
             bundles.Add(new ScriptBundle("~/bundles/admincollections").Include(
-                "~/Scripts/Pages/Admin/Collections.js"));
+                "~/Scripts/Pages/Admin/admincollections.js"));
 
             // Admin Collectors
             bundles.Add(new StyleBundle("~/Content/admincollectors").Include(
-                "~/Content/Pages/Admin/Collectors.css"));
+                "~/Content/Pages/Admin/admincollectors.css"));
 
             bundles.Add(new ScriptBundle("~/bundles/admincollectors").Include(
-                "~/Scripts/Pages/Admin/Collectors.js"));
+                "~/Scripts/Pages/Admin/admincollectors.js"));
 
             // Admin Credits
             bundles.Add(new StyleBundle("~/Content/admincredits").Include(
-                "~/Content/Pages/Admin/Credits.css"));
+                "~/Content/Pages/Admin/admincredits.css"));
 
             bundles.Add(new ScriptBundle("~/bundles/admincredits").Include(
-                "~/Scripts/Pages/Admin/Credits.js"));
+                "~/Scripts/Pages/Admin/admincredits.js"));
 
             // Admin Feedbacks
             bundles.Add(new StyleBundle("~/Content/adminfeedbacks").Include(
-                "~/Content/Pages/Admin/Feedbacks.css"));
+                "~/Content/Pages/Admin/adminfeedbacks.css"));
 
             bundles.Add(new ScriptBundle("~/bundles/adminfeedbacks").Include(
-                "~/Scripts/Pages/Admin/Feedbacks.js"));
+                "~/Scripts/Pages/Admin/adminfeedbacks.js"));
 
             // Admin Municipalities
             bundles.Add(new StyleBundle("~/Content/adminmunicipalities").Include(
-                "~/Content/Pages/Admin/Municipalities.css"));
+                "~/Content/Pages/Admin/adminmunicipalities.css"));
 
             bundles.Add(new ScriptBundle("~/bundles/adminmunicipalities").Include(
-                "~/Scripts/Pages/Admin/Municipalities.js"));
+                "~/Scripts/Pages/Admin/adminmunicipalities.js"));
 
             // Admin Notifications Management
             bundles.Add(new StyleBundle("~/Content/adminnotificationsmgmt").Include(
-                "~/Content/Pages/Admin/NotificationsMgmt.css"));
+                "~/Content/Pages/Admin/adminnotificationsmgmt.css"));
 
             bundles.Add(new ScriptBundle("~/bundles/adminnotificationsmgmt").Include(
-                "~/Scripts/Pages/Admin/NotificationsMgmt.js"));
+                "~/Scripts/Pages/Admin/adminnotificationsmgmt.js"));
 
             // Admin Pickups
             bundles.Add(new StyleBundle("~/Content/adminpickups").Include(
-                "~/Content/Pages/Admin/Pickups.css"));
+                "~/Content/Pages/Admin/adminpickups.css"));
 
             bundles.Add(new ScriptBundle("~/bundles/adminpickups").Include(
-                "~/Scripts/Pages/Admin/Pickups.js"));
+                "~/Scripts/Pages/Admin/adminpickups.js"));
 
             // Admin Profile
             bundles.Add(new StyleBundle("~/Content/adminprofile").Include(
-                "~/Content/Pages/Admin/Profile.css"));
+                "~/Content/Pages/Admin/adminprofile.css"));
 
             bundles.Add(new ScriptBundle("~/bundles/adminprofile").Include(
-                "~/Scripts/Pages/Admin/Profile.js"));
+                "~/Scripts/Pages/Admin/adminprofile.js"));
 
             // Admin Redemptions
             bundles.Add(new StyleBundle("~/Content/adminredemptions").Include(
-                "~/Content/Pages/Admin/Redemptions.css"));
+                "~/Content/Pages/Admin/adminredemptions.css"));
 
             bundles.Add(new ScriptBundle("~/bundles/adminredemptions").Include(
-                "~/Scripts/Pages/Admin/Redemptions.js"));
+                "~/Scripts/Pages/Admin/adminredemptions.js"));
 
             // Admin Reports
             bundles.Add(new StyleBundle("~/Content/adminreports").Include(
-                "~/Content/Pages/Admin/Reports.css"));
+                "~/Content/Pages/Admin/adminreports.css"));
 
             bundles.Add(new ScriptBundle("~/bundles/adminreports").Include(
-                "~/Scripts/Pages/Admin/Reports.js"));
+                "~/Scripts/Pages/Admin/adminreports.js"));
 
             // Admin Rewards
             bundles.Add(new StyleBundle("~/Content/adminrewards").Include(
-                "~/Content/Pages/Admin/Rewards.css"));
+                "~/Content/Pages/Admin/adminrewards.css"));
 
             bundles.Add(new ScriptBundle("~/bundles/adminrewards").Include(
-                "~/Scripts/Pages/Admin/Rewards.js"));
+                "~/Scripts/Pages/Admin/adminrewards.js"));
 
             // Admin Settings
             bundles.Add(new StyleBundle("~/Content/adminsettings").Include(
-                "~/Content/Pages/Admin/Settings.css"));
+                "~/Content/Pages/Admin/adminsettings.css"));
 
             bundles.Add(new ScriptBundle("~/bundles/adminsettings").Include(
-                "~/Scripts/Pages/Admin/Settings.js"));
+                "~/Scripts/Pages/Admin/adminsettings.js"));
 
             // Admin Transactions
             bundles.Add(new StyleBundle("~/Content/admintransactions").Include(
-                "~/Content/Pages/Admin/Transactions.css"));
+                "~/Content/Pages/Admin/admintransactions.css"));
 
             bundles.Add(new ScriptBundle("~/bundles/admintransactions").Include(
-                "~/Scripts/Pages/Admin/Transactions.js"));
+                "~/Scripts/Pages/Admin/admintransactions.js"));
 
             // Admin Waste Reports
             bundles.Add(new StyleBundle("~/Content/adminwastereports").Include(
-                "~/Content/Pages/Admin/WasteReports.css"));
+                "~/Content/Pages/Admin/adminwastereports.css"));
 
             bundles.Add(new ScriptBundle("~/bundles/adminwastereports").Include(
-                "~/Scripts/Pages/Admin/WasteReports.js"));
+                "~/Scripts/Pages/Admin/adminwastereports.js"));
 
             // Admin Waste Types
             bundles.Add(new StyleBundle("~/Content/adminwastetypes").Include(
-                "~/Content/Pages/Admin/WasteTypes.css"));
-
+                "~/Content/Pages/Admin/adminwastetypes.css"));
+}
             bundles.Add(new ScriptBundle("~/bundles/adminwastetypes").Include(
-                "~/Scripts/Pages/Admin/WasteTypes.js"));
-
-            // ==========================================
-            //   CITIZEN PAGES BUNDLES
-            // ==========================================
-
-            // Citizen Dashboard
-            bundles.Add(new StyleBundle("~/Content/citizendashboard").Include(
-                "~/Content/Pages/Citizen/Dashboard.css"));
-
-            bundles.Add(new ScriptBundle("~/bundles/citizendashboard").Include(
-                "~/Scripts/Pages/Citizen/Dashboard.js"));
-
-            // Citizen Community
-            bundles.Add(new StyleBundle("~/Content/citizencommunity").Include(
-                "~/Content/Pages/Citizen/Community.css"));
-
-            bundles.Add(new ScriptBundle("~/bundles/citizencommunity").Include(
-                "~/Scripts/Pages/Citizen/Community.js"));
-
-            // Citizen Feedback
-            bundles.Add(new StyleBundle("~/Content/citizenfeedback").Include(
-                "~/Content/Pages/Citizen/Feedback.css"));
-
-            bundles.Add(new ScriptBundle("~/bundles/citizenfeedback").Include(
-                "~/Scripts/Pages/Citizen/Feedback.js"));
-
-            // Citizen Help
-            bundles.Add(new StyleBundle("~/Content/citizenhelp").Include(
-                "~/Content/Pages/Citizen/Help.css"));
-
-            bundles.Add(new ScriptBundle("~/bundles/citizenhelp").Include(
-                "~/Scripts/Pages/Citizen/Help.js"));
-
-            // Citizen Leaderboard
-            bundles.Add(new StyleBundle("~/Content/citizenleaderboard").Include(
-                "~/Content/Pages/Citizen/Leaderboard.css"));
-
-            bundles.Add(new ScriptBundle("~/bundles/citizenleaderboard").Include(
-                "~/Scripts/Pages/Citizen/Leaderboard.js"));
-
-            // Citizen My Reports
-            bundles.Add(new StyleBundle("~/Content/citizenmyreports").Include(
-                "~/Content/Pages/Citizen/MyReports.css"));
-
-            bundles.Add(new ScriptBundle("~/bundles/citizenmyreports").Include(
-                "~/Scripts/Pages/Citizen/MyReports.js"));
-
-            // Citizen My Rewards
-            bundles.Add(new StyleBundle("~/Content/citizenmyrewards").Include(
-                "~/Content/Pages/Citizen/MyRewards.css"));
-
-            bundles.Add(new ScriptBundle("~/bundles/citizenmyrewards").Include(
-                "~/Scripts/Pages/Citizen/MyRewards.js"));
-
-            // Citizen Notifications
-            bundles.Add(new StyleBundle("~/Content/citizennotifications").Include(
-                "~/Content/Pages/Citizen/Notifications.css"));
-
-            bundles.Add(new ScriptBundle("~/bundles/citizennotifications").Include(
-                "~/Scripts/Pages/Citizen/Notifications.js"));
-
-            // Citizen Pickup Status
-            bundles.Add(new StyleBundle("~/Content/citizenpickupstatus").Include(
-                "~/Content/Pages/Citizen/PickupStatus.css"));
-
-            bundles.Add(new ScriptBundle("~/bundles/citizenpickupstatus").Include(
-                "~/Scripts/Pages/Citizen/PickupStatus.js"));
-
-            // Citizen Redemption History
-            bundles.Add(new StyleBundle("~/Content/citizenredemptionhistory").Include(
-                "~/Content/Pages/Citizen/RedemptionHistory.css"));
-
-            bundles.Add(new ScriptBundle("~/bundles/citizenredemptionhistory").Include(
-                "~/Scripts/Pages/Citizen/RedemptionHistory.js"));
-
-            // Citizen Report Waste
-            bundles.Add(new StyleBundle("~/Content/citizenreportwaste").Include(
-                "~/Content/Pages/Citizen/ReportWaste.css"));
-
-            bundles.Add(new ScriptBundle("~/bundles/citizenreportwaste").Include(
-                "~/Scripts/Pages/Citizen/ReportWaste.js"));
-
-            // Citizen Schedule Pickup
-            bundles.Add(new StyleBundle("~/Content/citizenschedulepickup").Include(
-                "~/Content/Pages/Citizen/SchedulePickup.css"));
-
-            bundles.Add(new ScriptBundle("~/bundles/citizenschedulepickup").Include(
-                "~/Scripts/Pages/Citizen/SchedulePickup.js"));
-
-            // Citizen User Profile
-            bundles.Add(new StyleBundle("~/Content/citizenuserprofile").Include(
-                "~/Content/Pages/Citizen/UserProfile.css"));
-
-            bundles.Add(new ScriptBundle("~/bundles/citizenuserprofile").Include(
-                "~/Scripts/Pages/Citizen/UserProfile.js"));
-
+                "~/Scripts/Pages/Admin/adminwastetypes.js"));
         }
 
         public static void RegisterJQueryScriptManager()
@@ -378,4 +306,3 @@ namespace SoorGreen.Admin
                 });
         }
     }
-}

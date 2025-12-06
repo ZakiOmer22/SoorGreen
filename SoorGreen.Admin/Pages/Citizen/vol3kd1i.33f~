@@ -1,0 +1,141 @@
+﻿<%@ Page Title="My Rewards" Language="C#" MasterPageFile="~/Pages/Citizen/Site.Master" 
+    AutoEventWireup="true" CodeFile="MyRewards.aspx.cs" Inherits="SoorGreen.Citizen.MyRewards" %>
+<%@ Import Namespace="System.Web.Optimization" %>
+<asp:Content ID="Content5" ContentPlaceHolderID="HeadContent" runat="server">
+    <link href='<%= ResolveUrl("~/Content/Pages/Citizen/myrewards.css") %>' rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+</asp:Content>
+
+<asp:Content ID="Content6" ContentPlaceHolderID="ScriptsContent" runat="server">
+    <script src='<%= ResolveUrl("~/Scripts/Pages/Citizen/myrewards.js") %>'></script>
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+</asp:Content>
+<asp:Content ID="Content1" ContentPlaceHolderID="TitleContent" runat="server">
+    My Rewards - SoorGreen Citizen
+</asp:Content>
+
+<asp:Content ID="Content2" ContentPlaceHolderID="MainContent" runat="server">
+   <br />
+   <br />
+   <br />
+    <!-- Hidden field for user stats only -->
+    <asp:HiddenField ID="hfUserStats" runat="server" ClientIDMode="Static" />
+
+    <div class="rewards-container">
+        <!-- Stats Cards -->
+        <div class="stats-cards">
+            <div class="stat-card">
+                <div class="stat-value" id="totalXP">0</div>
+                <div class="stat-label">Total XP</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="currentLevel">1</div>
+                <div class="stat-label">Current Level</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="rewardsClaimed">0</div>
+                <div class="stat-label">Rewards Claimed</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="nextLevelXP">100</div>
+                <div class="stat-label">XP to Next Level</div>
+            </div>
+        </div>
+
+        <div class="page-header">
+            <div class="header-text">
+                <h1 class="page-title">My Rewards</h1>
+                <p class="page-subtitle">Earn XP and unlock amazing rewards for your eco-friendly actions</p>
+            </div>
+            <div class="xp-badge">
+                <i class="fas fa-star"></i>
+                <span id="userXP">0</span> XP Available
+            </div>
+        </div>
+
+        <!-- Tabs Navigation -->
+        <div class="tabs-container">
+            <div class="tabs">
+                <button class="tab active" data-tab="rewards" onclick="switchTab('rewards'); return false;">
+                    <i class="fas fa-gift"></i>
+                    Available Rewards
+                </button>
+                <button class="tab" data-tab="achievements" onclick="switchTab('achievements'); return false;">
+                    <i class="fas fa-trophy"></i>
+                    Achievements
+                </button>
+                <button class="tab" data-tab="history" onclick="switchTab('history'); return false;">
+                    <i class="fas fa-history"></i>
+                    XP History
+                </button>
+            </div>
+        </div>
+
+        <!-- Rewards Tab -->
+        <div class="tab-content active" id="rewardsTab">
+            <div class="section-header">
+                <h3 class="section-title">Featured Rewards</h3>
+                <p class="section-description">Special rewards with exclusive benefits</p>
+            </div>
+            <div class="rewards-grid" id="featuredRewardsGrid">
+                <!-- Featured rewards will be populated by JavaScript -->
+            </div>
+
+            <div class="section-header">
+                <h3 class="section-title">All Rewards</h3>
+                <p class="section-description">Browse all available rewards</p>
+            </div>
+            <div class="rewards-grid" id="regularRewardsGrid">
+                <!-- Regular rewards will be populated by JavaScript -->
+            </div>
+        </div>
+
+        <!-- Achievements Tab -->
+        <div class="tab-content" id="achievementsTab" style="display: none;">
+            <div class="section-header">
+                <h3 class="section-title">Your Achievements</h3>
+                <p class="section-description">Complete challenges and earn bonus XP</p>
+            </div>
+            <div class="achievements-grid" id="achievementsGrid">
+                <!-- Achievements will be populated by JavaScript -->
+            </div>
+        </div>
+
+        <!-- History Tab -->
+        <div class="tab-content" id="historyTab" style="display: none;">
+            <div class="section-header">
+                <h3 class="section-title">XP Transaction History</h3>
+                <p class="section-description">Track your XP earnings and redemptions</p>
+            </div>
+            <div class="transaction-history" id="xpHistoryList">
+                <!-- XP History will be populated by JavaScript -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Claim Confirmation Modal -->
+    <div class="modal-overlay" id="claimConfirmationModal" style="display: none;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2><i class="fas fa-gift"></i> Claim Reward</h2>
+                <button class="btn-close-modal" onclick="closeClaimModal(); return false;">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div id="claimConfirmationContent">
+                    <!-- Will be populated by JavaScript -->
+                </div>
+                <div class="modal-actions">
+                    <button class="btn btn-outline" onclick="closeClaimModal(); return false;">
+                        <i class="fas fa-times"></i> Cancel
+                    </button>
+                    <button class="btn btn-primary" onclick="confirmClaim(); return false;">
+                        <i class="fas fa-check"></i> Confirm Claim
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</asp:Content>

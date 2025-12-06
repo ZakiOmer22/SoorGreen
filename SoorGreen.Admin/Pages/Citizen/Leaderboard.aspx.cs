@@ -5,30 +5,26 @@ using System.Collections.Generic;
 using System.Web.Configuration;
 using System.Web.UI;
 using System.Web.Script.Serialization;
+using System.Web.Services;
 
 namespace SoorGreen.Citizen
 {
     public partial class Leaderboard : System.Web.UI.Page
     {
         private string connectionString = WebConfigurationManager.ConnectionStrings["SoorGreenDBConnectionString"].ConnectionString;
+        private string currentUserId = "";
 
         protected void Page_Load(object sender, EventArgs e)
         {
             if (!IsPostBack)
             {
-                // Authentication check
-                if (Session["UserId"] == null || Session["UserRole"] == null)
+                if (Session["UserId"] == null)
                 {
                     Response.Redirect("~/Login.aspx");
                     return;
                 }
 
-                if (Session["UserRole"].ToString() != "CITZ" && Session["UserRole"].ToString() != "R001")
-                {
-                    Response.Redirect("~/Pages/Unauthorized.aspx");
-                    return;
-                }
-
+                currentUserId = Session["UserId"].ToString();
                 LoadData();
             }
         }
@@ -47,106 +43,46 @@ namespace SoorGreen.Citizen
         {
             try
             {
-                string tabFilter = Request.Form["tabFilter"] ?? "global";
-                string periodFilter = Request.Form["periodFilter"] ?? "all";
+                // Get leaderboard data
+                List<LeaderboardUser> leaderboardData = GetLeaderboardData();
 
-                // Store current filters
-                hfCurrentTab.Value = tabFilter;
-                hfCurrentPeriod.Value = periodFilter;
+                // Get user stats
+                var userStats = GetUserStats();
 
-                // Load leaderboard data based on filters
-                List<LeaderboardUser> leaderboardData;
+                // Get achievements
+                var achievements = GetAchievements();
 
-                switch (tabFilter)
-                {
-                    case "monthly":
-                        leaderboardData = LoadMonthlyLeaderboardData(periodFilter);
-                        break;
-                    case "achievements":
-                        leaderboardData = LoadAchievementsLeaderboardData(periodFilter);
-                        break;
-                    case "friends":
-                        leaderboardData = LoadFriendsLeaderboardData(periodFilter);
-                        break;
-                    default: // global
-                        leaderboardData = LoadGlobalLeaderboardData(periodFilter);
-                        break;
-                }
-
+                // Store in hidden fields
                 var serializer = new JavaScriptSerializer();
                 hfLeaderboardData.Value = serializer.Serialize(leaderboardData);
+                hfStatsData.Value = serializer.Serialize(userStats);
+                hfAchievementsData.Value = serializer.Serialize(achievements);
 
-                // Load statistics
-                var stats = new
-                {
-                    TotalUsers = GetTotalUsers(),
-                    TotalXP = GetTotalXP(),
-                    TotalPickups = GetTotalPickups(),
-                    TotalCO2Reduced = GetTotalCO2Reduced()
-                };
-
-                hfStatsData.Value = serializer.Serialize(stats);
+                // Update UI
+                UpdateUI(userStats);
 
             }
-            catch (Exception ex)
+            catch
             {
-                System.Diagnostics.Debug.WriteLine("Error in LoadData: " + ex.Message);
-                hfLeaderboardData.Value = "[]";
-                hfStatsData.Value = "{\"TotalUsers\":0,\"TotalXP\":0,\"TotalPickups\":0,\"TotalCO2Reduced\":0}";
+                // Silent fail
             }
         }
 
-        private List<LeaderboardUser> LoadGlobalLeaderboardData(string periodFilter)
+        private List<LeaderboardUser> GetLeaderboardData()
         {
-            var leaderboardData = new List<LeaderboardUser>();
-            string currentUserId = Session["UserId"] != null ? Session["UserId"].ToString() : "R001";
+            var list = new List<LeaderboardUser>();
 
             string query = @"
-                WITH UserStats AS (
-                    SELECT 
-                        u.UserId,
-                        u.FirstName,
-                        u.LastName,
-                        u.Email,
-                        ISNULL(u.XP_Credits, 0) as TotalXP,
-                        ISNULL((
-                            SELECT COUNT(*) 
-                            FROM PickupRequests 
-                            WHERE UserId = u.UserId AND Status = 'Completed'
-                        ), 0) as TotalPickups,
-                        ISNULL((
-                            SELECT COUNT(*) 
-                            FROM UserAchievements ua 
-                            WHERE ua.UserId = u.UserId AND ua.IsUnlocked = 1
-                        ), 0) as AchievementsCount,
-                        CASE 
-                            WHEN ISNULL(u.XP_Credits, 0) >= 1000 THEN 3
-                            WHEN ISNULL(u.XP_Credits, 0) >= 500 THEN 2
-                            ELSE 1
-                        END as UserLevel,
-                        (ISNULL(u.XP_Credits, 0) * 0.002) as CO2Reduced
-                    FROM Users u
-                    WHERE u.Role IN ('CITZ', 'R001')
-                    AND u.Status = 'Active'
-                ),
-                RankedUsers AS (
-                    SELECT *,
-                        ROW_NUMBER() OVER (ORDER BY TotalXP DESC) as UserRank
-                    FROM UserStats
-                )
                 SELECT TOP 20
                     UserId,
-                    FirstName,
-                    LastName,
-                    Email,
-                    TotalXP,
-                    TotalPickups,
-                    AchievementsCount,
-                    UserLevel,
-                    CO2Reduced,
-                    UserRank
-                FROM RankedUsers
-                ORDER BY UserRank";
+                    FullName,
+                    Phone,
+                    ISNULL(XP_Credits, 0) as TotalXP,
+                    CreatedAt
+                FROM Users
+                WHERE RoleId IN ('CITZ', 'R001')
+                AND IsVerified = 1
+                ORDER BY ISNULL(XP_Credits, 0) DESC";
 
             using (SqlConnection conn = new SqlConnection(connectionString))
             using (SqlCommand cmd = new SqlCommand(query, conn))
@@ -154,349 +90,223 @@ namespace SoorGreen.Citizen
                 conn.Open();
                 using (SqlDataReader reader = cmd.ExecuteReader())
                 {
+                    int rank = 1;
                     while (reader.Read())
                     {
-                        string userId = reader["UserId"] != null ? reader["UserId"].ToString() : "";
-                        string firstName = reader["FirstName"] != null ? reader["FirstName"].ToString() : "";
-                        string lastName = reader["LastName"] != null ? reader["LastName"].ToString() : "";
-                        string email = reader["Email"] != null ? reader["Email"].ToString() : "";
+                        string userId = reader["UserId"].ToString();
+                        string fullName = reader["FullName"].ToString();
+                        string phone = reader["Phone"].ToString();
+                        decimal totalXP = Convert.ToDecimal(reader["TotalXP"]);
 
-                        var user = new LeaderboardUser
+                        list.Add(new LeaderboardUser
                         {
                             Id = userId,
-                            Name = GetUserName(firstName, lastName, email),
-                            Email = email,
-                            Rank = reader["UserRank"] != DBNull.Value ? Convert.ToInt32(reader["UserRank"]) : 0,
-                            XP = reader["TotalXP"] != DBNull.Value ? Convert.ToInt32(reader["TotalXP"]) : 0,
-                            Level = reader["UserLevel"] != DBNull.Value ? Convert.ToInt32(reader["UserLevel"]) : 1,
-                            Pickups = reader["TotalPickups"] != DBNull.Value ? Convert.ToInt32(reader["TotalPickups"]) : 0,
-                            Achievements = reader["AchievementsCount"] != DBNull.Value ? Convert.ToInt32(reader["AchievementsCount"]) : 0,
-                            CO2Reduced = reader["CO2Reduced"] != DBNull.Value ? Convert.ToDecimal(reader["CO2Reduced"]) : 0,
+                            Name = fullName,
+                            Location = phone,
+                            Rank = rank,
+                            XP = (int)totalXP,
+                            Level = (int)(totalXP / 1000) + 1,
+                            Pickups = GetUserPickups(userId),
+                            CO2Reduced = totalXP * 0.002m,
                             IsCurrentUser = userId == currentUserId,
-                            Avatar = GetUserInitials(firstName, lastName, email)
-                        };
-
-                        leaderboardData.Add(user);
+                            Trend = GetRandomTrend(),
+                            MemberSince = Convert.ToDateTime(reader["CreatedAt"])
+                        });
+                        rank++;
                     }
                 }
             }
 
-            return leaderboardData;
+            return list;
         }
 
-        private List<LeaderboardUser> LoadMonthlyLeaderboardData(string periodFilter)
+        private int GetUserPickups(string userId)
         {
-            var leaderboardData = new List<LeaderboardUser>();
-            string currentUserId = Session["UserId"] != null ? Session["UserId"].ToString() : "R001";
-
-            string query = @"
-                WITH MonthlyStats AS (
-                    SELECT 
-                        u.UserId,
-                        u.FirstName,
-                        u.LastName,
-                        u.Email,
-                        ISNULL((
-                            SELECT SUM(Amount) 
-                            FROM RewardPoints 
-                            WHERE UserId = u.UserId 
-                            AND CreatedAt >= DATEADD(MONTH, DATEDIFF(MONTH, 0, GETDATE()), 0)
-                        ), 0) as MonthlyXP,
-                        ISNULL((
-                            SELECT COUNT(*) 
-                            FROM PickupRequests 
-                            WHERE UserId = u.UserId 
-                            AND Status = 'Completed'
-                            AND RequestedAt >= DATEADD(MONTH, DATEDIFF(MONTH, 0, GETDATE()), 0)
-                        ), 0) as MonthlyPickups,
-                        CASE 
-                            WHEN ISNULL(u.XP_Credits, 0) >= 1000 THEN 3
-                            WHEN ISNULL(u.XP_Credits, 0) >= 500 THEN 2
-                            ELSE 1
-                        END as UserLevel,
-                        (ISNULL(u.XP_Credits, 0) * 0.002) as CO2Reduced,
-                        ISNULL((
-                            SELECT COUNT(*) 
-                            FROM UserAchievements ua 
-                            WHERE ua.UserId = u.UserId AND ua.IsUnlocked = 1
-                        ), 0) as AchievementsCount
-                    FROM Users u
-                    WHERE u.Role IN ('CITZ', 'R001')
-                    AND u.Status = 'Active'
-                ),
-                RankedUsers AS (
-                    SELECT *,
-                        ROW_NUMBER() OVER (ORDER BY MonthlyXP DESC) as UserRank
-                    FROM MonthlyStats
-                    WHERE MonthlyXP > 0
-                )
-                SELECT TOP 20
-                    UserId,
-                    FirstName,
-                    LastName,
-                    Email,
-                    MonthlyXP as TotalXP,
-                    MonthlyPickups as TotalPickups,
-                    AchievementsCount,
-                    UserLevel,
-                    CO2Reduced,
-                    UserRank
-                FROM RankedUsers
-                ORDER BY UserRank";
-
-            using (SqlConnection conn = new SqlConnection(connectionString))
-            using (SqlCommand cmd = new SqlCommand(query, conn))
+            try
             {
-                conn.Open();
-                using (SqlDataReader reader = cmd.ExecuteReader())
+                string query = @"
+                    SELECT ISNULL(COUNT(*), 0) 
+                    FROM WasteReports wr
+                    JOIN PickupRequests pr ON wr.ReportId = pr.ReportId
+                    WHERE wr.UserId = @UserId AND pr.Status = 'Collected'";
+
+                using (SqlConnection conn = new SqlConnection(connectionString))
+                using (SqlCommand cmd = new SqlCommand(query, conn))
                 {
-                    while (reader.Read())
-                    {
-                        string userId = reader["UserId"] != null ? reader["UserId"].ToString() : "";
-                        string firstName = reader["FirstName"] != null ? reader["FirstName"].ToString() : "";
-                        string lastName = reader["LastName"] != null ? reader["LastName"].ToString() : "";
-                        string email = reader["Email"] != null ? reader["Email"].ToString() : "";
-
-                        var user = new LeaderboardUser
-                        {
-                            Id = userId,
-                            Name = GetUserName(firstName, lastName, email),
-                            Email = email,
-                            Rank = reader["UserRank"] != DBNull.Value ? Convert.ToInt32(reader["UserRank"]) : 0,
-                            XP = reader["TotalXP"] != DBNull.Value ? Convert.ToInt32(reader["TotalXP"]) : 0,
-                            Level = reader["UserLevel"] != DBNull.Value ? Convert.ToInt32(reader["UserLevel"]) : 1,
-                            Pickups = reader["TotalPickups"] != DBNull.Value ? Convert.ToInt32(reader["TotalPickups"]) : 0,
-                            Achievements = reader["AchievementsCount"] != DBNull.Value ? Convert.ToInt32(reader["AchievementsCount"]) : 0,
-                            CO2Reduced = reader["CO2Reduced"] != DBNull.Value ? Convert.ToDecimal(reader["CO2Reduced"]) : 0,
-                            IsCurrentUser = userId == currentUserId,
-                            Avatar = GetUserInitials(firstName, lastName, email)
-                        };
-
-                        leaderboardData.Add(user);
-                    }
+                    cmd.Parameters.AddWithValue("@UserId", userId);
+                    conn.Open();
+                    return Convert.ToInt32(cmd.ExecuteScalar());
                 }
             }
-
-            return leaderboardData;
-        }
-
-        private List<LeaderboardUser> LoadAchievementsLeaderboardData(string periodFilter)
-        {
-            var leaderboardData = new List<LeaderboardUser>();
-            string currentUserId = Session["UserId"] != null ? Session["UserId"].ToString() : "R001";
-
-            string query = @"
-                WITH UserAchievementStats AS (
-                    SELECT 
-                        u.UserId,
-                        u.FirstName,
-                        u.LastName,
-                        u.Email,
-                        ISNULL((
-                            SELECT COUNT(*) 
-                            FROM UserAchievements ua 
-                            WHERE ua.UserId = u.UserId AND ua.IsUnlocked = 1
-                        ), 0) as AchievementsCount,
-                        ISNULL(u.XP_Credits, 0) as TotalXP,
-                        ISNULL((
-                            SELECT COUNT(*) 
-                            FROM PickupRequests 
-                            WHERE UserId = u.UserId AND Status = 'Completed'
-                        ), 0) as TotalPickups,
-                        CASE 
-                            WHEN ISNULL(u.XP_Credits, 0) >= 1000 THEN 3
-                            WHEN ISNULL(u.XP_Credits, 0) >= 500 THEN 2
-                            ELSE 1
-                        END as UserLevel,
-                        (ISNULL(u.XP_Credits, 0) * 0.002) as CO2Reduced
-                    FROM Users u
-                    WHERE u.Role IN ('CITZ', 'R001')
-                    AND u.Status = 'Active'
-                    AND EXISTS (SELECT 1 FROM UserAchievements ua WHERE ua.UserId = u.UserId AND ua.IsUnlocked = 1)
-                ),
-                RankedUsers AS (
-                    SELECT *,
-                        ROW_NUMBER() OVER (ORDER BY AchievementsCount DESC, TotalXP DESC) as UserRank
-                    FROM UserAchievementStats
-                )
-                SELECT TOP 20
-                    UserId,
-                    FirstName,
-                    LastName,
-                    Email,
-                    TotalXP,
-                    TotalPickups,
-                    AchievementsCount,
-                    UserLevel,
-                    CO2Reduced,
-                    UserRank
-                FROM RankedUsers
-                ORDER BY UserRank";
-
-            using (SqlConnection conn = new SqlConnection(connectionString))
-            using (SqlCommand cmd = new SqlCommand(query, conn))
+            catch
             {
-                conn.Open();
-                using (SqlDataReader reader = cmd.ExecuteReader())
-                {
-                    while (reader.Read())
-                    {
-                        string userId = reader["UserId"] != null ? reader["UserId"].ToString() : "";
-                        string firstName = reader["FirstName"] != null ? reader["FirstName"].ToString() : "";
-                        string lastName = reader["LastName"] != null ? reader["LastName"].ToString() : "";
-                        string email = reader["Email"] != null ? reader["Email"].ToString() : "";
-
-                        var user = new LeaderboardUser
-                        {
-                            Id = userId,
-                            Name = GetUserName(firstName, lastName, email),
-                            Email = email,
-                            Rank = reader["UserRank"] != DBNull.Value ? Convert.ToInt32(reader["UserRank"]) : 0,
-                            XP = reader["TotalXP"] != DBNull.Value ? Convert.ToInt32(reader["TotalXP"]) : 0,
-                            Level = reader["UserLevel"] != DBNull.Value ? Convert.ToInt32(reader["UserLevel"]) : 1,
-                            Pickups = reader["TotalPickups"] != DBNull.Value ? Convert.ToInt32(reader["TotalPickups"]) : 0,
-                            Achievements = reader["AchievementsCount"] != DBNull.Value ? Convert.ToInt32(reader["AchievementsCount"]) : 0,
-                            CO2Reduced = reader["CO2Reduced"] != DBNull.Value ? Convert.ToDecimal(reader["CO2Reduced"]) : 0,
-                            IsCurrentUser = userId == currentUserId,
-                            Avatar = GetUserInitials(firstName, lastName, email)
-                        };
-
-                        leaderboardData.Add(user);
-                    }
-                }
+                return 0;
             }
-
-            return leaderboardData;
         }
 
-        private List<LeaderboardUser> LoadFriendsLeaderboardData(string periodFilter)
+        private string GetRandomTrend()
         {
-            // For now, return empty list as friend system might not be implemented
-            // This can be extended when friend functionality is added
-            return new List<LeaderboardUser>();
+            Random rnd = new Random();
+            int val = rnd.Next(1, 100);
+            if (val <= 40) return "up";
+            if (val <= 70) return "down";
+            return "neutral";
+        }
+
+        private UserStats GetUserStats()
+        {
+            var stats = new UserStats
+            {
+                UserId = currentUserId,
+                Name = "User",
+                Rank = 1,
+                XP = 0,
+                Level = 1,
+                Pickups = 0,
+                CO2Reduced = 0,
+                TotalUsers = 0,
+                TotalXP = 0,
+                TotalPickups = 0,
+                TotalCO2Reduced = 0
+            };
+
+            try
+            {
+                // Get current user
+                string query = "SELECT FullName, ISNULL(XP_Credits, 0) as TotalXP FROM Users WHERE UserId = @UserId";
+                using (SqlConnection conn = new SqlConnection(connectionString))
+                using (SqlCommand cmd = new SqlCommand(query, conn))
+                {
+                    cmd.Parameters.AddWithValue("@UserId", currentUserId);
+                    conn.Open();
+                    using (SqlDataReader reader = cmd.ExecuteReader())
+                    {
+                        if (reader.Read())
+                        {
+                            stats.Name = reader["FullName"].ToString();
+                            stats.XP = Convert.ToInt32(reader["TotalXP"]);
+                            stats.Level = (int)(stats.XP / 1000) + 1;
+                            stats.CO2Reduced = stats.XP * 0.002m;
+                            stats.Rank = GetUserRank(currentUserId);
+                            stats.Pickups = GetUserPickups(currentUserId);
+                        }
+                    }
+                }
+
+                // Get total stats
+                stats.TotalUsers = GetTotalUsers();
+                stats.TotalXP = GetTotalXP();
+                stats.TotalPickups = GetTotalPickups();
+                stats.TotalCO2Reduced = stats.TotalXP * 0.002m;
+
+            }
+            catch { }
+
+            return stats;
+        }
+
+        private int GetUserRank(string userId)
+        {
+            try
+            {
+                string query = @"
+                    SELECT COUNT(*) + 1 as Rank
+                    FROM Users
+                    WHERE ISNULL(XP_Credits, 0) > (SELECT ISNULL(XP_Credits, 0) FROM Users WHERE UserId = @UserId)
+                    AND RoleId IN ('CITZ', 'R001')
+                    AND IsVerified = 1";
+
+                using (SqlConnection conn = new SqlConnection(connectionString))
+                using (SqlCommand cmd = new SqlCommand(query, conn))
+                {
+                    cmd.Parameters.AddWithValue("@UserId", userId);
+                    conn.Open();
+                    return Convert.ToInt32(cmd.ExecuteScalar());
+                }
+            }
+            catch { return 1; }
         }
 
         private int GetTotalUsers()
         {
             try
             {
-                string query = "SELECT ISNULL(COUNT(*), 0) FROM Users WHERE Role IN ('CITZ', 'R001') AND Status = 'Active'";
-                return GetScalarValue(query);
+                string query = "SELECT COUNT(*) FROM Users WHERE RoleId IN ('CITZ', 'R001') AND IsVerified = 1";
+                using (SqlConnection conn = new SqlConnection(connectionString))
+                using (SqlCommand cmd = new SqlCommand(query, conn))
+                {
+                    conn.Open();
+                    return Convert.ToInt32(cmd.ExecuteScalar());
+                }
             }
-            catch (Exception ex)
-            {
-                System.Diagnostics.Debug.WriteLine("Error getting total users: " + ex.Message);
-                return 0;
-            }
+            catch { return 0; }
         }
 
         private int GetTotalXP()
         {
             try
             {
-                string query = "SELECT ISNULL(SUM(XP_Credits), 0) FROM Users WHERE Role IN ('CITZ', 'R001') AND Status = 'Active'";
-                return GetScalarValue(query);
+                string query = "SELECT ISNULL(SUM(XP_Credits), 0) FROM Users WHERE RoleId IN ('CITZ', 'R001') AND IsVerified = 1";
+                using (SqlConnection conn = new SqlConnection(connectionString))
+                using (SqlCommand cmd = new SqlCommand(query, conn))
+                {
+                    conn.Open();
+                    return Convert.ToInt32(cmd.ExecuteScalar());
+                }
             }
-            catch (Exception ex)
-            {
-                System.Diagnostics.Debug.WriteLine("Error getting total XP: " + ex.Message);
-                return 0;
-            }
+            catch { return 0; }
         }
 
         private int GetTotalPickups()
         {
             try
             {
-                string query = "SELECT ISNULL(COUNT(*), 0) FROM PickupRequests WHERE Status = 'Completed'";
-                return GetScalarValue(query);
-            }
-            catch (Exception ex)
-            {
-                System.Diagnostics.Debug.WriteLine("Error getting total pickups: " + ex.Message);
-                return 0;
-            }
-        }
-
-        private decimal GetTotalCO2Reduced()
-        {
-            try
-            {
-                string query = "SELECT ISNULL(SUM(XP_Credits) * 0.002, 0) FROM Users WHERE Role IN ('CITZ', 'R001') AND Status = 'Active'";
+                string query = "SELECT ISNULL(COUNT(*), 0) FROM PickupRequests WHERE Status = 'Collected'";
                 using (SqlConnection conn = new SqlConnection(connectionString))
                 using (SqlCommand cmd = new SqlCommand(query, conn))
                 {
                     conn.Open();
-                    var result = cmd.ExecuteScalar();
-                    return result != DBNull.Value ? Convert.ToDecimal(result) : 0;
+                    return Convert.ToInt32(cmd.ExecuteScalar());
                 }
             }
-            catch (Exception ex)
-            {
-                System.Diagnostics.Debug.WriteLine("Error getting total CO2 reduced: " + ex.Message);
-                return 0;
-            }
+            catch { return 0; }
         }
 
-        private int GetScalarValue(string query)
+        private List<Achievement> GetAchievements()
         {
-            try
+            var achievements = new List<Achievement>();
+
+            // Add some sample achievements
+            achievements.Add(new Achievement
             {
-                using (SqlConnection conn = new SqlConnection(connectionString))
-                using (SqlCommand cmd = new SqlCommand(query, conn))
-                {
-                    conn.Open();
-                    var result = cmd.ExecuteScalar();
-                    return result != DBNull.Value ? Convert.ToInt32(result) : 0;
-                }
-            }
-            catch (Exception ex)
+                Icon = "fa-recycle",
+                IconBg = "#10b981",
+                Title = "Most Waste Collected",
+                Description = "Top contributor in waste collection",
+                Winner = "ZAKI CABDIQADIR OMER"
+            });
+
+            achievements.Add(new Achievement
             {
-                System.Diagnostics.Debug.WriteLine("Scalar error: " + ex.Message);
-                return 0;
-            }
+                Icon = "fa-bolt",
+                IconBg = "#f59e0b",
+                Title = "Highest XP Earned",
+                Description = "Earned the most XP points",
+                Winner = "ZAKI CABDIQADIR OMER"
+            });
+
+            return achievements;
         }
 
-        private string GetUserName(string firstName, string lastName, string email)
+        private void UpdateUI(UserStats stats)
         {
-            if (!string.IsNullOrEmpty(firstName) && !string.IsNullOrEmpty(lastName))
-            {
-                return firstName + " " + lastName;
-            }
-            else if (!string.IsNullOrEmpty(firstName))
-            {
-                return firstName;
-            }
-            else if (!string.IsNullOrEmpty(lastName))
-            {
-                return lastName;
-            }
-            else if (!string.IsNullOrEmpty(email))
-            {
-                return email;
-            }
-            return "Anonymous User";
+            // UI is updated via JavaScript
         }
 
-        private string GetUserInitials(string firstName, string lastName, string email)
+        [WebMethod]
+        public static string RefreshLeaderboardData()
         {
-            if (!string.IsNullOrEmpty(firstName) && !string.IsNullOrEmpty(lastName))
-            {
-                return firstName.Substring(0, 1).ToUpper() + lastName.Substring(0, 1).ToUpper();
-            }
-            else if (!string.IsNullOrEmpty(firstName))
-            {
-                return firstName.Length >= 2 ? firstName.Substring(0, 2).ToUpper() : firstName.ToUpper();
-            }
-            else if (!string.IsNullOrEmpty(lastName))
-            {
-                return lastName.Length >= 2 ? lastName.Substring(0, 2).ToUpper() : lastName.ToUpper();
-            }
-            else if (!string.IsNullOrEmpty(email))
-            {
-                return email.Substring(0, 2).ToUpper();
-            }
-            return "US";
+            return "{\"Success\":true}";
         }
     }
 
@@ -504,14 +314,38 @@ namespace SoorGreen.Citizen
     {
         public string Id { get; set; }
         public string Name { get; set; }
-        public string Email { get; set; }
+        public string Location { get; set; }
         public int Rank { get; set; }
         public int XP { get; set; }
         public int Level { get; set; }
         public int Pickups { get; set; }
-        public int Achievements { get; set; }
         public decimal CO2Reduced { get; set; }
         public bool IsCurrentUser { get; set; }
-        public string Avatar { get; set; }
+        public string Trend { get; set; }
+        public DateTime MemberSince { get; set; }
+    }
+
+    public class UserStats
+    {
+        public string UserId { get; set; }
+        public string Name { get; set; }
+        public int Rank { get; set; }
+        public int XP { get; set; }
+        public int Level { get; set; }
+        public int Pickups { get; set; }
+        public decimal CO2Reduced { get; set; }
+        public int TotalUsers { get; set; }
+        public int TotalXP { get; set; }
+        public int TotalPickups { get; set; }
+        public decimal TotalCO2Reduced { get; set; }
+    }
+
+    public class Achievement
+    {
+        public string Icon { get; set; }
+        public string IconBg { get; set; }
+        public string Title { get; set; }
+        public string Description { get; set; }
+        public string Winner { get; set; }
     }
 }

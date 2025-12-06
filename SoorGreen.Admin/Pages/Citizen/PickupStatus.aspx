@@ -1,162 +1,218 @@
-﻿<%@ Page Title="Pickup Status" Language="C#" MasterPageFile="~/Pages/Citizen/Site.Master" AutoEventWireup="true" CodeFile="PickupStatus.aspx.cs" Inherits="SoorGreen.Admin.PickupStatus" %>
-<%@ Import Namespace="System.Web.Optimization" %>
+﻿<%@ Page Title="Pickup Status" Language="C#" MasterPageFile="~/Pages/Citizen/Site.Master" 
+    AutoEventWireup="true" CodeFile="PickupStatus.aspx.cs" Inherits="SoorGreen.Admin.PickupStatus" %>
+
+
 <asp:Content ID="Content3" ContentPlaceHolderID="HeadContent" runat="server">
-    <%: Styles.Render("~/Content/citizenpickupstatus") %>
+    <link href='<%= ResolveUrl("~/Content/Pages/Citizen/citizenpickupstatus.css") %>' rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
 </asp:Content>
+
 <asp:Content ID="Content4" ContentPlaceHolderID="ScriptsContent" runat="server">
-    <%: Scripts.Render("~/bundles/citizenpickupstatus") %>
+    <script src='<%= ResolveUrl("~/Scripts/Pages/Citizen/citizenpickupstatus.js") %>'></script>
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
 </asp:Content>
+
 <asp:Content ID="Content1" ContentPlaceHolderID="TitleContent" runat="server">
     Pickup Status - SoorGreen Citizen
 </asp:Content>
 
 <asp:Content ID="Content2" ContentPlaceHolderID="MainContent" runat="server">
-    <!-- Hidden Fields for Data Storage -->
-    <asp:HiddenField ID="hfActivePickups" runat="server" />
-    <asp:HiddenField ID="hfPickupHistory" runat="server" />
-    <asp:HiddenField ID="hfStatsData" runat="server" />
+    <!-- Hidden Fields -->
+    <asp:HiddenField ID="hfActivePickups" runat="server" ClientIDMode="Static" />
+    <asp:HiddenField ID="hfPickupHistory" runat="server" ClientIDMode="Static" />
+    <asp:HiddenField ID="hfStatsData" runat="server" ClientIDMode="Static" />
+    <asp:HiddenField ID="hfUserId" runat="server" ClientIDMode="Static" />
     
-   
+    <br />
+    <br />
+    <br />
     <div class="pickups-container">
-        <br />
-        <br />
-        <br />
-        
-        <!-- STATISTICS -->
-        <div class="stats-grid">
-            <div class="stat-card" onclick="switchTab('active')">
-                <div class="stat-icon">
-                    <i class="fas fa-truck-loading"></i>
+        <!-- Header -->
+        <div class="page-header-wrapper">
+            <nav class="breadcrumb">
+                <a href="Dashboard.aspx"><i class="fas fa-home"></i> Dashboard</a>
+                <i class="fas fa-chevron-right"></i>
+                <span class="active">Pickup Status</span>
+            </nav>
+            
+            <div class="header-main">
+                <div class="header-text">
+                    <h1 class="page-title">
+                        <i class="fas fa-truck-loading"></i>
+                        Pickup Status
+                    </h1>
+                    <p class="page-subtitle">Track, manage, and monitor your waste collection requests</p>
                 </div>
-                <div class="stat-value" id="totalPickups">0</div>
-                <div class="stat-label">Total Pickups</div>
+                
+                <div class="header-action">
+                    <button id="btnRefresh" class="btn-refresh" onclick="refreshData(); return false;">
+                        <i class="fas fa-sync-alt"></i> Refresh
+                    </button>
+                    <button class="btn-export" onclick="exportPickups(); return false;">
+                        <i class="fas fa-file-export"></i>
+                        Export Data
+                    </button>
+                    <button class="btn-new-pickup" onclick="window.location.href='SchedulePickup.aspx'; return false;">
+                        <i class="fas fa-plus"></i>
+                        Schedule Pickup
+                    </button>
+                </div>
             </div>
-            <div class="stat-card" onclick="switchTab('active')">
-                <div class="stat-icon">
-                    <i class="fas fa-spinner"></i>
+            
+            <!-- Stats Grid -->
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="fas fa-truck-loading"></i>
+                    </div>
+                    <div class="stat-content">
+                        <div class="stat-value" id="totalPickups">0</div>
+                        <div class="stat-label">Total Pickups</div>
+                    </div>
                 </div>
-                <div class="stat-value" id="activePickups">0</div>
-                <div class="stat-label">Active Pickups</div>
-            </div>
-            <div class="stat-card" onclick="switchTab('history')">
-                <div class="stat-icon">
-                    <i class="fas fa-check-circle"></i>
+                
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="fas fa-spinner"></i>
+                    </div>
+                    <div class="stat-content">
+                        <div class="stat-value" id="activePickups">0</div>
+                        <div class="stat-label">Active</div>
+                    </div>
                 </div>
-                <div class="stat-value" id="completedPickups">0</div>
-                <div class="stat-label">Completed</div>
-            </div>
-            <div class="stat-card" onclick="switchTab('history')">
-                <div class="stat-icon">
-                    <i class="fas fa-chart-line"></i>
+                
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="fas fa-check-circle"></i>
+                    </div>
+                    <div class="stat-content">
+                        <div class="stat-value" id="completedPickups">0</div>
+                        <div class="stat-label">Completed</div>
+                    </div>
                 </div>
-                <div class="stat-value" id="successRate">0%</div>
-                <div class="stat-label">Success Rate</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-icon">
-                    <i class="fas fa-star"></i>
+                
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="fas fa-chart-line"></i>
+                    </div>
+                    <div class="stat-content">
+                        <div class="stat-value" id="successRate">0%</div>
+                        <div class="stat-label">Success Rate</div>
+                    </div>
                 </div>
-                <div class="stat-value" id="totalXP">0 XP</div>
-                <div class="stat-label">Total XP Earned</div>
             </div>
         </div>
 
-        <!-- HEADER -->
-        <div class="d-flex justify-content-between align-items-center mb-4">
-            <div>
-                <h1 style="color: #ffffff !important; margin: 0;">Pickup Status</h1>
-                <p class="text-muted mb-0">Track and manage your waste collection requests</p>
-            </div>
-            <div>
-                <asp:Button ID="btnRefresh" runat="server" Text="Refresh Data" 
-                    CssClass="btn-primary me-2" OnClick="btnLoadData_Click" />
-                <button type="button" class="btn-outline-light" onclick="window.location.href='SchedulePickup.aspx'">
-                    <i class="fas fa-plus me-2"></i>Schedule New Pickup
+        <!-- Tabs Navigation -->
+        <div class="tabs-container">
+            <div class="tabs">
+                <button class="tab active" data-tab="active" onclick="switchTab('active'); return false;">
+                    <i class="fas fa-spinner"></i>
+                    Active Pickups
+                    <span class="tab-badge" id="activeTabBadge">0</span>
+                </button>
+                <button class="tab" data-tab="history" onclick="switchTab('history'); return false;">
+                    <i class="fas fa-history"></i>
+                    Pickup History
+                    <span class="tab-badge" id="historyTabBadge">0</span>
                 </button>
             </div>
         </div>
 
-        <!-- TABS -->
-        <div class="tabs mb-4" style="display: flex; gap: 0.5rem; border-bottom: 1px solid rgba(255, 255, 255, 0.1); padding-bottom: 0.5rem;">
-            <button type="button" class="tab active" data-tab="active" style="background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); color: rgba(255, 255, 255, 0.7) !important; padding: 0.75rem 1.5rem; border-radius: 8px 8px 0 0; cursor: pointer; transition: all 0.3s ease; font-weight: 600;">
-                Active Pickups
-            </button>
-            <button type="button" class="tab" data-tab="history" style="background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); color: rgba(255, 255, 255, 0.7) !important; padding: 0.75rem 1.5rem; border-radius: 8px 8px 0 0; cursor: pointer; transition: all 0.3s ease; font-weight: 600;">
-                Pickup History
-            </button>
+        <!-- Filters Section -->
+        <div class="filters-container">
+            <div class="filters-header">
+                <h3><i class="fas fa-filter"></i> Filter Pickups</h3>
+                <button class="btn-clear-filters" onclick="clearFilters(); return false;">
+                    <i class="fas fa-times"></i> Clear Filters
+                </button>
+            </div>
+            
+            <div class="filters-grid">
+                <div class="filter-group">
+                    <label><i class="fas fa-search"></i> Search</label>
+                    <div class="search-box">
+                        <input type="text" id="searchPickups" placeholder="Search by ID, address, or collector..." />
+                        <i class="fas fa-search"></i>
+                    </div>
+                </div>
+                
+                <div class="filter-group">
+                    <label><i class="fas fa-tag"></i> Status</label>
+                    <select id="statusFilter" class="form-control">
+                        <option value="all">All Status</option>
+                        <option value="Requested">Requested</option>
+                        <option value="Scheduled">Scheduled</option>
+                        <option value="Assigned">Assigned</option>
+                        <option value="In Progress">In Progress</option>
+                        <option value="Completed">Completed</option>
+                        <option value="Cancelled">Cancelled</option>
+                    </select>
+                </div>
+                
+                <div class="filter-group">
+                    <label><i class="fas fa-trash-alt"></i> Waste Type</label>
+                    <select id="wasteTypeFilter" class="form-control">
+                        <option value="all">All Types</option>
+                        <option value="Plastic">Plastic</option>
+                        <option value="Paper">Paper</option>
+                        <option value="Glass">Glass</option>
+                        <option value="Metal">Metal</option>
+                        <option value="E-Waste">E-Waste</option>
+                        <option value="Organic">Organic</option>
+                    </select>
+                </div>
+                
+                <div class="filter-group">
+                    <label><i class="fas fa-calendar"></i> Date Range</label>
+                    <div class="date-range-picker">
+                        <input type="text" id="dateRangeFilter" placeholder="Select date range..." readonly />
+                        <i class="fas fa-calendar-alt"></i>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="filters-actions">
+                <button class="btn-apply-filters" onclick="applyFilters(); return false;">
+                    <i class="fas fa-check"></i> Apply Filters
+                </button>
+            </div>
         </div>
 
-        <!-- ACTIVE PICKUPS TAB -->
-        <div class="tab-content active" id="activeTab">
-            <!-- FILTER CARD -->
-            <div class="filter-card">
-                <h5 class="mb-3" style="color: #ffffff !important;"><i class="fas fa-filter me-2"></i>Filter Pickups</h5>
-                <div class="filter-group">
-                    <div class="form-group search-box">
-                        <label class="form-label">Search Pickups</label>
-                        <div class="position-relative">
-                            <i class="fas fa-search search-icon"></i>
-                            <input type="text" class="form-control search-input" id="searchPickups" placeholder="Search by ID, waste type, or address...">
+        <!-- Active Pickups Tab Content -->
+        <div class="tab-content active" id="activeTabContent">
+            <div class="reports-section">
+                <div class="section-header">
+                    <h2><i class="fas fa-spinner"></i> Active Pickups</h2>
+                    <div class="section-actions">
+                        <div class="view-toggle">
+                            <button class="view-btn active" data-view="grid" onclick="switchView('grid'); return false;">
+                                <i class="fas fa-th-large"></i>
+                            </button>
+                            <button class="view-btn" data-view="list" onclick="switchView('list'); return false;">
+                                <i class="fas fa-list"></i>
+                            </button>
                         </div>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label class="form-label">Status</label>
-                        <select class="form-control" id="statusFilter">
-                            <option value="all">All Status</option>
-                            <option value="requested">Requested</option>
-                            <option value="scheduled">Scheduled</option>
-                            <option value="assigned">Assigned</option>
+                        <select id="sortBy" class="form-control" onchange="sortPickups(); return false;">
+                            <option value="date-newest">Date: Newest First</option>
+                            <option value="date-oldest">Date: Oldest First</option>
+                            <option value="weight-high">Weight: High to Low</option>
+                            <option value="status">Status</option>
                         </select>
                     </div>
-                    
-                    <div class="form-group">
-                        <label class="form-label">Date Range</label>
-                        <select class="form-control" id="dateFilter">
-                            <option value="all">All Time</option>
-                            <option value="today">Today</option>
-                            <option value="week">This Week</option>
-                            <option value="month">This Month</option>
-                        </select>
-                    </div>
-                    
-                    <div class="form-group">
-                        <button type="button" class="btn-primary" id="applyFiltersBtn" style="margin-top: 1.7rem;">
-                            <i class="fas fa-filter me-2"></i>Apply Filters
-                        </button>
-                    </div>
                 </div>
-            </div>
-
-            <!-- VIEW OPTIONS -->
-            <div class="d-flex justify-content-between align-items-center mb-3">
-                <div class="view-options">
-                    <button type="button" class="view-btn active" data-view="grid">
-                        <i class="fas fa-th me-2"></i>Grid View
-                    </button>
-                    <button type="button" class="view-btn" data-view="table">
-                        <i class="fas fa-table me-2"></i>Table View
-                    </button>
-                </div>
-                <div class="page-info" id="pageInfo">
-                    Showing 0 pickups
-                </div>
-            </div>
-
-            <!-- GRID VIEW -->
-            <div id="gridView">
-                <div class="pickups-grid" id="activePickupsGrid">
-                    <div class="loading-spinner">
+                
+                <!-- Grid View -->
+                <div class="reports-grid" id="activeGridView">
+                    <div class="loading-state">
                         <i class="fas fa-spinner fa-spin"></i>
                         <p>Loading active pickups...</p>
                     </div>
                 </div>
-            </div>
-
-            <!-- TABLE VIEW -->
-            <div id="tableView" style="display: none;">
-                <div class="table-responsive">
-                    <table class="pickups-table" id="activePickupsTable">
+                
+                <!-- List View -->
+                <div class="reports-table-container" id="activeListView" style="display: none;">
+                    <table class="reports-table">
                         <thead>
                             <tr>
                                 <th>Pickup ID</th>
@@ -169,60 +225,76 @@
                                 <th>Actions</th>
                             </tr>
                         </thead>
-                        <tbody id="activePickupsTableBody">
+                        <tbody id="activeTableBody">
                             <tr>
                                 <td colspan="8" class="text-center">Loading active pickups...</td>
                             </tr>
                         </tbody>
                     </table>
                 </div>
-            </div>
-
-            <!-- PAGINATION -->
-            <div class="pagination-container">
-                <div class="page-info" id="paginationInfo">
-                    Page 1 of 1
+                
+                <!-- Empty State -->
+                <div id="activeEmptyState" class="empty-state" style="display: none;">
+                    <div class="empty-state-icon">
+                        <i class="fas fa-calendar-check"></i>
+                    </div>
+                    <h3>No Active Pickups</h3>
+                    <p>You don't have any active pickups at the moment.</p>
+                    <button class="btn btn-primary" onclick="window.location.href='SchedulePickup.aspx'; return false;">
+                        <i class="fas fa-plus"></i> Schedule a Pickup
+                    </button>
                 </div>
-                <nav>
-                    <ul class="pagination mb-0" id="pagination">
-                    </ul>
-                </nav>
-            </div>
-
-            <!-- EMPTY STATE -->
-            <div id="noActiveEmptyState" class="empty-state" style="display: none;">
-                <div class="empty-state-icon">
-                    <i class="fas fa-calendar-check"></i>
+                
+                <!-- Pagination -->
+                <div class="pagination-container">
+                    <div class="pagination-info" id="activePaginationInfo">Showing 0 pickups</div>
+                    <div class="pagination-controls">
+                        <button class="btn-pagination" id="activePrevPageBtn" onclick="prevPage('active'); return false;" disabled>
+                            <i class="fas fa-chevron-left"></i> Previous
+                        </button>
+                        <div class="page-numbers" id="activePageNumbers"></div>
+                        <button class="btn-pagination" id="activeNextPageBtn" onclick="nextPage('active'); return false;" disabled>
+                            Next <i class="fas fa-chevron-right"></i>
+                        </button>
+                    </div>
                 </div>
-                <h3 class="empty-state-title">No Active Pickups</h3>
-                <p class="empty-state-description">You don't have any active pickups at the moment.</p>
-                <button type="button" class="btn-primary" onclick="window.location.href='SchedulePickup.aspx'">
-                    <i class="fas fa-plus me-2"></i>Schedule a Pickup
-                </button>
             </div>
         </div>
 
-        <!-- HISTORY TAB -->
-        <div class="tab-content" id="historyTab" style="display: none;">
-            <!-- VIEW OPTIONS -->
-            <div class="d-flex justify-content-between align-items-center mb-3">
-                <div class="view-options">
-                    <button type="button" class="view-btn active" data-view="table" data-section="history">
-                        <i class="fas fa-table me-2"></i>Table View
-                    </button>
-                    <button type="button" class="view-btn" data-view="grid" data-section="history">
-                        <i class="fas fa-th me-2"></i>Grid View
-                    </button>
+        <!-- History Tab Content -->
+        <div class="tab-content" id="historyTabContent" style="display: none;">
+            <div class="reports-section">
+                <div class="section-header">
+                    <h2><i class="fas fa-history"></i> Pickup History</h2>
+                    <div class="section-actions">
+                        <div class="view-toggle">
+                            <button class="view-btn active" data-view="grid" onclick="switchHistoryView('grid'); return false;">
+                                <i class="fas fa-th-large"></i>
+                            </button>
+                            <button class="view-btn" data-view="list" onclick="switchHistoryView('list'); return false;">
+                                <i class="fas fa-list"></i>
+                            </button>
+                        </div>
+                        <select id="historySortBy" class="form-control" onchange="sortHistory(); return false;">
+                            <option value="date-newest">Date: Newest First</option>
+                            <option value="date-oldest">Date: Oldest First</option>
+                            <option value="xp-high">XP: High to Low</option>
+                            <option value="weight-high">Weight: High to Low</option>
+                        </select>
+                    </div>
                 </div>
-                <div class="page-info" id="historyPageInfo">
-                    Showing 0 historical pickups
+                
+                <!-- Grid View -->
+                <div class="reports-grid" id="historyGridView">
+                    <div class="loading-state">
+                        <i class="fas fa-spinner fa-spin"></i>
+                        <p>Loading pickup history...</p>
+                    </div>
                 </div>
-            </div>
-
-            <!-- TABLE VIEW -->
-            <div id="historyTableView">
-                <div class="table-responsive">
-                    <table class="pickups-table" id="historyTable">
+                
+                <!-- List View -->
+                <div class="reports-table-container" id="historyListView" style="display: none;">
+                    <table class="reports-table">
                         <thead>
                             <tr>
                                 <th>Pickup ID</th>
@@ -242,120 +314,182 @@
                         </tbody>
                     </table>
                 </div>
-            </div>
-
-            <!-- GRID VIEW -->
-            <div id="historyGridView" style="display: none;">
-                <div class="pickups-grid" id="historyPickupsGrid">
-                    <div class="loading-spinner">
-                        <i class="fas fa-spinner fa-spin"></i>
-                        <p>Loading pickup history...</p>
+                
+                <!-- Empty State -->
+                <div id="historyEmptyState" class="empty-state" style="display: none;">
+                    <div class="empty-state-icon">
+                        <i class="fas fa-history"></i>
+                    </div>
+                    <h3>No Pickup History</h3>
+                    <p>You haven't completed any pickups yet.</p>
+                </div>
+                
+                <!-- Pagination -->
+                <div class="pagination-container">
+                    <div class="pagination-info" id="historyPaginationInfo">Showing 0 pickups</div>
+                    <div class="pagination-controls">
+                        <button class="btn-pagination" id="historyPrevPageBtn" onclick="prevPage('history'); return false;" disabled>
+                            <i class="fas fa-chevron-left"></i> Previous
+                        </button>
+                        <div class="page-numbers" id="historyPageNumbers"></div>
+                        <button class="btn-pagination" id="historyNextPageBtn" onclick="nextPage('history'); return false;" disabled>
+                            Next <i class="fas fa-chevron-right"></i>
+                        </button>
                     </div>
                 </div>
             </div>
+        </div>
+    </div>
 
-            <!-- PAGINATION -->
-            <div class="pagination-container">
-                <div class="page-info" id="historyPaginationInfo">
-                    Page 1 of 1
-                </div>
-                <nav>
-                    <ul class="pagination mb-0" id="historyPagination">
-                    </ul>
-                </nav>
+    <!-- Pickup Details Modal -->
+    <div class="modal-overlay" id="pickupDetailsModal" style="display: none;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2><i class="fas fa-truck-loading"></i> Pickup Details</h2>
+                <button class="btn-close-modal" onclick="closeModal(); return false;">
+                    <i class="fas fa-times"></i>
+                </button>
             </div>
-
-            <!-- EMPTY STATE -->
-            <div id="historyEmptyState" class="empty-state" style="display: none;">
-                <div class="empty-state-icon">
-                    <i class="fas fa-history"></i>
+            
+            <div class="modal-body">
+                <div class="report-details" id="pickupDetailsContent">
+                    <!-- Will be populated by JavaScript -->
                 </div>
-                <h3 class="empty-state-title">No Pickup History</h3>
-                <p class="empty-state-description">You haven't completed any pickups yet.</p>
+                
+                <div class="modal-actions">
+                    <button class="btn btn-outline" onclick="closeModal(); return false;">
+                        <i class="fas fa-times"></i> Close
+                    </button>
+                    <button class="btn btn-warning" id="cancelPickupBtn" onclick="showCancelConfirmation(); return false;">
+                        <i class="fas fa-times-circle"></i> Cancel Pickup
+                    </button>
+                    <button class="btn btn-primary" id="reschedulePickupBtn" onclick="reschedulePickup(); return false;">
+                        <i class="fas fa-calendar-alt"></i> Reschedule
+                    </button>
+                </div>
             </div>
         </div>
     </div>
 
-    <!-- PICKUP DETAILS MODAL -->
-    <div class="modal-overlay" id="viewPickupModal">
-        <div class="modal-content" style="max-width: 600px;">
+    <!-- Cancel Confirmation Modal -->
+    <div class="modal-overlay" id="cancelConfirmationModal" style="display: none;">
+        <div class="modal-content">
             <div class="modal-header">
-                <h3 class="modal-title">Pickup Details</h3>
-                <button type="button" class="close-modal">&times;</button>
+                <h2><i class="fas fa-exclamation-triangle"></i> Confirm Cancellation</h2>
+                <button class="btn-close-modal" onclick="closeCancelModal(); return false;">
+                    <i class="fas fa-times"></i>
+                </button>
             </div>
+            
             <div class="modal-body">
-                <div class="pickup-details-container">
-                    <div class="pickup-info-grid">
-                        <div class="info-item">
-                            <label>Pickup ID:</label>
-                            <span id="viewPickupId">-</span>
-                        </div>
-                        <div class="info-item">
-                            <label>Waste Type:</label>
-                            <span id="viewWasteType">-</span>
-                        </div>
-                        <div class="info-item">
-                            <label>Weight:</label>
-                            <span id="viewWeight">-</span>
-                        </div>
-                        <div class="info-item">
-                            <label>Status:</label>
-                            <span id="viewStatus">-</span>
-                        </div>
-                        <div class="info-item">
-                            <label>Scheduled Date:</label>
-                            <span id="viewScheduledDate">-</span>
-                        </div>
-                        <div class="info-item">
-                            <label>Collector:</label>
-                            <span id="viewCollector">-</span>
-                        </div>
-                        <div class="info-item full-width">
-                            <label>Address:</label>
-                            <span id="viewAddress">-</span>
-                        </div>
-                        <div class="info-item full-width">
-                            <label>XP Earned:</label>
-                            <span id="viewXPEarned">-</span>
-                        </div>
-                        <div class="info-item">
-                            <label>Created Date:</label>
-                            <span id="viewCreatedDate">-</span>
-                        </div>
-                        <div class="info-item">
-                            <label>Completed Date:</label>
-                            <span id="viewCompletedDate">-</span>
+                <div class="delete-warning">
+                    <i class="fas fa-times-circle"></i>
+                    <h3>Cancel Pickup?</h3>
+                    <p id="cancelMessage">Are you sure you want to cancel this pickup? This action cannot be undone.</p>
+                </div>
+                
+                <div class="modal-actions">
+                    <button class="btn btn-outline" onclick="closeCancelModal(); return false;">
+                        <i class="fas fa-times"></i> Cancel
+                    </button>
+                    <button class="btn btn-danger" id="confirmCancelBtn" onclick="cancelPickup(); return false;">
+                        <i class="fas fa-times-circle"></i> Cancel Pickup
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Export Modal -->
+    <div class="modal-overlay" id="exportModal" style="display: none;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2><i class="fas fa-file-export"></i> Export Pickups</h2>
+                <button class="btn-close-modal" onclick="closeExportModal(); return false;">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            
+            <div class="modal-body">
+                <div class="export-options">
+                    <div class="export-option">
+                        <input type="radio" id="exportPdf" name="exportFormat" value="pdf" checked />
+                        <label for="exportPdf">
+                            <i class="fas fa-file-pdf"></i>
+                            <div>
+                                <h4>PDF Document</h4>
+                                <p>Best for printing and sharing</p>
+                            </div>
+                        </label>
+                    </div>
+                    
+                    <div class="export-option">
+                        <input type="radio" id="exportExcel" name="exportFormat" value="excel" />
+                        <label for="exportExcel">
+                            <i class="fas fa-file-excel"></i>
+                            <div>
+                                <h4>Excel Spreadsheet</h4>
+                                <p>Best for data analysis</p>
+                            </div>
+                        </label>
+                    </div>
+                    
+                    <div class="export-option">
+                        <input type="radio" id="exportCsv" name="exportFormat" value="csv" />
+                        <label for="exportCsv">
+                            <i class="fas fa-file-csv"></i>
+                            <div>
+                                <h4>CSV File</h4>
+                                <p>Best for importing to other systems</p>
+                            </div>
+                        </label>
+                    </div>
+                </div>
+                
+                <div class="export-settings">
+                    <div class="form-group">
+                        <label><i class="fas fa-calendar"></i> Date Range</label>
+                        <select id="exportDateRange" class="form-control">
+                            <option value="all">All Pickups</option>
+                            <option value="active">Active Only</option>
+                            <option value="history">History Only</option>
+                            <option value="today">Today</option>
+                            <option value="week">This Week</option>
+                            <option value="month">This Month</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label><i class="fas fa-columns"></i> Include Data</label>
+                        <div class="checkbox-group">
+                            <label class="checkbox-label">
+                                <input type="checkbox" id="includeBasic" checked />
+                                <span class="checkmark"></span>
+                                Basic Information
+                            </label>
+                            <label class="checkbox-label">
+                                <input type="checkbox" id="includeStatus" checked />
+                                <span class="checkmark"></span>
+                                Status Details
+                            </label>
+                            <label class="checkbox-label">
+                                <input type="checkbox" id="includePerformance" />
+                                <span class="checkmark"></span>
+                                Performance Metrics
+                            </label>
                         </div>
                     </div>
                 </div>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn-action" id="closePickupModalBtn">Close</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- CANCEL CONFIRMATION MODAL -->
-    <div class="modal-overlay" id="cancelPickupModal">
-        <div class="modal-content" style="max-width: 500px;">
-            <div class="modal-header">
-                <h3 class="modal-title">Confirm Cancellation</h3>
-                <button type="button" class="close-modal">&times;</button>
-            </div>
-            <div class="modal-body">
-                <div class="text-center">
-                    <i class="fas fa-exclamation-triangle fa-3x text-warning mb-3"></i>
-                    <h4>Are you sure?</h4>
-                    <p>You are about to cancel pickup: <strong id="cancelPickupId">-</strong></p>
-                    <p class="text-muted">This action cannot be undone.</p>
+                
+                <div class="modal-actions">
+                    <button class="btn btn-outline" onclick="closeExportModal(); return false;">
+                        <i class="fas fa-times"></i> Cancel
+                    </button>
+                    <button class="btn btn-primary" onclick="generateExport(); return false;">
+                        <i class="fas fa-download"></i> Export
+                    </button>
                 </div>
             </div>
-            <div class="modal-footer">
-                <button type="button" class="btn-action" id="cancelCancelBtn" style="flex: 1;">Cancel</button>
-                <button type="button" class="btn-primary" id="confirmCancelBtn" style="flex: 1;">Cancel Pickup</button>
-            </div>
         </div>
     </div>
-
-        
 </asp:Content>

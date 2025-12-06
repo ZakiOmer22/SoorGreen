@@ -1229,7 +1229,7 @@
         </div>
         <div class="preloader-content">
             <div class="preloader-logo">
-                <i class="fas fa-recycle"></i>
+                <image src="favicon.ico" />
             </div>
             <h1 class="preloader-title">SoorGreen</h1>
             <p class="preloader-subtitle">Building Sustainable Cities Together</p>

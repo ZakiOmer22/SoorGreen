@@ -1,0 +1,387 @@
+﻿<%@ Page Title="Report Waste" Language="C#" MasterPageFile="~/Pages/Citizen/Site.Master" 
+    AutoEventWireup="true" CodeFile="ReportWaste.aspx.cs" Inherits="SoorGreen.Admin.ReportWaste" %>
+
+<asp:Content ID="Content3" ContentPlaceHolderID="HeadContent" runat="server">
+    <link href='<%= ResolveUrl("~/Content/Pages/Citizen/citizenreportwaste.css") %>' rel="stylesheet" />
+</asp:Content>
+
+<asp:Content ID="Content4" ContentPlaceHolderID="ScriptsContent" runat="server">
+    <script src='<%= ResolveUrl("~/Scripts/Pages/Citizen/citizenreportwaste.js") %>'></script>
+</asp:Content>
+
+<asp:Content ID="Content1" ContentPlaceHolderID="TitleContent" runat="server">
+    Report Waste - SoorGreen Citizen
+</asp:Content>
+
+
+<asp:Content ID="Content2" ContentPlaceHolderID="MainContent" runat="server">
+    <div class="report-container">
+        <!-- Page Header -->
+        <div class="page-header">
+            <div class="header-content">
+                <div class="header-left">
+                    <h1>Report New Waste</h1>
+                    <p class="subtitle">Submit waste for collection and earn rewards</p>
+                </div>
+                <div class="reward-badge">
+                    <i class="fas fa-gift"></i>
+                    Earn up to <asp:Literal ID="litMaxReward" runat="server" Text="0" /> XP
+                </div>
+            </div>
+        </div>
+
+        <!-- Stats Cards -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-content">
+                    <div class="stat-text">
+                        <h3>Total Reports</h3>
+                        <div class="stat-value" id="totalReports">0</div>
+                        <span class="stat-trend trend-up"><i class="fas fa-arrow-up"></i> 12%</span>
+                    </div>
+                    <div class="stat-icon reports">
+                        <i class="fas fa-file-alt"></i>
+                    </div>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-content">
+                    <div class="stat-text">
+                        <h3>XP Earned</h3>
+                        <div class="stat-value" id="totalRewards">0</div>
+                        <span class="stat-trend trend-up"><i class="fas fa-arrow-up"></i> 8%</span>
+                    </div>
+                    <div class="stat-icon rewards">
+                        <i class="fas fa-coins"></i>
+                    </div>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-content">
+                    <div class="stat-text">
+                        <h3>Avg Weight</h3>
+                        <div class="stat-value" id="avgWeight">0.0<span style="font-size: 16px; color: var(--secondary-text);">kg</span></div>
+                        <span class="stat-trend trend-up"><i class="fas fa-arrow-up"></i> 5%</span>
+                    </div>
+                    <div class="stat-icon weight">
+                        <i class="fas fa-weight-hanging"></i>
+                    </div>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-content">
+                    <div class="stat-text">
+                        <h3>Success Rate</h3>
+                        <div class="stat-value" id="successRate">0%</div>
+                        <span class="stat-trend trend-down"><i class="fas fa-arrow-down"></i> 2%</span>
+                    </div>
+                    <div class="stat-icon success">
+                        <i class="fas fa-check-circle"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Progress Bar -->
+        <div class="progress-container">
+            <div class="progress-header">
+                <div class="progress-title">Submission Progress</div>
+                <div class="progress-percentage" id="progressPercentage">25%</div>
+            </div>
+            <div class="progress-bar">
+                <div class="progress-fill" id="progressFill" style="width: 25%"></div>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="report-main">
+            <!-- Steps Sidebar -->
+            <div class="steps-sidebar">
+                <div class="step-item active" onclick="goToStep(1)">
+                    <div class="step-number">1</div>
+                    <div class="step-info">
+                        <h4>Select Waste Type</h4>
+                        <p>Choose category</p>
+                    </div>
+                </div>
+                <div class="step-item" onclick="goToStep(2)">
+                    <div class="step-number">2</div>
+                    <div class="step-info">
+                        <h4>Waste Details</h4>
+                        <p>Weight & description</p>
+                    </div>
+                </div>
+                <div class="step-item" onclick="goToStep(3)">
+                    <div class="step-number">3</div>
+                    <div class="step-info">
+                        <h4>Location</h4>
+                        <p>Collection address</p>
+                    </div>
+                </div>
+                <div class="step-item" onclick="goToStep(4)">
+                    <div class="step-number">4</div>
+                    <div class="step-info">
+                        <h4>Review & Submit</h4>
+                        <p>Final confirmation</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Form Container -->
+            <div class="form-container">
+                <!-- Step 1: Waste Type -->
+                <div class="form-step active" id="step1Form">
+                    <div class="form-header">
+                        <h2>Select Waste Type</h2>
+                        <p>Choose the type of waste you want to report for collection</p>
+                    </div>
+
+                    <div class="waste-grid">
+                        <div class="waste-card" data-type="plastic" data-typeid="WT01">
+                            <div class="waste-icon text-primary">
+                                <i class="fas fa-wine-bottle"></i>
+                            </div>
+                            <div class="waste-name">Plastic</div>
+                            <div class="waste-desc">Bottles, containers, packaging materials</div>
+                            <div class="waste-rate">5 XP/kg</div>
+                        </div>
+                        <div class="waste-card" data-type="paper" data-typeid="WT02">
+                            <div class="waste-icon text-warning">
+                                <i class="fas fa-newspaper"></i>
+                            </div>
+                            <div class="waste-name">Paper</div>
+                            <div class="waste-desc">Newspapers, cardboard, office paper</div>
+                            <div class="waste-rate" style="background: var(--warning);">3 XP/kg</div>
+                        </div>
+                        <div class="waste-card" data-type="glass" data-typeid="WT03">
+                            <div class="waste-icon text-success">
+                                <i class="fas fa-wine-bottle"></i>
+                            </div>
+                            <div class="waste-name">Glass</div>
+                            <div class="waste-desc">Bottles, jars, glass containers</div>
+                            <div class="waste-rate" style="background: var(--success);">4 XP/kg</div>
+                        </div>
+                        <div class="waste-card" data-type="metal" data-typeid="WT04">
+                            <div class="waste-icon text-info">
+                                <i class="fas fa-cube"></i>
+                            </div>
+                            <div class="waste-name">Metal</div>
+                            <div class="waste-desc">Cans, foil, metal containers</div>
+                            <div class="waste-rate" style="background: var(--info);">6 XP/kg</div>
+                        </div>
+                        <div class="waste-card" data-type="ewaste" data-typeid="WT05">
+                            <div class="waste-icon text-danger">
+                                <i class="fas fa-laptop"></i>
+                            </div>
+                            <div class="waste-name">E-Waste</div>
+                            <div class="waste-desc">Electronics, batteries, devices</div>
+                            <div class="waste-rate" style="background: var(--danger);">8 XP/kg</div>
+                        </div>
+                        <div class="waste-card" data-type="organic" data-typeid="WT06">
+                            <div class="waste-icon text-success">
+                                <i class="fas fa-leaf"></i>
+                            </div>
+                            <div class="waste-name">Organic</div>
+                            <div class="waste-desc">Food waste, garden waste</div>
+                            <div class="waste-rate" style="background: #22c55e;">2 XP/kg</div>
+                        </div>
+                    </div>
+
+                    <asp:HiddenField ID="hdnWasteType" runat="server" />
+                    <asp:HiddenField ID="hdnWasteTypeId" runat="server" />
+
+                    <div class="form-navigation">
+                        <div></div>
+                        <button type="button" class="btn btn-primary" onclick="nextStep(2)">
+                            Continue <i class="fas fa-arrow-right"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Step 2: Waste Details -->
+                <div class="form-step" id="step2Form">
+                    <div class="form-header">
+                        <h2>Waste Details</h2>
+                        <p>Provide details about the waste you're reporting</p>
+                    </div>
+
+                    <div class="form-section">
+                        <div class="form-group">
+                            <label class="form-label">Estimated Weight</label>
+                            <div class="input-with-icon">
+                                <i class="fas fa-weight input-icon"></i>
+                                <asp:TextBox ID="txtWeight" runat="server" CssClass="form-control" 
+                                    placeholder="Enter weight in kilograms" TextMode="Number" step="0.1" min="0.1" />
+                            </div>
+                            <small style="color: var(--secondary-text); font-size: 12px; margin-top: 4px; display: block;">
+                                Collector will verify actual weight during pickup
+                            </small>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Description (Optional)</label>
+                            <asp:TextBox ID="txtDescription" runat="server" CssClass="form-control" 
+                                placeholder="Describe the waste (e.g., 'Plastic bottles', 'Old newspapers')" 
+                                TextMode="MultiLine" Rows="4" />
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Upload Photo (Optional)</label>
+                            <div class="photo-upload" onclick="document.getElementById('<%= filePhoto.ClientID %>').click()">
+                                <div class="photo-upload-icon">
+                                    <i class="fas fa-cloud-upload-alt"></i>
+                                </div>
+                                <p style="color: var(--secondary-text); margin-bottom: 8px;">Click to upload waste photo</p>
+                                <small style="color: var(--secondary-text);">JPG, PNG - Max 5MB</small>
+                                <asp:FileUpload ID="filePhoto" runat="server" Style="display: none;" onchange="previewPhoto(this)" />
+                            </div>
+                            <img id="photoPreview" style="max-width: 200px; max-height: 200px; border-radius: 8px; margin-top: 16px; display: none;" />
+                        </div>
+                    </div>
+
+                    <div class="form-navigation">
+                        <button type="button" class="btn btn-outline" onclick="prevStep(1)">
+                            <i class="fas fa-arrow-left"></i> Back
+                        </button>
+                        <button type="button" class="btn btn-primary" onclick="nextStep(3)">
+                            Continue <i class="fas fa-arrow-right"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Step 3: Location -->
+                <div class="form-step" id="step3Form">
+                    <div class="form-header">
+                        <h2>Collection Location</h2>
+                        <p>Specify where the waste should be collected from</p>
+                    </div>
+
+                    <div class="form-section">
+                        <div class="form-group">
+                            <label class="form-label">Full Address <span style="color: var(--danger);">*</span></label>
+                            <div class="input-with-icon">
+                                <i class="fas fa-map-marker-alt input-icon"></i>
+                                <asp:TextBox ID="txtAddress" runat="server" CssClass="form-control" 
+                                    placeholder="Enter complete address for collection" TextMode="MultiLine" Rows="3" />
+                            </div>
+                        </div>
+
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 24px;">
+                            <div class="form-group">
+                                <label class="form-label">Landmark (Optional)</label>
+                                <div class="input-with-icon">
+                                    <i class="fas fa-map-pin input-icon"></i>
+                                    <asp:TextBox ID="txtLandmark" runat="server" CssClass="form-control" 
+                                        placeholder="Nearby landmark" />
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Collection Instructions</label>
+                                <div class="input-with-icon">
+                                    <i class="fas fa-info-circle input-icon"></i>
+                                    <asp:TextBox ID="txtInstructions" runat="server" CssClass="form-control" 
+                                        placeholder="Special instructions" />
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <div class="form-check" style="display: flex; align-items: center; gap: 8px;">
+                                <asp:CheckBox ID="chkUseCurrentLocation" runat="server" CssClass="form-check-input" 
+                                    Style="width: 16px; height: 16px;" />
+                                <label class="form-label" style="margin: 0; font-weight: 400;">Use my current location</label>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <button type="button" class="btn btn-outline" onclick="simulateLocation()" style="width: 100%;">
+                                <i class="fas fa-location-arrow"></i> Set Current Location
+                            </button>
+                        </div>
+                    </div>
+
+                    <asp:HiddenField ID="hdnLatitude" runat="server" />
+                    <asp:HiddenField ID="hdnLongitude" runat="server" />
+
+                    <div class="form-navigation">
+                        <button type="button" class="btn btn-outline" onclick="prevStep(2)">
+                            <i class="fas fa-arrow-left"></i> Back
+                        </button>
+                        <button type="button" class="btn btn-primary" onclick="nextStep(4)">
+                            Continue <i class="fas fa-arrow-right"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Step 4: Review -->
+                <div class="form-step" id="step4Form">
+                    <div class="form-header">
+                        <h2>Review & Submit</h2>
+                        <p>Confirm your waste report details before submission</p>
+                    </div>
+
+                    <div class="review-table-container">
+                        <table class="review-table">
+                            <thead>
+                                <tr>
+                                    <th>Field</th>
+                                    <th>Details</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td><strong>Waste Type</strong></td>
+                                    <td id="reviewWasteType">-</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Estimated Weight</strong></td>
+                                    <td id="reviewWeight">- kg</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Description</strong></td>
+                                    <td id="reviewDescription">-</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Address</strong></td>
+                                    <td id="reviewAddress">-</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Landmark</strong></td>
+                                    <td id="reviewLandmark">-</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Instructions</strong></td>
+                                    <td id="reviewInstructions">-</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Location</strong></td>
+                                    <td id="reviewCoordinates">-</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div class="reward-card">
+                        <h5>Estimated Reward</h5>
+                        <div class="reward-amount" id="estimatedReward">0 XP</div>
+                        <div class="reward-note">Points will be awarded after collection verification</div>
+                    </div>
+
+                    <div class="form-navigation">
+                        <button type="button" class="btn btn-outline" onclick="prevStep(3)">
+                            <i class="fas fa-arrow-left"></i> Back
+                        </button>
+                        <asp:Button ID="btnSubmitReport" runat="server" Text="Submit Report" 
+                            CssClass="btn btn-submit" OnClick="btnSubmitReport_Click"
+                            OnClientClick="return validateFinalSubmission();" />
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Theme Toggle -->
+        <button class="theme-toggle" onclick="toggleTheme()" id="themeToggleBtn">
+            <i class="fas fa-moon"></i>
+        </button>
+    </div>
+</asp:Content>

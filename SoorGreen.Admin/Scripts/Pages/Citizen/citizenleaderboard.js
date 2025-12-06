@@ -1,138 +1,287 @@
-﻿
-        // Load data from hidden fields on page load
-        document.addEventListener('DOMContentLoaded', function () {
-            const leaderboardData = JSON.parse(document.getElementById('<%= hfLeaderboardData.ClientID %>').value);
-            const statsData = JSON.parse(document.getElementById('<%= hfStatsData.ClientID %>').value);
-            const currentTab = document.getElementById('<%= hfCurrentTab.ClientID %>').value;
-            const currentPeriod = document.getElementById('<%= hfCurrentPeriod.ClientID %>').value;
+﻿// Global variables for UI state only
+let currentTab = 'global';
+let currentPeriod = 'all';
+let currentCategory = 'all';
+let currentPage = 1;
 
-            // Set filter values
-            document.getElementById('tabFilter').value = currentTab;
-            document.getElementById('periodFilter').value = currentPeriod;
+// Initialize when page loads
+document.addEventListener('DOMContentLoaded', function () {
+    initializeTabSwitching();
+    initializeFilters();
+    initializeHelpPanel();
+    initializePagination();
 
-            updateLeaderboardTable(leaderboardData);
-            updateStats(statsData);
-            setupEventListeners();
+    // Adjust for master page sidebar
+    adjustForMasterPage();
+});
+
+// Adjust leaderboard for master page sidebar
+function adjustForMasterPage() {
+    const sidebar = document.querySelector('.sidebar');
+    const mainContent = document.querySelector('.main-content');
+    const leaderboardContainer = document.querySelector('.leaderboard-container');
+
+    if (sidebar && leaderboardContainer) {
+        // Check if sidebar is collapsed
+        const isSidebarCollapsed = sidebar.classList.contains('collapsed');
+        const isMobile = window.innerWidth < 992;
+
+        if (!isMobile && leaderboardContainer.parentElement === mainContent) {
+            // Add spacing for sidebar
+            leaderboardContainer.style.marginLeft = isSidebarCollapsed ? '80px' : '280px';
+            leaderboardContainer.style.transition = 'margin-left 0.3s ease';
+        }
+    }
+}
+
+// Listen for sidebar toggle from master page
+document.addEventListener('sidebarToggle', function () {
+    setTimeout(adjustForMasterPage, 300); // Wait for sidebar animation
+});
+
+// Tab Switching Functions - PURE UI
+function initializeTabSwitching() {
+    const tabs = document.querySelectorAll('.filter-tab');
+    tabs.forEach(tab => {
+        tab.addEventListener('click', function () {
+            const tabName = this.getAttribute('data-tab');
+            switchTab(tabName);
         });
+    });
+}
 
-        function setupEventListeners() {
-            document.getElementById('tabFilter').addEventListener('change', function () {
-                applyFilters();
-            });
+function switchTab(tabName) {
+    currentTab = tabName;
+    currentPage = 1;
 
-            document.getElementById('periodFilter').addEventListener('change', function () {
-                applyFilters();
-            });
-        }
+    // Update active tab UI
+    document.querySelectorAll('.filter-tab').forEach(tab => {
+        tab.classList.remove('active');
+    });
+    const activeTab = document.querySelector(`.filter-tab[data-tab="${tabName}"]`);
+    if (activeTab) {
+        activeTab.classList.add('active');
+    }
 
-        function updateLeaderboardTable(data) {
-            const tbody = document.getElementById('leaderboardTableBody');
+    // Update filters based on tab (UI only)
+    updateFiltersForTab(tabName);
 
-            if (!data || data.length === 0) {
-                document.getElementById('emptyState').style.display = 'block';
-                document.querySelector('.table-responsive').style.display = 'none';
-                document.getElementById('paginationContainer').style.display = 'none';
-                document.getElementById('resultsInfo').textContent = 'Showing 0 users';
-                return;
-            }
+    // Trigger server-side data load
+    loadServerData();
+}
 
-            let html = '';
+function updateFiltersForTab(tabName) {
+    const periodFilter = document.getElementById('periodFilter');
+    const categoryFilter = document.getElementById('categoryFilter');
 
-            data.forEach(function (user) {
-                const rankClass = user.rank <= 3 ? 'rank-' + user.rank : 'rank-other';
-                const userClass = user.isCurrentUser ? 'current-user' : '';
+    if (!periodFilter || !categoryFilter) return;
 
-                html += `
-                <tr class="${userClass}">
-                    <td>
-                        <div class="rank-badge ${rankClass}">
-                            ${user.rank}
-                        </div>
-                    </td>
-                    <td>
-                        <div class="d-flex align-items-center gap-3">
-                            <div class="user-avatar">${user.avatar || 'US'}</div>
-                            <div>
-                                <div class="fw-bold text-light">${user.name || 'Anonymous User'}</div>
-                                <div class="text-muted small">${user.email || ''}</div>
-                            </div>
-                        </div>
-                    </td>
-                    <td>
-                        <span class="level-badge">Level ${user.level || 1}</span>
-                    </td>
-                    <td>
-                        <span class="xp-badge">
-                            <i class="fas fa-star"></i>
-                            ${user.xp || 0}
-                        </span>
-                    </td>
-                    <td>${user.pickups || 0}</td>
-                    <td>${user.achievements || 0}</td>
-                    <td>${(user.co2Reduced || 0).toFixed(1)}T</td>
-                </tr>
-            `;
-            });
+    switch (tabName) {
+        case 'global':
+            periodFilter.disabled = false;
+            categoryFilter.disabled = false;
+            break;
+        case 'monthly':
+            periodFilter.value = 'month';
+            periodFilter.disabled = true;
+            categoryFilter.disabled = false;
+            break;
+        case 'today':
+            periodFilter.value = 'today';
+            periodFilter.disabled = true;
+            categoryFilter.disabled = false;
+            break;
+        case 'friends':
+            periodFilter.disabled = false;
+            categoryFilter.disabled = true;
+            break;
+        case 'local':
+            periodFilter.disabled = false;
+            categoryFilter.disabled = false;
+            break;
+    }
+}
 
-            tbody.innerHTML = html;
-            document.getElementById('emptyState').style.display = 'none';
-            document.querySelector('.table-responsive').style.display = 'block';
-            document.getElementById('paginationContainer').style.display = data.length > 0 ? 'flex' : 'none';
-            document.getElementById('resultsInfo').textContent = 'Showing ' + data.length + ' users';
-        }
+// Filter Functions - PURE UI
+function initializeFilters() {
+    const periodFilter = document.getElementById('periodFilter');
+    const categoryFilter = document.getElementById('categoryFilter');
 
-        function updateStats(stats) {
-            if (!stats) return;
-
-            document.getElementById('totalUsers').textContent = stats.TotalUsers || 0;
-            document.getElementById('totalXP').textContent = formatNumber(stats.TotalXP || 0);
-            document.getElementById('totalPickups').textContent = formatNumber(stats.TotalPickups || 0);
-            document.getElementById('co2Reduced').textContent = formatNumber(stats.TotalCO2Reduced || 0) + 'T';
-        }
-
-        function formatNumber(number) {
-            if (number >= 1000000) {
-                return (number / 1000000).toFixed(1) + 'M';
-            } else if (number >= 1000) {
-                return (number / 1000).toFixed(1) + 'K';
-            }
-            return number;
-        }
-
-        function applyFilters() {
-            showNotification('Applying filters...', 'info');
-            document.getElementById('<%= btnApplyFilters.ClientID %>').click();
-        }
-
-        function clearFilters() {
-            document.getElementById('tabFilter').value = 'global';
-            document.getElementById('periodFilter').value = 'all';
+    if (periodFilter) {
+        periodFilter.addEventListener('change', function () {
+            currentPeriod = this.value;
             applyFilters();
+        });
+    }
+
+    if (categoryFilter) {
+        categoryFilter.addEventListener('change', function () {
+            currentCategory = this.value;
+            applyFilters();
+        });
+    }
+}
+
+function applyFilters() {
+    currentPage = 1;
+    loadServerData();
+}
+
+function refreshLeaderboard() {
+    showNotification('Refreshing leaderboard data...', 'info');
+    loadServerData();
+}
+
+function exportLeaderboard() {
+    showNotification('Preparing export...', 'info');
+    // Export will be handled by server-side code
+}
+
+// Server Data Loading - Minimal wrapper
+function loadServerData() {
+    // This just triggers the server-side postback or AJAX
+    // The actual data will be rendered by ASP.NET
+    if (typeof __doPostBack !== 'undefined') {
+        __doPostBack('', '');
+    }
+}
+
+// Pagination Functions - PURE UI
+function initializePagination() {
+    const prevBtn = document.querySelector('.page-btn.prev');
+    const nextBtn = document.querySelector('.page-btn.next');
+
+    if (prevBtn) {
+        prevBtn.addEventListener('click', function () {
+            if (!this.disabled) changePage(-1);
+        });
+    }
+
+    if (nextBtn) {
+        nextBtn.addEventListener('click', function () {
+            if (!this.disabled) changePage(1);
+        });
+    }
+}
+
+function changePage(delta) {
+    // Update current page and trigger server load
+    const newPage = currentPage + delta;
+    changePageTo(newPage);
+}
+
+function changePageTo(page) {
+    if (page < 1) return;
+
+    currentPage = page;
+    loadServerData();
+
+    // Scroll to top of table (UI only)
+    const tableContainer = document.querySelector('.leaderboard-table-container');
+    if (tableContainer) {
+        tableContainer.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+}
+
+// Help Panel Functions - PURE UI
+function initializeHelpPanel() {
+    const helpBtn = document.querySelector('.btn-help');
+    const closeHelpBtn = document.querySelector('.btn-close-help');
+    const helpPanel = document.getElementById('helpPanel');
+
+    if (helpBtn) {
+        helpBtn.addEventListener('click', showLeaderboardHelp);
+    }
+
+    if (closeHelpBtn) {
+        closeHelpBtn.addEventListener('click', hideHelp);
+    }
+
+    // Close help panel when clicking outside
+    if (helpPanel) {
+        document.addEventListener('click', function (event) {
+            if (helpPanel.classList.contains('active') &&
+                !helpPanel.contains(event.target) &&
+                event.target !== helpBtn) {
+                hideHelp();
+            }
+        });
+    }
+}
+
+function showLeaderboardHelp() {
+    const helpPanel = document.getElementById('helpPanel');
+    if (helpPanel) {
+        helpPanel.classList.add('active');
+    }
+}
+
+function hideHelp() {
+    const helpPanel = document.getElementById('helpPanel');
+    if (helpPanel) {
+        helpPanel.classList.remove('active');
+    }
+}
+
+// Notification System - PURE UI (reusable)
+function showNotification(message, type) {
+    // Remove existing notifications
+    const existingNotifications = document.querySelectorAll('.leaderboard-notification');
+    existingNotifications.forEach(notif => notif.remove());
+
+    // Create notification element with inline styles to avoid CSS conflicts
+    const notification = document.createElement('div');
+    notification.className = 'leaderboard-notification';
+
+    // Add notification styles directly to the element
+    notification.style.position = 'fixed';
+    notification.style.top = '100px'; // Below master page navbar (80px + 20px)
+    notification.style.right = '20px';
+    notification.style.padding = '16px';
+    notification.style.background = type === 'success' ? '#10b981' :
+        type === 'error' ? '#ef4444' :
+            type === 'warning' ? '#f59e0b' : '#3b82f6';
+    notification.style.color = 'white';
+    notification.style.borderRadius = '8px';
+    notification.style.boxShadow = '0 4px 6px rgba(0, 0, 0, 0.1)';
+    notification.style.display = 'flex';
+    notification.style.alignItems = 'center';
+    notification.style.gap = '12px';
+    notification.style.zIndex = '9999'; // Below help panel (10000) but above other content
+    notification.style.maxWidth = '400px';
+    notification.style.animation = 'notificationSlideIn 0.3s ease';
+
+    notification.innerHTML = `
+        <div class="notification-content" style="display: flex; align-items: center; gap: 8px; flex: 1;">
+            <i class="fas ${type === 'success' ? 'fa-check-circle' :
+            type === 'error' ? 'fa-exclamation-circle' :
+                type === 'warning' ? 'fa-exclamation-triangle' : 'fa-info-circle'}"></i>
+            <span>${message}</span>
+        </div>
+        <button class="notification-close" onclick="this.parentElement.remove()" style="background: none; border: none; color: white; cursor: pointer; padding: 0; margin-left: 8px;">
+            <i class="fas fa-times"></i>
+        </button>
+    `;
+
+    // Add to document
+    document.body.appendChild(notification);
+
+    // Auto-remove after 5 seconds
+    setTimeout(() => {
+        if (notification.parentElement) {
+            notification.remove();
         }
+    }, 5000);
+}
 
-        function changePage(direction) {
-            showNotification('Loading page...', 'info');
-        }
+// Make functions globally available
+window.switchTab = switchTab;
+window.applyFilters = applyFilters;
+window.refreshLeaderboard = refreshLeaderboard;
+window.exportLeaderboard = exportLeaderboard;
+window.changePage = changePage;
+window.showLeaderboardHelp = showLeaderboardHelp;
+window.hideHelp = hideHelp;
 
-        function showNotification(message, type) {
-            const existingNotifications = document.querySelectorAll('.custom-notification');
-            existingNotifications.forEach(function (notification) {
-                notification.remove();
-            });
-
-            const notification = document.createElement('div');
-            notification.className = 'custom-notification notification-' + type;
-            notification.innerHTML = `
-                <i class="fas ${type === 'success' ? 'fa-check-circle' : type === 'error' ? 'fa-exclamation-circle' : 'fa-info-circle'}"></i>
-                <span>${message}</span>
-                <button onclick="this.parentElement.remove()">&times;</button>
-            `;
-
-            document.body.appendChild(notification);
-
-            setTimeout(function () {
-                if (notification.parentElement) {
-                    notification.remove();
-                }
-            }, 5000);
-        }
+// Handle window resize for responsive adjustments
+window.addEventListener('resize', adjustForMasterPage);

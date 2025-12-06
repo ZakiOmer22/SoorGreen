@@ -1,5 +1,8 @@
 ﻿<%@ Page Title="System Settings" Language="C#" MasterPageFile="~/Pages/Admin/Site.master" AutoEventWireup="true" CodeFile="Settings.aspx.cs" Inherits="SoorGreen.Admin.Admin.Settings" %>
 
+<asp:Content ID="Content3" ContentPlaceHolderID="HeadContent" runat="server">
+    <link href='<%= ResolveUrl("~/Content/Pages/Admin/adminsettings.css") %>' rel="stylesheet" />
+</asp:Content>
 <asp:Content ID="PageTitle" ContentPlaceHolderID="PageTitle" runat="server">
     System Settings
 </asp:Content>

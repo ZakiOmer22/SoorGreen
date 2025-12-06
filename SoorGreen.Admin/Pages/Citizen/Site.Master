@@ -1,11 +1,14 @@
 ﻿<%@ Master Language="C#" AutoEventWireup="true" CodeFile="Site.master.cs" Inherits="SoorGreen.Admin.SiteMaster" %>
+
 <!DOCTYPE html>
 <html lang="en">
 <head runat="server">
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title><asp:ContentPlaceHolder ID="TitleContent" runat="server">SoorGreen - Citizen Portal</asp:ContentPlaceHolder></title>
-    
+    <title>
+        <asp:ContentPlaceHolder ID="TitleContent" runat="server">SoorGreen - Citizen Portal</asp:ContentPlaceHolder>
+    </title>
+
     <!-- HEAD CONTENT PLACEHOLDER - ADDED -->
     <asp:ContentPlaceHolder ID="HeadContent" runat="server"></asp:ContentPlaceHolder>
 
@@ -22,13 +25,12 @@
     <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet" />
 
     <style>
-        /* THEME VARIABLES */
+        /* THEME VARIABLES - Add custom scrollbar variables */
         :root {
             --primary: #00d4aa;
             --primary-dark: #00b894;
             --secondary: #0984e3;
             --accent: #fd79a8;
-            
             /* Light theme defaults */
             --bg-primary: #f8fafc;
             --bg-secondary: #ffffff;
@@ -37,23 +39,26 @@
             --text-secondary: #64748b;
             --border-color: #e2e8f0;
             --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-            
             /* Navbar & Sidebar */
             --navbar-bg: #ffffff;
             --sidebar-bg: #ffffff;
-            
             /* Card styles */
             --card-bg: #ffffff;
             --card-border: #e2e8f0;
-            
             /* Status colors */
             --success: #10b981;
             --warning: #f59e0b;
             --danger: #ef4444;
             --info: #3b82f6;
-            
             --sidebar-width: 280px;
             --sidebar-collapsed: 80px;
+            --primary-rgb: 0, 212, 170; /* RGB values for primary color */
+            
+            /* Custom Scrollbar Colors */
+            --scrollbar-bg: transparent;
+            --scrollbar-thumb: #cbd5e1;
+            --scrollbar-thumb-hover: #94a3b8;
+            --scrollbar-track: #f1f5f9;
         }
 
         /* DARK THEME VARIABLES */
@@ -65,17 +70,20 @@
             --text-secondary: #94a3b8;
             --border-color: #334155;
             --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3);
-            
             --navbar-bg: #1e293b;
             --sidebar-bg: #1e293b;
-            
             --card-bg: #1e293b;
             --card-border: #334155;
-            
             --success: #10b981;
             --warning: #f59e0b;
             --danger: #ef4444;
             --info: #3b82f6;
+            
+            /* Dark theme scrollbar colors */
+            --scrollbar-bg: transparent;
+            --scrollbar-thumb: #475569;
+            --scrollbar-thumb-hover: #64748b;
+            --scrollbar-track: #1e293b;
         }
 
         * {
@@ -84,24 +92,70 @@
             box-sizing: border-box;
         }
 
+        /* ===== BEAUTIFUL CUSTOM SCROLLBARS ===== */
+        /* For WebKit browsers (Chrome, Safari, Edge) */
+        ::-webkit-scrollbar {
+            width: 10px;
+            height: 10px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--scrollbar-track);
+            border-radius: 8px;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--scrollbar-thumb);
+            border-radius: 8px;
+            border: 2px solid var(--scrollbar-track);
+            transition: all 0.3s ease;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--scrollbar-thumb-hover);
+            border-width: 1px;
+        }
+
+        /* For Firefox */
+        * {
+            scrollbar-width: thin;
+            scrollbar-color: var(--scrollbar-thumb) var(--scrollbar-track);
+        }
+
+        /* For Internet Explorer and Edge (legacy) */
+        body {
+            -ms-overflow-style: -ms-autohiding-scrollbar;
+        }
+
+        /* ===== FULL-SPACE CONTENT LAYOUT ===== */
+        html, body, form {
+            height: 100%;
+            width: 100%;
+            margin: 0;
+            padding: 0;
+        }
+
         body {
             font-family: 'Inter', sans-serif;
             background: var(--bg-primary);
             color: var(--text-primary);
             transition: background-color 0.3s ease, color 0.3s ease;
-            overflow-x: hidden;
             line-height: 1.6;
+            display: flex;
+            flex-direction: column;
             min-height: 100vh;
+            overflow: hidden; /* Prevent body scrolling */
         }
 
-        /* ===== LAYOUT STRUCTURE ===== */
+        /* ===== APP CONTAINER ===== */
         .app-container {
             display: flex;
-            min-height: 100vh;
-            padding-top: 80px;
+            flex: 1;
+            min-height: calc(100vh - 80px);
+            margin-top: 80px;
         }
 
-        /* ===== SIDEBAR STYLES ===== */
+        /* ===== SIDEBAR WITH CUSTOM SCROLLBAR ===== */
         .sidebar {
             width: var(--sidebar-width);
             background: var(--sidebar-bg);
@@ -114,6 +168,28 @@
             overflow-y: auto;
             transition: all 0.3s ease;
             z-index: 999;
+            
+            /* Custom scrollbar for sidebar */
+            scrollbar-width: thin;
+            scrollbar-color: var(--scrollbar-thumb) var(--sidebar-bg);
+        }
+
+        .sidebar::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .sidebar::-webkit-scrollbar-track {
+            background: var(--sidebar-bg);
+            border-radius: 3px;
+        }
+
+        .sidebar::-webkit-scrollbar-thumb {
+            background: var(--scrollbar-thumb);
+            border-radius: 3px;
+        }
+
+        .sidebar::-webkit-scrollbar-thumb:hover {
+            background: var(--scrollbar-thumb-hover);
         }
 
         .sidebar.collapsed {
@@ -225,17 +301,17 @@
             border-left: 3px solid transparent;
         }
 
-        .menu-link:hover {
-            background: rgba(var(--primary-rgb), 0.05);
-            color: var(--text-primary);
-            border-left-color: var(--primary);
-        }
+            .menu-link:hover {
+                background: rgba(var(--primary-rgb), 0.05);
+                color: var(--text-primary);
+                border-left-color: var(--primary);
+            }
 
-        .menu-link.active {
-            background: rgba(var(--primary-rgb), 0.1);
-            color: var(--primary);
-            border-left-color: var(--primary);
-        }
+            .menu-link.active {
+                background: rgba(var(--primary-rgb), 0.1);
+                color: var(--primary);
+                border-left-color: var(--primary);
+            }
 
         .menu-icon {
             width: 24px;
@@ -276,7 +352,7 @@
             margin-right: 0;
         }
 
-        /* ===== MAIN CONTENT AREA ===== */
+        /* ===== MAIN CONTENT AREA - FULL SPACE ===== */
         .main-content {
             flex: 1;
             margin-left: var(--sidebar-width);
@@ -284,28 +360,54 @@
             transition: all 0.3s ease;
             min-height: calc(100vh - 80px);
             background: var(--bg-primary);
+            overflow-y: auto; /* Enable scrolling only in main content */
+            display: flex;
+            flex-direction: column;
         }
 
         .main-content.expanded {
             margin-left: var(--sidebar-collapsed);
         }
 
-        /* ===== UPDATED NAVBAR ===== */
+        /* ===== CONTENT WRAPPER FOR FULL SPACE ===== */
+        .content-wrapper {
+            flex: 1;
+            width: 100%;
+            max-width: 100%;
+            margin: 0;
+            padding: 0;
+        }
+
+        /* ===== UPDATED NAVBAR - FIXED ===== */
         .navbar {
             background: var(--navbar-bg) !important;
             backdrop-filter: blur(20px);
             border-bottom: 1px solid var(--border-color);
-            padding: 1rem 0;
+            padding: 0.75rem 0; /* Reduced padding */
             position: fixed;
             width: 100%;
             top: 0;
             z-index: 1000;
             transition: all 0.3s ease;
             box-shadow: var(--shadow);
+            /* Add explicit height control */
+            min-height: 80px;
+            max-height: 80px;
+            display: flex;
+            align-items: center;
         }
 
-        .navbar.scrolled {
-            padding: 0.5rem 0;
+            .navbar.scrolled {
+                padding: 0.5rem 0;
+                min-height: 70px;
+                max-height: 70px;
+            }
+
+        /* Ensure container-fluid fits navbar */
+        .navbar > .container-fluid {
+            height: 100%;
+            display: flex;
+            align-items: center;
         }
 
         .navbar-brand {
@@ -325,33 +427,52 @@
             position: relative;
         }
 
-        .nav-link:hover {
-            color: var(--primary) !important;
-            transform: translateY(-2px);
-        }
+            .nav-link:hover {
+                color: var(--primary) !important;
+                transform: translateY(-2px);
+            }
 
-        .nav-link::after {
-            content: '';
-            position: absolute;
-            bottom: -5px;
+            .nav-link::after {
+                content: '';
+                position: absolute;
+                bottom: -5px;
+                left: 0;
+                width: 0;
+                height: 2px;
+                background: var(--primary);
+                transition: width 0.3s ease;
+            }
+
+            .nav-link:hover::after {
+                width: 100%;
+            }
+
+            .nav-link.active {
+                color: var(--primary) !important;
+            }
+
+                .nav-link.active::after {
+                    width: 100%;
+                }
+
+        /* ===== SIDEBAR OVERLAY FOR MOBILE - ADDED ===== */
+        .sidebar-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
             left: 0;
-            width: 0;
-            height: 2px;
-            background: var(--primary);
-            transition: width 0.3s ease;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 998;
+            opacity: 0;
+            transition: opacity 0.3s ease;
         }
 
-        .nav-link:hover::after {
-            width: 100%;
-        }
-
-        .nav-link.active {
-            color: var(--primary) !important;
-        }
-
-        .nav-link.active::after {
-            width: 100%;
-        }
+            .sidebar-overlay.active {
+                display: block;
+                opacity: 1;
+            }
 
         /* ===== DASHBOARD COMPONENT STYLES ===== */
         .stat-card {
@@ -365,10 +486,10 @@
             box-shadow: var(--shadow);
         }
 
-        .stat-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 10px 30px rgba(var(--primary-rgb), 0.2);
-        }
+            .stat-card:hover {
+                transform: translateY(-5px);
+                box-shadow: 0 10px 30px rgba(var(--primary-rgb), 0.2);
+            }
 
         .stat-icon {
             width: 60px;
@@ -381,25 +502,25 @@
             font-size: 1.5rem;
         }
 
-        .stat-icon.primary {
-            background: rgba(var(--primary-rgb), 0.1);
-            color: var(--primary);
-        }
+            .stat-icon.primary {
+                background: rgba(var(--primary-rgb), 0.1);
+                color: var(--primary);
+            }
 
-        .stat-icon.success {
-            background: rgba(34, 197, 94, 0.1);
-            color: var(--success);
-        }
+            .stat-icon.success {
+                background: rgba(34, 197, 94, 0.1);
+                color: var(--success);
+            }
 
-        .stat-icon.warning {
-            background: rgba(245, 158, 11, 0.1);
-            color: var(--warning);
-        }
+            .stat-icon.warning {
+                background: rgba(245, 158, 11, 0.1);
+                color: var(--warning);
+            }
 
-        .stat-icon.info {
-            background: rgba(59, 130, 246, 0.1);
-            color: var(--info);
-        }
+            .stat-icon.info {
+                background: rgba(59, 130, 246, 0.1);
+                color: var(--info);
+            }
 
         .stat-number {
             font-size: 2rem;
@@ -434,10 +555,10 @@
             box-shadow: var(--shadow);
         }
 
-        .quick-action:hover {
-            transform: translateY(-3px);
-            border-color: var(--primary);
-        }
+            .quick-action:hover {
+                transform: translateY(-3px);
+                border-color: var(--primary);
+            }
 
         .action-icon {
             width: 50px;
@@ -468,9 +589,9 @@
             border-bottom: 1px solid var(--border-color);
         }
 
-        .activity-item:last-child {
-            border-bottom: none;
-        }
+            .activity-item:last-child {
+                border-bottom: none;
+            }
 
         .activity-icon {
             width: 40px;
@@ -508,69 +629,572 @@
             font-size: 0.8rem;
         }
 
-        /* ===== UPDATED FOOTER ===== */
+        /* ===== AMAZING FOOTER STYLES ===== */
         .footer {
-            background: var(--bg-secondary);
-            padding: 3rem 0 1rem;
-            border-top: 1px solid var(--border-color);
+            background: linear-gradient(135deg, var(--darker) 0%, var(--dark) 100%);
+            padding: 4rem 0 1rem;
+            border-top: 1px solid rgba(255,255,255,0.1);
             margin-top: auto;
+            position: relative;
+            overflow: hidden;
         }
 
-        .footer-links {
-            list-style: none;
-            padding: 0;
+        /* Light mode footer */
+        [data-theme="light"] .footer {
+            background: linear-gradient(135deg, var(--darker) 0%, var(--dark) 100%);
+            border-top: 1px solid rgba(33, 37, 41, 0.1);
         }
 
-        .footer-links li {
-            margin-bottom: 0.5rem;
+        .footer::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, var(--primary), var(--secondary), transparent);
         }
 
-        .footer-links a {
-            color: var(--text-secondary);
+        /* Brand Card */
+        .footer-brand-card {
+            background: rgba(255,255,255,0.05);
+            padding: 2rem;
+            border-radius: 20px;
+            border: 1px solid rgba(255,255,255,0.1);
+            backdrop-filter: blur(10px);
+            position: relative;
+            overflow: hidden;
+        }
+
+        [data-theme="light"] .footer-brand-card {
+            background: rgba(33, 37, 41, 0.05);
+            border: 1px solid rgba(33, 37, 41, 0.1);
+        }
+
+        .footer-brand-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.05), transparent);
+            transition: left 0.6s ease;
+        }
+
+        [data-theme="light"] .footer-brand-card::before {
+            background: linear-gradient(90deg, transparent, rgba(33, 37, 41, 0.05), transparent);
+        }
+
+        .footer-brand-card:hover::before {
+            left: 100%;
+        }
+
+        .brand-header {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .brand-logo {
+            position: relative;
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            border-radius: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            color: white;
+        }
+
+        .logo-glow {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            border-radius: 15px;
+            opacity: 0.5;
+            filter: blur(10px);
+            animation: logoPulse 2s ease-in-out infinite alternate;
+        }
+
+        @keyframes logoPulse {
+            0% {
+                opacity: 0.3;
+                transform: scale(1);
+            }
+
+            100% {
+                opacity: 0.6;
+                transform: scale(1.1);
+            }
+        }
+
+        .brand-title {
+            font-size: 1.8rem;
+            font-weight: 800;
+            background: linear-gradient(45deg, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin: 0;
+        }
+
+        .brand-description {
+            color: rgba(255,255,255,0.8);
+            line-height: 1.7;
+            margin-bottom: 2rem;
+        }
+
+        [data-theme="light"] .brand-description {
+            color: rgba(33, 37, 41, 0.8);
+        }
+
+        /* Social Section */
+        .social-section {
+            margin-top: 2rem;
+        }
+
+        .social-title {
+            color: var(--light);
+            font-size: 0.9rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .social-links-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0.75rem;
+        }
+
+        .social-card {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.75rem 1rem;
+            background: rgba(255,255,255,0.08);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 12px;
+            color: rgba(255,255,255,0.8);
             text-decoration: none;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        [data-theme="light"] .social-card {
+            background: rgba(33, 37, 41, 0.08);
+            border: 1px solid rgba(33, 37, 41, 0.1);
+            color: rgba(33, 37, 41, 0.8);
+        }
+
+        .social-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
+            transition: left 0.5s ease;
+        }
+
+        [data-theme="light"] .social-card::before {
+            background: linear-gradient(90deg, transparent, rgba(33, 37, 41, 0.1), transparent);
+        }
+
+        .social-card:hover::before {
+            left: 100%;
+        }
+
+        .social-card:hover {
+            transform: translateY(-2px);
+            border-color: var(--primary);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+
+        .social-card.facebook:hover {
+            background: rgba(59, 89, 152, 0.2);
+        }
+
+        .social-card.twitter:hover {
+            background: rgba(29, 161, 242, 0.2);
+        }
+
+        .social-card.linkedin:hover {
+            background: rgba(0, 119, 181, 0.2);
+        }
+
+        .social-card.instagram:hover {
+            background: rgba(225, 48, 108, 0.2);
+        }
+
+        .social-card i {
+            font-size: 1.1rem;
+            width: 20px;
+            text-align: center;
+        }
+
+        /* Footer Sections */
+        .footer-section {
+            padding: 0 1rem;
+        }
+
+        .section-title {
+            color: var(--light);
+            font-size: 1.1rem;
+            font-weight: 700;
+            margin-bottom: 1.5rem;
+            position: relative;
+        }
+
+            .section-title::after {
+                content: '';
+                position: absolute;
+                bottom: -8px;
+                left: 0;
+                width: 30px;
+                height: 2px;
+                background: linear-gradient(90deg, var(--primary), var(--secondary));
+                border-radius: 2px;
+            }
+
+        .footer-links-grid {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+
+        .footer-link-item {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.75rem 1rem;
+            color: rgba(255,255,255,0.7);
+            text-decoration: none;
+            border-radius: 10px;
+            transition: all 0.3s ease;
+            background: rgba(255,255,255,0.05);
+            border: 1px solid transparent;
+        }
+
+        [data-theme="light"] .footer-link-item {
+            color: rgba(33, 37, 41, 0.7);
+            background: rgba(33, 37, 41, 0.05);
+        }
+
+        .footer-link-item:hover {
+            color: var(--primary);
+            background: rgba(0,212,170,0.1);
+            border-color: rgba(0,212,170,0.3);
+            transform: translateX(8px);
+        }
+
+        .footer-link-item i {
+            width: 20px;
+            text-align: center;
+            font-size: 0.9rem;
+        }
+
+        /* Contact Info */
+        .contact-info {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .contact-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 1rem;
+            padding: 1rem;
+            background: rgba(255,255,255,0.05);
+            border-radius: 12px;
+            border: 1px solid rgba(255,255,255,0.1);
             transition: all 0.3s ease;
         }
 
-        .footer-links a:hover {
+        [data-theme="light"] .contact-item {
+            background: rgba(33, 37, 41, 0.05);
+            border: 1px solid rgba(33, 37, 41, 0.1);
+        }
+
+        .contact-item:hover {
+            background: rgba(255,255,255,0.08);
+            border-color: rgba(0,212,170,0.3);
+            transform: translateY(-2px);
+        }
+
+        [data-theme="light"] .contact-item:hover {
+            background: rgba(33, 37, 41, 0.08);
+        }
+
+        .contact-icon {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1rem;
+            flex-shrink: 0;
+        }
+
+        .contact-details {
+            display: flex;
+            flex-direction: column;
+            gap: 0.25rem;
+        }
+
+        .contact-label {
+            font-size: 0.8rem;
+            color: var(--primary);
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .contact-value {
+            color: rgba(255,255,255,0.9);
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+
+        [data-theme="light"] .contact-value {
+            color: rgba(33, 37, 41, 0.9);
+        }
+
+        /* eALIF Team Section */
+        .ealif-section {
+            margin: 3rem 0 2rem;
+            padding: 2rem;
+            background: linear-gradient(135deg, rgba(0,212,170,0.1), rgba(9,132,227,0.1));
+            border-radius: 20px;
+            border: 1px solid rgba(255,255,255,0.1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        [data-theme="light"] .ealif-section {
+            border: 1px solid rgba(33, 37, 41, 0.1);
+        }
+
+        .ealif-section::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, var(--primary), var(--secondary), transparent);
+        }
+
+        .ealif-content {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 1.5rem;
+            text-align: center;
+        }
+
+        .ealif-logo {
+            width: 50px;
+            height: 50px;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.3rem;
+            animation: logoSpin 4s linear infinite;
+        }
+
+        @keyframes logoSpin {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        .ealif-text {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.25rem;
+        }
+
+        .powered-by {
+            font-size: 0.9rem;
+            color: rgba(255,255,255,0.7);
+            font-weight: 500;
+        }
+
+        [data-theme="light"] .powered-by {
+            color: rgba(33, 37, 41, 0.7);
+        }
+
+        .team-name {
+            font-size: 1.4rem;
+            font-weight: 800;
+            background: linear-gradient(45deg, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .ealif-badge {
+            background: rgba(255,255,255,0.1);
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            border: 1px solid rgba(255,255,255,0.2);
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: rgba(255,255,255,0.9);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        [data-theme="light"] .ealif-badge {
+            background: rgba(33, 37, 41, 0.1);
+            border: 1px solid rgba(33, 37, 41, 0.2);
+            color: rgba(33, 37, 41, 0.9);
+        }
+
+        /* Copyright Section */
+        .copyright-section {
+            border-top: 1px solid rgba(255,255,255,0.1);
+            padding-top: 2rem;
+        }
+
+        [data-theme="light"] .copyright-section {
+            border-top: 1px solid rgba(33, 37, 41, 0.1);
+        }
+
+        .copyright-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .copyright-text {
+            color: rgba(255,255,255,0.6);
+            font-size: 0.9rem;
+        }
+
+        [data-theme="light"] .copyright-text {
+            color: rgba(33, 37, 41, 0.6);
+        }
+
+        .footer-actions {
+            display: flex;
+            gap: 1.5rem;
+        }
+
+        .footer-action-link {
+            color: rgba(255,255,255,0.6);
+            text-decoration: none;
+            font-size: 0.9rem;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        [data-theme="light"] .footer-action-link {
+            color: rgba(33, 37, 41, 0.6);
+        }
+
+        .footer-action-link:hover {
             color: var(--primary);
         }
 
-        /* Mobile Responsive */
-        @media (max-width: 991.98px) {
-            .sidebar {
-                transform: translateX(-100%);
-            }
-            
-            .sidebar.mobile-open {
-                transform: translateX(0);
-            }
-            
-            .main-content {
-                margin-left: 0 !important;
-                padding: 1rem;
-            }
-            
-            .sidebar-overlay {
-                display: none;
-                position: fixed;
-                top: 0;
-                left: 0;
-                right: 0;
-                bottom: 0;
-                background: rgba(0, 0, 0, 0.5);
-                z-index: 998;
-            }
-            
-            .sidebar-overlay.active {
-                display: block;
+        .footer-action-link::after {
+            content: '';
+            position: absolute;
+            bottom: -2px;
+            left: 0;
+            width: 0;
+            height: 1px;
+            background: var(--primary);
+            transition: width 0.3s ease;
+        }
+
+        .footer-action-link:hover::after {
+            width: 100%;
+        }
+
+        /* Floating Elements */
+        .footer-floating-elements {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+        }
+
+        .floating-element {
+            position: absolute;
+            font-size: 1.5rem;
+            opacity: 0.1;
+            animation: floatAround 20s infinite linear;
+        }
+
+        .el-1 {
+            top: 20%;
+            left: 5%;
+            animation-delay: 0s;
+            color: var(--primary);
+        }
+
+        .el-2 {
+            top: 60%;
+            left: 90%;
+            animation-delay: 5s;
+            color: var(--secondary);
+        }
+
+        .el-3 {
+            top: 80%;
+            left: 10%;
+            animation-delay: 10s;
+            color: var(--accent);
+        }
+
+        .el-4 {
+            top: 40%;
+            left: 85%;
+            animation-delay: 15s;
+            color: var(--primary);
+        }
+
+        @keyframes floatAround {
+            0%, 100% {
+                transform: translate(0, 0) rotate(0deg);
             }
 
-            .welcome-title {
-                font-size: 1.5rem;
+            25% {
+                transform: translate(100px, -50px) rotate(90deg);
             }
 
-            .stat-number {
-                font-size: 1.5rem;
+            50% {
+                transform: translate(50px, -100px) rotate(180deg);
+            }
+
+            75% {
+                transform: translate(-100px, -50px) rotate(270deg);
             }
         }
 
@@ -586,10 +1210,10 @@
             transition: all 0.3s ease;
         }
 
-        .sidebar-toggle:hover {
-            background: rgba(var(--primary-rgb), 0.1);
-            color: var(--primary);
-        }
+            .sidebar-toggle:hover {
+                background: rgba(var(--primary-rgb), 0.1);
+                color: var(--primary);
+            }
 
         /* ===== THEME TOGGLE BUTTON - FIXED ===== */
         #themeToggle {
@@ -611,21 +1235,21 @@
             opacity: 1 !important;
         }
 
-        #themeToggle:hover {
-            background: rgba(var(--primary-rgb), 0.1);
-            border-color: var(--primary);
-            color: var(--primary);
-            transform: rotate(15deg);
-        }
+            #themeToggle:hover {
+                background: rgba(var(--primary-rgb), 0.1);
+                border-color: var(--primary);
+                color: var(--primary);
+                transform: rotate(15deg);
+            }
 
-        #themeToggle .fa-sun {
-            display: none;
-            color: #fbbf24;
-        }
+            #themeToggle .fa-sun {
+                display: none;
+                color: #fbbf24;
+            }
 
-        #themeToggle .fa-moon {
-            color: #64748b;
-        }
+            #themeToggle .fa-moon {
+                color: #64748b;
+            }
 
         [data-theme="dark"] #themeToggle .fa-sun {
             display: block;
@@ -710,20 +1334,20 @@
             box-shadow: var(--shadow);
         }
 
-        .account-dropdown .dropdown-item {
-            color: var(--text-primary);
-            padding: 0.75rem 1rem;
-            transition: all 0.3s ease;
-        }
+            .account-dropdown .dropdown-item {
+                color: var(--text-primary);
+                padding: 0.75rem 1rem;
+                transition: all 0.3s ease;
+            }
 
-        .account-dropdown .dropdown-item:hover {
-            background: var(--primary);
-            color: white;
-        }
+                .account-dropdown .dropdown-item:hover {
+                    background: var(--primary);
+                    color: white;
+                }
 
-        .account-dropdown .dropdown-divider {
-            border-color: var(--border-color);
-        }
+            .account-dropdown .dropdown-divider {
+                border-color: var(--border-color);
+            }
 
         /* Form elements */
         input, select, textarea {
@@ -732,9 +1356,9 @@
             color: var(--text-primary) !important;
         }
 
-        input::placeholder, textarea::placeholder {
-            color: var(--text-secondary) !important;
-        }
+            input::placeholder, textarea::placeholder {
+                color: var(--text-secondary) !important;
+            }
 
         .form-label {
             color: var(--text-primary);
@@ -750,30 +1374,289 @@
             color: var(--text-primary);
         }
 
-        .table th {
-            background: var(--bg-secondary);
-            border-color: var(--border-color);
-        }
+            .table th {
+                background: var(--bg-secondary);
+                border-color: var(--border-color);
+            }
 
-        .table td {
-            border-color: var(--border-color);
-        }
+            .table td {
+                border-color: var(--border-color);
+            }
 
-        /* Add this to your existing CSS variables section */
-        :root {
-            --primary-rgb: 0, 212, 170; /* RGB values for primary color */
-        }
-        
         /* FORCE THEME TOGGLE TO BE VISIBLE */
         .navbar .theme-toggle-container {
             display: flex !important;
             align-items: center;
         }
-        
+
         #themeToggle {
             display: flex !important;
             visibility: visible !important;
             opacity: 1 !important;
+        }
+
+        /* ===== PAGE CONTENT HELPERS ===== */
+        .page-wrapper {
+            width: 100%;
+            padding: 20px;
+        }
+
+        /* For pages that have their own containers like Leaderboard */
+        .main-content .leaderboard-container,
+        .main-content .dashboard-container,
+        .main-content .page-container {
+            max-width: 100%;
+            margin: 0;
+            padding: 0;
+        }
+
+        /* Ensure form elements in content areas work properly */
+        .main-content form {
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            width: 100%;
+        }
+
+        /* ===== ENHANCED SCROLLBAR FOR SPECIFIC ELEMENTS ===== */
+        /* For tables and grids */
+        .table-responsive::-webkit-scrollbar,
+        .users-grid::-webkit-scrollbar,
+        .settings-grid::-webkit-scrollbar {
+            height: 8px;
+        }
+
+        .table-responsive::-webkit-scrollbar-thumb,
+        .users-grid::-webkit-scrollbar-thumb,
+        .settings-grid::-webkit-scrollbar-thumb {
+            background: var(--scrollbar-thumb);
+            border-radius: 4px;
+        }
+
+        .table-responsive::-webkit-scrollbar-track,
+        .users-grid::-webkit-scrollbar-track,
+        .settings-grid::-webkit-scrollbar-track {
+            background: var(--scrollbar-track);
+            border-radius: 4px;
+        }
+
+        /* ===== SMOOTH SCROLLING ===== */
+        html {
+            scroll-behavior: smooth;
+        }
+
+        /* ===== FORCE CONTENT TO USE FULL WIDTH ===== */
+        .main-content > *:not(.container):not(.container-fluid) {
+            width: 100%;
+            max-width: 100%;
+        }
+
+        /* Remove default container padding for full-width pages */
+        .main-content .container,
+        .main-content .container-fluid {
+            width: 100%;
+            max-width: 100%;
+            padding-left: 0;
+            padding-right: 0;
+        }
+
+        /* For pages that need specific container styling */
+        .main-content .page-container,
+        .main-content .dashboard-container,
+        .main-content .leaderboard-container {
+            width: 100%;
+            max-width: 100%;
+            padding: 0;
+            margin: 0;
+        }
+
+        /* ===== OVERRIDE BOOTSTRAP'S DEFAULT CONTAINER ===== */
+        @media (min-width: 1400px) {
+            .main-content .container,
+            .main-content .container-fluid {
+                max-width: 100%;
+                padding-left: 2rem;
+                padding-right: 2rem;
+            }
+        }
+
+        /* ===== ENSURE ALL CONTENT PLACEHOLDERS USE FULL SPACE ===== */
+        #MainContent {
+            display: flex;
+            flex-direction: column;
+            flex: 1;
+            width: 100%;
+            height: 100%;
+        }
+
+        /* ===== FIX FOR BOOTSTRAP GRIDS ===== */
+        .main-content .row {
+            margin-left: 0;
+            margin-right: 0;
+        }
+
+        .main-content .col,
+        .main-content .col-1,
+        .main-content .col-10,
+        .main-content .col-11,
+        .main-content .col-12,
+        .main-content .col-2,
+        .main-content .col-3,
+        .main-content .col-4,
+        .main-content .col-5,
+        .main-content .col-6,
+        .main-content .col-7,
+        .main-content .col-8,
+        .main-content .col-9,
+        .main-content .col-auto,
+        .main-content .col-lg,
+        .main-content .col-lg-1,
+        .main-content .col-lg-10,
+        .main-content .col-lg-11,
+        .main-content .col-lg-12,
+        .main-content .col-lg-2,
+        .main-content .col-lg-3,
+        .main-content .col-lg-4,
+        .main-content .col-lg-5,
+        .main-content .col-lg-6,
+        .main-content .col-lg-7,
+        .main-content .col-lg-8,
+        .main-content .col-lg-9,
+        .main-content .col-lg-auto,
+        .main-content .col-md,
+        .main-content .col-md-1,
+        .main-content .col-md-10,
+        .main-content .col-md-11,
+        .main-content .col-md-12,
+        .main-content .col-md-2,
+        .main-content .col-md-3,
+        .main-content .col-md-4,
+        .main-content .col-md-5,
+        .main-content .col-md-6,
+        .main-content .col-md-7,
+        .main-content .col-md-8,
+        .main-content .col-md-9,
+        .main-content .col-md-auto,
+        .main-content .col-sm,
+        .main-content .col-sm-1,
+        .main-content .col-sm-10,
+        .main-content .col-sm-11,
+        .main-content .col-sm-12,
+        .main-content .col-sm-2,
+        .main-content .col-sm-3,
+        .main-content .col-sm-4,
+        .main-content .col-sm-5,
+        .main-content .col-sm-6,
+        .main-content .col-sm-7,
+        .main-content .col-sm-8,
+        .main-content .col-sm-9,
+        .main-content .col-sm-auto,
+        .main-content .col-xl,
+        .main-content .col-xl-1,
+        .main-content .col-xl-10,
+        .main-content .col-xl-11,
+        .main-content .col-xl-12,
+        .main-content .col-xl-2,
+        .main-content .col-xl-3,
+        .main-content .col-xl-4,
+        .main-content .col-xl-5,
+        .main-content .col-xl-6,
+        .main-content .col-xl-7,
+        .main-content .col-xl-8,
+        .main-content .col-xl-9,
+        .main-content .col-xl-auto {
+            padding-left: 15px;
+            padding-right: 15px;
+        }
+
+        /* Mobile sidebar behavior */
+        @media (max-width: 992px) {
+            .sidebar {
+                transform: translateX(-100%);
+                z-index: 999;
+                width: 280px;
+            }
+            
+            .sidebar.mobile-open {
+                transform: translateX(0);
+            }
+            
+            .main-content {
+                margin-left: 0 !important;
+                padding: 1rem;
+            }
+            
+            .main-content.expanded {
+                margin-left: 0 !important;
+            }
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .footer {
+                padding: 3rem 0 1rem;
+            }
+
+            .footer-brand-card {
+                padding: 1.5rem;
+            }
+
+            .brand-header {
+                flex-direction: column;
+                text-align: center;
+                gap: 1rem;
+            }
+
+            .social-links-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .ealif-content {
+                flex-direction: column;
+                gap: 1rem;
+            }
+
+            .copyright-content {
+                flex-direction: column;
+                text-align: center;
+            }
+
+            .footer-actions {
+                justify-content: center;
+            }
+
+            .contact-item {
+                padding: 0.75rem;
+            }
+            
+            .main-content {
+                padding: 1rem;
+            }
+            
+            .navbar {
+                min-height: 70px;
+                max-height: 70px;
+            }
+            
+            .sidebar {
+                top: 70px;
+                height: calc(100vh - 70px);
+            }
+            
+            .app-container {
+                margin-top: 70px;
+                min-height: calc(100vh - 70px);
+            }
+        }
+
+        @media (max-width: 480px) {
+            .navbar-brand span {
+                display: none;
+            }
+            
+            .user-welcome .user-info {
+                display: none;
+            }
         }
     </style>
 </head>
@@ -793,8 +1676,8 @@
                 </a>
 
                 <!-- THEME TOGGLE BUTTON - RIGHT HERE, BEFORE NAVBAR COLLAPSE -->
-                <button class="me-3" id="themeToggle" onclick="toggleTheme()" 
-                        title="Toggle dark/light mode" style="display: flex !important;">
+                <button class="me-3" id="themeToggle" onclick="toggleTheme()"
+                    title="Toggle dark/light mode" style="display: flex !important;">
                     <i class="fas fa-moon"></i>
                     <i class="fas fa-sun"></i>
                 </button>
@@ -805,7 +1688,7 @@
 
                 <div class="collapse navbar-collapse" id="navMenu">
                     <ul class="navbar-nav ms-auto align-items-lg-center">
-                        
+
                         <!-- User Account Section -->
                         <asp:Panel ID="pnlLoggedInUser" runat="server" Visible="false" CssClass="nav-item dropdown">
                             <div class="user-welcome dropdown-toggle" data-bs-toggle="dropdown">
@@ -830,13 +1713,16 @@
                                 <li><a class="dropdown-item" href="MyReports.aspx">
                                     <i class="fas fa-history me-2"></i>My Reports
                                 </a></li>
-                                <li><hr class="dropdown-divider" /></li>
+                                <li>
+                                    <hr class="dropdown-divider" />
+                                </li>
                                 <li><a class="dropdown-item" href="Settings.aspx">
                                     <i class="fas fa-cog me-2"></i>Settings
                                 </a></li>
-                                <li><asp:LinkButton ID="btnLogout" runat="server" CssClass="dropdown-item text-danger" OnClick="btnLogout_Click">
+                                <li>
+                                    <asp:LinkButton ID="btnLogout" runat="server" CssClass="dropdown-item text-danger" OnClick="btnLogout_Click">
                                     <i class="fas fa-sign-out-alt me-2"></i>Logout
-                                </asp:LinkButton></li>
+                                    </asp:LinkButton></li>
                             </ul>
                         </asp:Panel>
 
@@ -1000,51 +1886,191 @@
 
         <!-- ===== MAIN CONTENT ===== -->
         <main class="main-content" id="mainContent">
-            <asp:ContentPlaceHolder ID="MainContent" runat="server" />
+            <div class="content-wrapper">
+                <asp:ContentPlaceHolder ID="MainContent" runat="server" />
+            </div>
         </main>
 
-        <!-- ===== FOOTER ===== -->
+        <!-- ===== AMAZING FOOTER UI ===== -->
         <footer class="footer">
             <div class="container">
-                <div class="row gy-4">
-                    <div class="col-lg-4">
-                        <h5 class="fw-bold">
-                            <i class="fas fa-recycle me-2"></i>SoorGreen
-                        </h5>
-                        <p class="mt-3">
-                            Empowering sustainable cities with digital waste management. We believe in technology that serves the planet.
-                        </p>
-                    </div>
-                    <div class="col-lg-2 col-md-6">
-                        <h6 class="fw-bold mb-3">Quick Links</h6>
-                        <ul class="footer-links">
-                            <li><a href="Default.aspx">Home</a></li>
-                            <li><a href="About.aspx">About</a></li>
-                            <li><a href="Services.aspx">Services</a></li>
-                            <li><a href="Contact.aspx">Contact</a></li>
-                        </ul>
-                    </div>
-                    <div class="col-lg-3 col-md-6">
-                        <h6 class="fw-bold mb-3">Platform</h6>
-                        <ul class="footer-links">
-                            <li><a href="CitizenPortal.aspx">Citizen Portal</a></li>
-                            <li><a href="AdminDashboard.aspx">Admin Dashboard</a></li>
-                            <li><a href="API.aspx">API Services</a></li>
-                        </ul>
-                    </div>
-                    <div class="col-lg-3">
-                        <h6 class="fw-bold mb-3">Contact</h6>
-                        <ul class="footer-links">
-                            <li><i class="fas fa-map-marker-alt me-2"></i>123 Green Street, Eco City</li>
-                            <li><i class="fas fa-phone me-2"></i>+1 (555) 123-4567</li>
-                            <li><i class="fas fa-envelope me-2"></i>support@soorgreen.com</li>
-                        </ul>
+                <!-- Main Footer Content -->
+                <div class="footer-main">
+                    <div class="row gy-5">
+                        <!-- Brand Section with Enhanced Design -->
+                        <div class="col-lg-4">
+                            <div class="footer-brand-card">
+                                <div class="brand-header">
+                                    <div class="brand-logo">
+                                        <i class="fas fa-recycle"></i>
+                                        <div class="logo-glow"></div>
+                                    </div>
+                                    <h3 class="brand-title">SoorGreen</h3>
+                                </div>
+                                <p class="brand-description">
+                                    Transforming waste management through innovative technology and sustainable solutions. 
+                                    Building cleaner, greener cities for future generations.
+                                </p>
+
+                                <!-- Enhanced Social Links -->
+                                <div class="social-section">
+                                    <h6 class="social-title">Follow Our Journey</h6>
+                                    <div class="social-links-grid">
+                                        <a href="#" class="social-card facebook">
+                                            <i class="fab fa-facebook-f"></i>
+                                            <span>Facebook</span>
+                                        </a>
+                                        <a href="#" class="social-card twitter">
+                                            <i class="fab fa-twitter"></i>
+                                            <span>Twitter</span>
+                                        </a>
+                                        <a href="#" class="social-card linkedin">
+                                            <i class="fab fa-linkedin-in"></i>
+                                            <span>LinkedIn</span>
+                                        </a>
+                                        <a href="#" class="social-card instagram">
+                                            <i class="fab fa-instagram"></i>
+                                            <span>Instagram</span>
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Quick Links with Icons -->
+                        <div class="col-lg-2 col-md-6">
+                            <div class="footer-section">
+                                <h4 class="section-title">Navigation</h4>
+                                <div class="footer-links-grid">
+                                    <a href="Default.aspx" class="footer-link-item">
+                                        <i class="fas fa-home"></i>
+                                        <span>Home</span>
+                                    </a>
+                                    <a href="About.aspx" class="footer-link-item">
+                                        <i class="fas fa-info-circle"></i>
+                                        <span>About</span>
+                                    </a>
+                                    <a href="Services.aspx" class="footer-link-item">
+                                        <i class="fas fa-concierge-bell"></i>
+                                        <span>Services</span>
+                                    </a>
+                                    <a href="Contact.aspx" class="footer-link-item">
+                                        <i class="fas fa-envelope"></i>
+                                        <span>Contact</span>
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Platform Links -->
+                        <div class="col-lg-3 col-md-6">
+                            <div class="footer-section">
+                                <h4 class="section-title">Our Platform</h4>
+                                <div class="footer-links-grid">
+                                    <a href="CitizenPortal.aspx" class="footer-link-item">
+                                        <i class="fas fa-users"></i>
+                                        <span>Citizen Portal</span>
+                                    </a>
+                                    <a href="AdminDashboard.aspx" class="footer-link-item">
+                                        <i class="fas fa-chart-line"></i>
+                                        <span>Admin Dashboard</span>
+                                    </a>
+                                    <a href="CollectorPortal.aspx" class="footer-link-item">
+                                        <i class="fas fa-truck"></i>
+                                        <span>Collector Portal</span>
+                                    </a>
+                                    <a href="API.aspx" class="footer-link-item">
+                                        <i class="fas fa-code"></i>
+                                        <span>API Services</span>
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Contact Info with Enhanced Design -->
+                        <div class="col-lg-3">
+                            <div class="footer-section">
+                                <h4 class="section-title">Get In Touch</h4>
+                                <div class="contact-info">
+                                    <div class="contact-item">
+                                        <div class="contact-icon">
+                                            <i class="fas fa-map-marker-alt"></i>
+                                        </div>
+                                        <div class="contact-details">
+                                            <span class="contact-label">Our Location</span>
+                                            <span class="contact-value">123 Green Street, Eco City</span>
+                                        </div>
+                                    </div>
+                                    <div class="contact-item">
+                                        <div class="contact-icon">
+                                            <i class="fas fa-phone"></i>
+                                        </div>
+                                        <div class="contact-details">
+                                            <span class="contact-label">Call Us</span>
+                                            <span class="contact-value">+1 (555) 123-4567</span>
+                                        </div>
+                                    </div>
+                                    <div class="contact-item">
+                                        <div class="contact-icon">
+                                            <i class="fas fa-envelope"></i>
+                                        </div>
+                                        <div class="contact-details">
+                                            <span class="contact-label">Email Us</span>
+                                            <span class="contact-value">support@soorgreen.com</span>
+                                        </div>
+                                    </div>
+                                    <div class="contact-item">
+                                        <div class="contact-icon">
+                                            <i class="fas fa-clock"></i>
+                                        </div>
+                                        <div class="contact-details">
+                                            <span class="contact-label">Working Hours</span>
+                                            <span class="contact-value">Mon-Fri: 9AM-6PM</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
-                <hr class="mt-4" />
-                <div class="text-center mt-3">
-                    &copy; <%= DateTime.Now.Year %> SoorGreen. All Rights Reserved.
+
+                <!-- eALIF Team Section -->
+                <div class="ealif-section">
+                    <div class="ealif-content">
+                        <div class="ealif-logo">
+                            <asp:Image ImageUrl="~/favicon.ico" runat="server" />
+                        </div>
+                        <div class="ealif-text">
+                            <span class="powered-by">Powered by</span>
+                            <span class="team-name">eALIF Suite</span>
+                        </div>
+                        <div class="ealif-badge">
+                            <span>Innovation Driven</span>
+                        </div>
+                    </div>
                 </div>
+
+                <!-- Copyright Section -->
+                <div class="copyright-section">
+                    <div class="copyright-content">
+                        <div class="copyright-text">
+                            <span>&copy; <%= DateTime.Now.Year %> SoorGreen Initiative. All rights reserved.</span>
+                        </div>
+                        <div class="footer-actions">
+                            <a href="privacyPolicy.aspx" class="footer-action-link">Privacy Policy</a>
+                            <a href="#" class="footer-action-link">Terms of Service</a>
+                            <a href="#" class="footer-action-link">Cookie Policy</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Floating Elements -->
+            <div class="footer-floating-elements">
+                <div class="floating-element el-1"><i class="fas fa-leaf"></i></div>
+                <div class="floating-element el-2"><i class="fas fa-recycle"></i></div>
+                <div class="floating-element el-3"><i class="fas fa-seedling"></i></div>
+                <div class="floating-element el-4"><i class="fas fa-globe-americas"></i></div>
             </div>
         </footer>
     </form>
@@ -1052,10 +2078,10 @@
     <!-- Scripts -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
-    
+
     <!-- SCRIPT CONTENT PLACEHOLDER - CHANGED TO ScriptsContent -->
     <asp:ContentPlaceHolder ID="ScriptsContent" runat="server"></asp:ContentPlaceHolder>
-    
+
     <script>
         // Initialize AOS
         AOS.init({
@@ -1137,20 +2163,23 @@
             });
         });
 
-        // Sidebar functionality
+        // Sidebar functionality - UPDATED
         function toggleSidebar() {
             const sidebar = document.getElementById('sidebar');
-            const mainContent = document.getElementById('mainContent');
             const overlay = document.querySelector('.sidebar-overlay');
 
             if (window.innerWidth < 992) {
                 // Mobile behavior
                 sidebar.classList.toggle('mobile-open');
                 overlay.classList.toggle('active');
+                document.body.style.overflow = sidebar.classList.contains('mobile-open') ? 'hidden' : '';
             } else {
                 // Desktop behavior - toggle collapse
                 sidebar.classList.toggle('collapsed');
-                mainContent.classList.toggle('expanded');
+                const mainContent = document.getElementById('mainContent');
+                if (mainContent) {
+                    mainContent.classList.toggle('expanded');
+                }
             }
         }
 

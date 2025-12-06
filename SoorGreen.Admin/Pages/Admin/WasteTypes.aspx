@@ -1,259 +1,382 @@
 ﻿<%@ Page Title="Waste Types" Language="C#" MasterPageFile="~/Pages/Admin/Site.master" AutoEventWireup="true" CodeFile="WasteTypes.aspx.cs" Inherits="SoorGreen.Admin.Admin.WasteTypes" %>
-<%@ Register Assembly="System.Web.Extensions, Version=4.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35" Namespace="System.Web.UI" TagPrefix="asp" %>
-<%@ Import Namespace="System.Web.Optimization" %>
-<asp:Content ID="Content1" ContentPlaceHolderID="HeadContent" runat="server">
-    <%: Styles.Render("~/Content/adminwastetypes") %>
+
+<asp:Content ID="Content3" ContentPlaceHolderID="HeadContent" runat="server">
+    <link href='<%= ResolveUrl("~/Content/Pages/Admin/admincitizens.css") %>' rel="stylesheet" />
 </asp:Content>
-<asp:Content ID="Content3" ContentPlaceHolderID="ScriptsContent" runat="server">
-    <%: Scripts.Render("~/bundles/adminwastetypes") %>
-</asp:Content>
+
 <asp:Content ID="PageTitle" ContentPlaceHolderID="PageTitle" runat="server">
-    Waste Types Management
+    <div class="d-flex align-items-center">
+        <h1 class="h3 mb-0" style="color: var(--text-primary);">Waste Types Management</h1>
+    </div>
 </asp:Content>
 
 <asp:Content ID="MainContent" ContentPlaceHolderID="MainContent" runat="server">
-    <asp:ScriptManager ID="ScriptManager1" runat="server" EnablePageMethods="true"></asp:ScriptManager>
-    
-   
-
-    <div class="waste-types-container">
-        <!-- Statistics Cards -->
-        <div class="stats-cards">
-            <div class="stat-card">
-                <div class="stat-value" id="totalTypes">0</div>
-                <div class="stat-label">Total Waste Types</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-value" id="avgCreditRate">0.00</div>
-                <div class="stat-label">Average Credit Rate</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-value" id="highestCredit">0.00</div>
-                <div class="stat-label">Highest Credit Rate</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-value" id="activeTypes">0</div>
-                <div class="stat-label">Active Types</div>
+    <!-- Message Panel -->
+    <asp:Panel ID="pnlMessage" runat="server" CssClass="message-panel" Visible="false">
+        <div class='message-alert' id="divMessage" runat="server">
+            <i class='fas' id="iconMessage" runat="server"></i>
+            <div>
+                <strong><asp:Literal ID="litMessageTitle" runat="server"></asp:Literal></strong>
+                <p class="mb-0"><asp:Literal ID="litMessageText" runat="server"></asp:Literal></p>
             </div>
         </div>
+    </asp:Panel>
 
-        <div class="filter-card" style="background: rgba(255, 255, 255, 0.05); backdrop-filter: blur(20px); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 15px; padding: 1.5rem; margin-bottom: 2rem;">
-            <h5 class="mb-3" style="color: #ffffff !important;"><i class="fas fa-filter me-2"></i>Filter Waste Types</h5>
+    <!-- Add/Edit Modal -->
+    <div class="modal fade" id="wasteTypeModal" tabindex="-1" role="dialog" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="modalTitle">
+                        <i class="fas fa-trash me-2"></i>
+                        <asp:Literal ID="litModalTitle" runat="server" Text="Add New Waste Type"></asp:Literal>
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <asp:HiddenField ID="hdnWasteTypeId" runat="server" />
+                    
+                    <div class="mb-3">
+                        <label class="form-label"><i class="fas fa-tag me-2"></i>Waste Type Name</label>
+                        <asp:TextBox ID="txtName" runat="server" CssClass="form-control" 
+                            placeholder="e.g., Plastic, Paper, Glass, etc." required></asp:TextBox>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label"><i class="fas fa-coins me-2"></i>Credit Per Kg</label>
+                        <div class="input-group">
+                            <span class="input-group-text">$</span>
+                            <asp:TextBox ID="txtCreditPerKg" runat="server" CssClass="form-control" 
+                                placeholder="0.00" TextMode="Number" step="0.01" required></asp:TextBox>
+                            <span class="input-group-text">per kg</span>
+                        </div>
+                        <small class="form-text text-muted">Credit amount citizens earn per kg of this waste type</small>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label"><i class="fas fa-palette me-2"></i>Color Code</label>
+                        <div class="input-group">
+                            <asp:TextBox ID="txtColorCode" runat="server" CssClass="form-control" 
+                                placeholder="#007bff" MaxLength="7"></asp:TextBox>
+                            <span class="input-group-text">
+                                <i class="fas fa-eye-dropper"></i>
+                            </span>
+                        </div>
+                        <small class="form-text text-muted">Hex color code for UI representation (optional)</small>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label"><i class="fas fa-info-circle me-2"></i>Description</label>
+                        <asp:TextBox ID="txtDescription" runat="server" CssClass="form-control" 
+                            TextMode="MultiLine" Rows="3" placeholder="Brief description of this waste type..."></asp:TextBox>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label"><i class="fas fa-layer-group me-2"></i>Category</label>
+                        <asp:DropDownList ID="ddlCategory" runat="server" CssClass="form-control">
+                            <asp:ListItem Value="Recyclable">Recyclable</asp:ListItem>
+                            <asp:ListItem Value="Organic">Organic</asp:ListItem>
+                            <asp:ListItem Value="Hazardous">Hazardous</asp:ListItem>
+                            <asp:ListItem Value="Electronic">Electronic</asp:ListItem>
+                            <asp:ListItem Value="Other">Other</asp:ListItem>
+                        </asp:DropDownList>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <asp:Button ID="btnSaveWasteType" runat="server" CssClass="btn btn-primary" 
+                        Text="Save Waste Type" OnClick="btnSaveWasteType_Click" />
+                    <asp:Button ID="btnDeleteWasteType" runat="server" CssClass="btn btn-danger" 
+                        Text="Delete Waste Type" OnClick="btnDeleteWasteType_Click" Visible="false" 
+                        OnClientClick="return confirm('Are you sure you want to delete this waste type?');" />
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="users-container">
+        <!-- Filter Card -->
+        <div class="filter-card">
+            <h5 class="mb-4"><i class="fas fa-sliders-h me-2"></i>Filter Options</h5>
             <div class="filter-group">
                 <div class="form-group search-box">
-                    <label class="form-label">Search Types</label>
+                    <label class="form-label"><i class="fas fa-search me-2"></i>Search Waste Types</label>
                     <div class="position-relative">
                         <i class="fas fa-search search-icon"></i>
-                        <input type="text" class="form-control search-input" id="searchTypes" placeholder="Search by name or description...">
+                        <asp:TextBox ID="txtSearch" runat="server" CssClass="form-control search-input" 
+                            placeholder="Search by name, category, description..."></asp:TextBox>
                     </div>
                 </div>
-                
                 <div class="form-group">
-                    <label class="form-label">Credit Range</label>
-                    <select class="form-control" id="creditFilter">
-                        <option value="all">All Credits</option>
-                        <option value="low">Low (0-0.25)</option>
-                        <option value="medium">Medium (0.26-0.75)</option>
-                        <option value="high">High (0.76+)</option>
-                    </select>
+                    <label class="form-label"><i class="fas fa-layer-group me-2"></i>Category</label>
+                    <div class="select-with-icon">
+                        <asp:DropDownList ID="ddlCategoryFilter" runat="server" CssClass="form-control">
+                            <asp:ListItem Value="all">All Categories</asp:ListItem>
+                            <asp:ListItem Value="Recyclable">Recyclable</asp:ListItem>
+                            <asp:ListItem Value="Organic">Organic</asp:ListItem>
+                            <asp:ListItem Value="Hazardous">Hazardous</asp:ListItem>
+                            <asp:ListItem Value="Electronic">Electronic</asp:ListItem>
+                            <asp:ListItem Value="Other">Other</asp:ListItem>
+                        </asp:DropDownList>
+                        <i class="fas fa-chevron-down select-arrow"></i>
+                    </div>
                 </div>
-                
                 <div class="form-group">
-                    <label class="form-label">Status</label>
-                    <select class="form-control" id="statusFilter">
-                        <option value="all">All Status</option>
-                        <option value="active">Active</option>
-                        <option value="inactive">Inactive</option>
-                    </select>
-                </div>
-                
-                <div class="form-group">
-                    <button type="button" class="btn-primary" id="applyFiltersBtn" style="margin-top: 1.7rem;">
-                        <i class="fas fa-filter me-2"></i>Apply Filters
-                    </button>
+                    <label class="form-label" style="visibility: hidden;">Action</label>
+                    <div class="d-flex gap-2">
+                        <button type="button" class="btn btn-primary btn-with-icon" onclick="__doPostBack('ctl00$MainContent$btnApplyFilters', '')">
+                            <i class="fas fa-filter me-2"></i>Apply Filters
+                        </button>
+                        <asp:Button ID="btnApplyFilters" runat="server" style="display:none;" OnClick="btnApplyFilters_Click" />
+                        
+                        <button type="button" class="btn btn-success btn-with-icon" onclick="showAddModal()">
+                            <i class="fas fa-plus me-2"></i>Add Waste Type
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>
 
-        <div class="d-flex justify-content-between align-items-center mb-3">
-            <div class="view-options">
-                <button type="button" class="view-btn active" data-view="grid">
-                    <i class="fas fa-th me-2"></i>Grid View
+        <!-- Stats Cards -->
+        <div class="d-flex gap-3 mb-4 flex-wrap">
+            <div class="stats-card users" style="flex: 1; min-width: 200px;">
+                <div class="stats-icon">
+                    <i class="fas fa-trash"></i>
+                </div>
+                <div class="stats-number" id="statTotal" runat="server">0</div>
+                <div class="stats-label">Total Waste Types</div>
+            </div>
+            <div class="stats-card active" style="flex: 1; min-width: 200px;">
+                <div class="stats-icon">
+                    <i class="fas fa-recycle"></i>
+                </div>
+                <div class="stats-number text-success" id="statRecyclable" runat="server">0</div>
+                <div class="stats-label">Recyclable</div>
+            </div>
+            <div class="stats-card pickups" style="flex: 1; min-width: 200px;">
+                <div class="stats-icon">
+                    <i class="fas fa-leaf"></i>
+                </div>
+                <div class="stats-number text-primary" id="statOrganic" runat="server">0</div>
+                <div class="stats-label">Organic</div>
+            </div>
+            <div class="stats-card waste" style="flex: 1; min-width: 200px;">
+                <div class="stats-icon">
+                    <i class="fas fa-coins"></i>
+                </div>
+                <div class="stats-number text-warning" id="statAvgCredit" runat="server">$0.00</div>
+                <div class="stats-label">Avg Credit/Kg</div>
+            </div>
+        </div>
+
+        <!-- View Controls -->
+        <div class="view-controls">
+            <div class="d-flex align-items-center gap-3 flex-wrap">
+                <div class="view-options">
+                    <asp:LinkButton ID="btnCardView" runat="server" CssClass="view-btn active" 
+                        OnClick="btnCardView_Click" CausesValidation="false">
+                        <i class="fas fa-th-large me-2"></i>Card View
+                    </asp:LinkButton>
+                    <asp:LinkButton ID="btnTableView" runat="server" CssClass="view-btn" 
+                        OnClick="btnTableView_Click" CausesValidation="false">
+                        <i class="fas fa-table me-2"></i>Table View
+                    </asp:LinkButton>
+                </div>
+                <div class="page-info">
+                    <i class="fas fa-trash me-2"></i>
+                    Showing <asp:Label ID="lblWasteTypeCount" runat="server" Text="0"></asp:Label> waste types
+                </div>
+            </div>
+            <div class="d-flex gap-2">
+                <button type="button" class="btn btn-secondary btn-with-icon" onclick="__doPostBack('ctl00$MainContent$btnExportCSV', '')">
+                    <i class="fas fa-file-export me-2"></i>Export CSV
                 </button>
-                <button type="button" class="view-btn" data-view="table">
-                    <i class="fas fa-table me-2"></i>Table View
+                <asp:Button ID="btnExportCSV" runat="server" style="display:none;" OnClick="btnExportCSV_Click" />
+                
+                <button type="button" class="btn btn-secondary btn-with-icon" onclick="__doPostBack('ctl00$MainContent$btnRefresh', '')">
+                    <i class="fas fa-sync-alt me-2"></i>Refresh
                 </button>
-            </div>
-            
-            <!-- ADD BUTTON HERE -->
-            <button type="button" class="btn-add" id="addTypeBtn">
-                <i class="fas fa-plus me-2"></i>Add New Waste Type
-            </button>
-            
-            <div class="page-info" id="pageInfo">
-                Showing 0 types
-            </div>
-        </div>
-
-        <div id="gridView">
-            <div class="types-grid" id="typesGrid">
-            </div>
-        </div>
-
-        <div id="tableView" style="display: none;">
-            <div class="table-responsive">
-                <table class="types-table" id="typesTable">
-                    <thead>
-                        <tr>
-                            <th>Type ID</th>
-                            <th>Name</th>
-                            <th>Credit Rate</th>
-                            <th>Status</th>
-                            <th>Reports Count</th>
-                            <th>Total Weight</th>
-                            <th>Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody id="typesTableBody">
-                    </tbody>
-                </table>
-            </div>
-        </div>
-
-        <div class="pagination-container">
-            <div class="page-info" id="paginationInfo">
-                Page 1 of 1
-            </div>
-            <nav>
-                <ul class="pagination mb-0" id="pagination">
-                </ul>
-            </nav>
-        </div>
-    </div>
-
-    <!-- View Type Details Modal -->
-    <div class="modal-overlay" id="viewTypeModal">
-        <div class="modal-content" style="max-width: 700px;">
-            <div class="modal-header">
-                <h3 class="modal-title">Waste Type Details</h3>
-                <button type="button" class="close-modal">&times;</button>
-            </div>
-            <div class="modal-body">
-                <div class="type-details-container">
-                    <div class="type-info-grid">
-                        <div class="info-item">
-                            <label>Type ID:</label>
-                            <span id="viewTypeId">-</span>
-                        </div>
-                        <div class="info-item">
-                            <label>Status:</label>
-                            <span id="viewTypeStatus">-</span>
-                        </div>
-                        <div class="info-item">
-                            <label>Name:</label>
-                            <span id="viewTypeName">-</span>
-                        </div>
-                        <div class="info-item">
-                            <label>Credit Rate:</label>
-                            <span id="viewCreditRate">-</span>
-                        </div>
-                        <div class="info-item">
-                            <label>Total Reports:</label>
-                            <span id="viewReportsCount">-</span>
-                        </div>
-                        <div class="info-item">
-                            <label>Total Weight:</label>
-                            <span id="viewTotalWeight">-</span>
-                        </div>
-                        <div class="info-item">
-                            <label>Average Weight:</label>
-                            <span id="viewAvgWeight">-</span>
-                        </div>
-                        <div class="info-item">
-                            <label>Total Credits:</label>
-                            <span id="viewTotalCredits">-</span>
-                        </div>
-                        <div class="info-item full-width">
-                            <label>Description:</label>
-                            <span id="viewTypeDescription">-</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn-action btn-edit" id="editTypeBtn">
-                    <i class="fas fa-edit me-2"></i>Edit Type
+                <asp:Button ID="btnRefresh" runat="server" style="display:none;" OnClick="btnRefresh_Click" />
+                
+                <button type="button" class="btn btn-secondary btn-with-icon" onclick="__doPostBack('ctl00$MainContent$btnClearFilters', '')">
+                    <i class="fas fa-times me-2"></i>Clear Filters
                 </button>
-                <button type="button" class="btn-action" id="closeViewModalBtn">Close</button>
+                <asp:Button ID="btnClearFilters" runat="server" style="display:none;" OnClick="btnClearFilters_Click" />
             </div>
         </div>
-    </div>
 
-    <!-- Add/Edit Waste Type Modal -->
-    <div class="modal-overlay" id="editTypeModal">
-        <div class="modal-content" style="max-width: 600px;">
-            <div class="modal-header">
-                <h3 class="modal-title" id="editModalTitle">Add New Waste Type</h3>
-                <button type="button" class="close-modal">&times;</button>
-            </div>
-            <div class="modal-body">
-                <div class="form-group">
-                    <label class="form-label">Waste Type Name</label>
-                    <input type="text" class="form-control" id="typeName" placeholder="Enter waste type name">
-                </div>
-                <div class="form-row">
-                    <div class="form-half">
-                        <label class="form-label">Credit Rate (per kg)</label>
-                        <input type="number" class="form-control" id="creditRate" step="0.01" min="0" placeholder="0.00">
+        <!-- Card View -->
+        <asp:Panel ID="pnlCardView" runat="server" CssClass="users-grid">
+            <asp:Repeater ID="rptWasteTypesGrid" runat="server" 
+                OnItemDataBound="rptWasteTypesGrid_ItemDataBound">
+                <ItemTemplate>
+                    <div class="user-card">
+                        <div class="d-flex justify-content-between align-items-start mb-3">
+                            <div>
+                                <h5>
+                                    <i class="fas fa-trash me-2"></i><%# Eval("Name") %>
+                                    <span class="badge ms-2" style='background-color: <%# GetColorCode(Eval("ColorCode")) %>'>
+                                        <%# Eval("Category") %>
+                                    </span>
+                                </h5>
+                                <div class="text-muted small">
+                                    <i class="fas fa-hashtag me-1"></i><%# Eval("WasteTypeId") %>
+                                </div>
+                            </div>
+                            <div class="text-end">
+                                <div class="fs-4 fw-bold text-success">$<%# Eval("CreditPerKg", "{0:N2}") %></div>
+                                <div class="small text-muted">per kg</div>
+                            </div>
+                        </div>
+                        
+                        <p>
+                            <span><i class="fas fa-info-circle me-2"></i>Description:</span>
+                            <span><%# string.IsNullOrEmpty(Eval("Description").ToString()) ? "No description" : Eval("Description") %></span>
+                        </p>
+                        
+                        <div class="card-stats">
+                            <div class="stat-item">
+                                <span class="stat-value text-primary"><%# GetReportCount(Eval("WasteTypeId").ToString()) %></span>
+                                <span class="stat-label">Reports</span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="stat-value text-warning"><%# GetTotalWeight(Eval("WasteTypeId").ToString()) %> kg</span>
+                                <span class="stat-label">Total Weight</span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="stat-value text-success">$<%# GetTotalCredits(Eval("WasteTypeId").ToString()) %></span>
+                                <span class="stat-label">Total Credits</span>
+                            </div>
+                        </div>
+                        
+                        <div class="action-buttons">
+                            <button type="button" class="btn btn-primary" onclick='editWasteType("<%# Eval("WasteTypeId") %>")'>
+                                <i class="fas fa-edit me-1"></i>Edit
+                            </button>
+                            <button type="button" class="btn btn-info" onclick='viewDetails("<%# Eval("WasteTypeId") %>")'>
+                                <i class="fas fa-chart-bar me-1"></i>Stats
+                            </button>
+                            <%# GetDeleteButton(Eval("WasteTypeId").ToString()) %>
+                        </div>
                     </div>
-                    <div class="form-half">
-                        <label class="form-label">Status</label>
-                        <select class="form-control" id="typeStatus">
-                            <option value="Active">Active</option>
-                            <option value="Inactive">Inactive</option>
-                        </select>
+                </ItemTemplate>
+                <FooterTemplate>
+                    <asp:Label ID="lblEmptyGrid" runat="server" Text="No waste types found" 
+                        Visible='<%# rptWasteTypesGrid.Items.Count == 0 %>' CssClass="empty-state">
+                        <i class="fas fa-trash-slash"></i>
+                        <p>No waste types found matching your criteria</p>
+                    </asp:Label>
+                </FooterTemplate>
+            </asp:Repeater>
+        </asp:Panel>
+
+        <!-- Table View -->
+        <asp:Panel ID="pnlTableView" runat="server" CssClass="table-container" Visible="false">
+            <asp:GridView ID="gvWasteTypes" runat="server" AutoGenerateColumns="False" 
+                CssClass="users-table" 
+                EmptyDataText="No waste types found" ShowHeaderWhenEmpty="true">
+                <Columns>
+                    <asp:TemplateField HeaderText="ID">
+                        <ItemTemplate>
+                            <div class="d-flex align-items-center">
+                                <div class="role-icon waste-type" style='background-color: <%# GetColorCode(Eval("ColorCode")) %>'>
+                                    <i class='fas fa-trash'></i>
+                                </div>
+                                <strong><%# Eval("WasteTypeId") %></strong>
+                            </div>
+                        </ItemTemplate>
+                    </asp:TemplateField>
+                    
+                    <asp:TemplateField HeaderText="Waste Type">
+                        <ItemTemplate>
+                            <div><strong><%# Eval("Name") %></strong></div>
+                            <small class="text-muted"><%# Eval("Description") %></small>
+                        </ItemTemplate>
+                    </asp:TemplateField>
+                    
+                    <asp:TemplateField HeaderText="Category">
+                        <ItemTemplate>
+                            <span class="badge" style='background-color: <%# GetCategoryColor(Eval("Category").ToString()) %>'>
+                                <%# Eval("Category") %>
+                            </span>
+                        </ItemTemplate>
+                    </asp:TemplateField>
+                    
+                    <asp:TemplateField HeaderText="Credit Rate">
+                        <ItemTemplate>
+                            <div class="d-flex align-items-center gap-2">
+                                <i class="fas fa-coins text-warning"></i>
+                                <div>
+                                    <strong>$<%# Eval("CreditPerKg", "{0:N2}") %></strong>
+                                    <div class="small text-muted">per kg</div>
+                                </div>
+                            </div>
+                        </ItemTemplate>
+                    </asp:TemplateField>
+                    
+                    <asp:TemplateField HeaderText="Usage Stats">
+                        <ItemTemplate>
+                            <small>Reports: <strong><%# GetReportCount(Eval("WasteTypeId").ToString()) %></strong></small><br>
+                            <small>Weight: <strong><%# GetTotalWeight(Eval("WasteTypeId").ToString()) %> kg</strong></small>
+                        </ItemTemplate>
+                    </asp:TemplateField>
+                    
+                    <asp:TemplateField HeaderText="Actions">
+                        <ItemTemplate>
+                            <div class="d-flex gap-2">
+                                <button type="button" class="btn btn-primary" onclick='editWasteType("<%# Eval("WasteTypeId") %>")'>
+                                    <i class="fas fa-edit"></i>
+                                </button>
+                                <button type="button" class="btn btn-info" onclick='viewDetails("<%# Eval("WasteTypeId") %>")'>
+                                    <i class="fas fa-chart-bar"></i>
+                                </button>
+                                <%# GetDeleteButton(Eval("WasteTypeId").ToString()) %>
+                            </div>
+                        </ItemTemplate>
+                    </asp:TemplateField>
+                </Columns>
+                <EmptyDataTemplate>
+                    <div class="empty-state" style="margin: 2rem;">
+                        <i class="fas fa-trash-slash"></i>
+                        <p>No waste types found matching your criteria</p>
                     </div>
-                </div>
-                <div class="form-group">
-                    <label class="form-label">Description (Optional)</label>
-                    <textarea class="form-control" id="typeDescription" rows="3" placeholder="Enter description..."></textarea>
-                </div>
-                <div class="form-group">
-                    <label class="form-label">Color Indicator (Optional)</label>
-                    <input type="color" class="form-control" id="typeColor" value="#20c997" style="height: 50px;">
-                </div>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn-action" id="cancelEditBtn">Cancel</button>
-                <button type="button" class="btn-primary" id="confirmEditBtn">Save Waste Type</button>
-            </div>
-        </div>
+                </EmptyDataTemplate>
+            </asp:GridView>
+        </asp:Panel>
     </div>
 
-    <!-- Delete Confirmation Modal -->
-    <div class="modal-overlay" id="deleteTypeModal">
-        <div class="modal-content" style="max-width: 500px;">
-            <div class="modal-header">
-                <h3 class="modal-title">Confirm Delete</h3>
-                <button type="button" class="close-modal">&times;</button>
-            </div>
-            <div class="modal-body">
-                <div class="text-center">
-                    <i class="fas fa-exclamation-triangle fa-3x text-warning mb-3"></i>
-                    <h4>Are you sure?</h4>
-                    <p>You are about to delete waste type: <strong id="deleteTypeName">-</strong></p>
-                    <p class="text-muted">This action cannot be undone. Associated waste reports will need to be reassigned.</p>
-                </div>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn-action" id="cancelDeleteBtn" style="flex: 1;">Cancel</button>
-                <button type="button" class="btn-primary" id="confirmDeleteBtn" style="flex: 1;">Delete Type</button>
-            </div>
-        </div>
-    </div>
-
-    <asp:Button ID="btnLoadTypes" runat="server" OnClick="LoadWasteTypes" Style="display: none;" />
-    <asp:HiddenField ID="hfTypesData" runat="server" />
-    <asp:HiddenField ID="hfCurrentPage" runat="server" Value="1" />
-    <asp:HiddenField ID="hfStatsData" runat="server" />
+    <!-- Simple JavaScript functions -->
+    <script>
+    function showAddModal() {
+        // Reset form
+        document.getElementById('<%= hdnWasteTypeId.ClientID %>').value = '';
+        document.getElementById('<%= litModalTitle.ClientID %>').innerText = 'Add New Waste Type';
+        document.getElementById('<%= btnDeleteWasteType.ClientID %>').style.display = 'none';
+        
+        // Clear form fields
+        document.getElementById('<%= txtName.ClientID %>').value = '';
+        document.getElementById('<%= txtCreditPerKg.ClientID %>').value = '';
+        document.getElementById('<%= txtColorCode.ClientID %>').value = '#007bff';
+        document.getElementById('<%= txtDescription.ClientID %>').value = '';
+        document.getElementById('<%= ddlCategory.ClientID %>').selectedIndex = 0;
+        
+        // Show modal
+        var modal = new bootstrap.Modal(document.getElementById('wasteTypeModal'));
+        modal.show();
+    }
+    
+    function editWasteType(wasteTypeId) {
+        // Set the waste type ID
+        document.getElementById('<%= hdnWasteTypeId.ClientID %>').value = wasteTypeId;
+        document.getElementById('<%= litModalTitle.ClientID %>').innerText = 'Edit Waste Type';
+        document.getElementById('<%= btnDeleteWasteType.ClientID %>').style.display = 'inline-block';
+        
+        // Trigger server-side event to load data
+        __doPostBack('ctl00$MainContent$hdnWasteTypeId', 'edit_' + wasteTypeId);
+    }
+    
+    function viewDetails(wasteTypeId) {
+        alert('View detailed statistics for waste type: ' + wasteTypeId);
+    }
+    </script>
 </asp:Content>

@@ -1,8 +1,5 @@
 ﻿<%@ Page Title="My Profile" Language="C#" MasterPageFile="~/Pages/Admin/Site.master" AutoEventWireup="true" CodeFile="Profile.aspx.cs" Inherits="SoorGreen.Admin.Admin.UserProfile" %>
-<%@ Import Namespace="System.Web.Optimization" %>
-<asp:Content ID="Content1" ContentPlaceHolderID="HeadContent" runat="server">
-    <%: Styles.Render("~/Content/adminprofile") %>
-</asp:Content>
+
 <asp:Content ID="Content3" ContentPlaceHolderID="ScriptsContent" runat="server">
     <%: Scripts.Render("~/bundles/adminprofile") %>
 </asp:Content>
@@ -11,15 +8,11 @@
 </asp:Content>
 
 <asp:Content ID="MainContent" ContentPlaceHolderID="MainContent" runat="server">
+    <link href='<%= ResolveUrl("~/Content/Pages/Admin/adminprofile.css") %>' rel="stylesheet" />
     <asp:ScriptManager ID="ScriptManager1" runat="server" EnablePageMethods="true"></asp:ScriptManager>
 
-   
-    <div class="container-fluid">
-        <div class="page-header">
-            <h1 class="page-title">My Profile</h1>
-            <p class="page-subtitle">Manage your account settings and preferences</p>
-        </div>
 
+    <div class="container-fluid">
         <div class="profile-container">
             <!-- Loading Spinner -->
             <div class="loading-spinner" id="loadingSpinner">

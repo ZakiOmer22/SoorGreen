@@ -1,11 +1,15 @@
 ﻿<%@ Page Title="Feedback" Language="C#" MasterPageFile="~/Pages/Citizen/Site.Master" AutoEventWireup="true" CodeFile="Feedback.aspx.cs" Inherits="SoorGreen.Citizen.Feedback" %>
-<%@ Import Namespace="System.Web.Optimization" %>
+
 <asp:Content ID="Content3" ContentPlaceHolderID="HeadContent" runat="server">
-    <%: Styles.Render("~/Content/citizenfeedback") %>
+    <link href='<%= ResolveUrl("~/Content/Pages/Citizen/citizenfeedback.css") %>' rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
 </asp:Content>
+
 <asp:Content ID="Content4" ContentPlaceHolderID="ScriptsContent" runat="server">
-    <%: Scripts.Render("~/bundles/citizenfeedback") %>
+    <script src='<%= ResolveUrl("~/Scripts/Pages/Citizen/citizenfeedback.js") %>'></script>
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
 </asp:Content>
+
 <asp:Content ID="Content1" ContentPlaceHolderID="TitleContent" runat="server">
     Feedback - SoorGreen Citizen
 </asp:Content>
