@@ -3,6 +3,7 @@ using System.Data.SqlClient;
 using System.Web.Configuration;
 using System.Security.Cryptography;
 using System.Text;
+using System.Linq; // Add this for LINQ support
 
 public partial class LoginPage : System.Web.UI.Page
 {
@@ -34,50 +35,66 @@ public partial class LoginPage : System.Web.UI.Page
                     // UPDATED: Get user data including password hash
                     string query = @"SELECT UserId, FullName, Email, RoleId, IsVerified, Phone, Password
                            FROM Users 
-                           WHERE Email = @Email OR Phone = @Email";
+                           WHERE (Email = @LoginId OR Phone = @LoginId)";
 
                     using (SqlCommand cmd = new SqlCommand(query, conn))
                     {
-                        string emailValue = (txtEmail != null && txtEmail.Text != null) ? txtEmail.Text.Trim() : "";
-                        string passwordValue = (txtPassword != null && txtPassword.Text != null) ? txtPassword.Text.Trim() : "";
+                        string loginId = txtEmail.Text.Trim();
 
-                        cmd.Parameters.AddWithValue("@Email", emailValue);
+                        // For phone numbers, remove any non-digit characters
+                        if (IsPhoneNumber(loginId))
+                        {
+                            loginId = new string(loginId.Where(char.IsDigit).ToArray());
+                        }
+
+                        cmd.Parameters.AddWithValue("@LoginId", loginId);
 
                         using (SqlDataReader reader = cmd.ExecuteReader())
                         {
                             if (reader.Read())
                             {
-                                // FIXED: Compare hashed passwords - .NET 4.0 compatible
+                                // FIXED: Compare hashed passwords
                                 string storedHashedPassword = reader["Password"] != null ? reader["Password"].ToString() : "";
-                                string inputHashedPassword = HashPassword(passwordValue);
+                                string inputPassword = txtPassword.Text.Trim();
+                                string inputHashedPassword = HashPassword(inputPassword);
 
-                                if (storedHashedPassword == inputHashedPassword)
+                                if (!string.IsNullOrEmpty(storedHashedPassword) && storedHashedPassword == inputHashedPassword)
                                 {
                                     // Login successful
-                                    Session["UserID"] = reader["UserId"].ToString();
-                                    Session["UserName"] = reader["FullName"].ToString();
-                                    Session["UserEmail"] = reader["Email"].ToString();
-                                    Session["UserRole"] = reader["RoleId"].ToString();
-                                    Session["IsVerified"] = reader["IsVerified"];
-                                    Session["UserPhone"] = reader["Phone"] != null ? reader["Phone"].ToString() : "";
+                                    string userId = reader["UserId"].ToString();
+                                    string userName = reader["FullName"].ToString();
+                                    string userEmail = reader["Email"].ToString();
+                                    string userRole = reader["RoleId"].ToString();
+                                    object isVerified = reader["IsVerified"];
+                                    string userPhone = reader["Phone"] != null ? reader["Phone"].ToString() : "";
 
-                                    UpdateLastLogin(reader["UserId"].ToString());
-                                    LogAudit(reader["UserId"].ToString(), "User Login", "Successful login");
+                                    // Set session variables
+                                    Session["UserID"] = userId;
+                                    Session["UserName"] = userName;
+                                    Session["UserEmail"] = userEmail;
+                                    Session["UserRole"] = userRole;
+                                    Session["IsVerified"] = isVerified;
+                                    Session["UserPhone"] = userPhone;
 
-                                    ShowToast("Welcome back, " + reader["FullName"].ToString() + "!", "success");
-                                    RedirectToDashboard(reader["RoleId"].ToString());
+                                    UpdateLastLogin(userId);
+                                    LogAudit(userId, "User Login", "Successful login");
+
+                                    ShowToast("Welcome back, " + userName + "!", "success");
+
+                                    // Redirect based on role
+                                    RedirectToDashboard(userRole);
                                 }
                                 else
                                 {
                                     // Password doesn't match
-                                    LogAudit(null, "Failed Login", "Invalid password for: " + emailValue);
+                                    LogAudit(null, "Failed Login", "Invalid password for: " + loginId);
                                     ShowToast("Invalid email/phone or password. Please try again.", "error");
                                 }
                             }
                             else
                             {
                                 // User not found
-                                LogAudit(null, "Failed Login", "User not found: " + emailValue);
+                                LogAudit(null, "Failed Login", "User not found: " + loginId);
                                 ShowToast("Invalid email/phone or password. Please try again.", "error");
                             }
                         }
@@ -92,7 +109,19 @@ public partial class LoginPage : System.Web.UI.Page
         }
     }
 
-    // FIXED: Added password hashing function to match ForgotPassword page
+    private bool IsPhoneNumber(string input)
+    {
+        // Check if input is likely a phone number (mostly digits)
+        if (string.IsNullOrEmpty(input)) return false;
+
+        int digitCount = input.Count(char.IsDigit);
+        int totalChars = input.Length;
+
+        // If more than 60% of characters are digits, treat as phone number
+        return (digitCount * 100 / totalChars) > 60;
+    }
+
+    // FIXED: Password hashing function
     private string HashPassword(string password)
     {
         using (SHA256 sha256Hash = SHA256.Create())
@@ -110,13 +139,13 @@ public partial class LoginPage : System.Web.UI.Page
 
     private bool ValidateLogin()
     {
-        if (txtEmail == null || string.IsNullOrEmpty(txtEmail.Text))
+        if (txtEmail == null || string.IsNullOrEmpty(txtEmail.Text.Trim()))
         {
             ShowToast("Email or phone number is required.", "warning");
             return false;
         }
 
-        if (txtPassword == null || string.IsNullOrEmpty(txtPassword.Text))
+        if (txtPassword == null || string.IsNullOrEmpty(txtPassword.Text.Trim()))
         {
             ShowToast("Password is required.", "warning");
             return false;
@@ -153,6 +182,13 @@ public partial class LoginPage : System.Web.UI.Page
     {
         string dashboardUrl = GetDashboardUrl(roleId);
 
+        // If no specific dashboard, redirect to default
+        if (string.IsNullOrEmpty(dashboardUrl))
+        {
+            dashboardUrl = "Default.aspx";
+        }
+
+        // Use JavaScript to redirect after toast is shown
         string script = string.Format(@"
             setTimeout(function() {{
                 window.location.href = '{0}';
@@ -164,19 +200,35 @@ public partial class LoginPage : System.Web.UI.Page
 
     private string GetDashboardUrl(string roleId)
     {
-        switch (roleId)
+        // Based on your database: R001=Citizen, R002=Collector, R003=Company, R004=Admin
+        switch (roleId.ToUpper())
         {
-            case "CITZ":
-            case "R001":
+            case "R001": // Citizen
+            case "CITZ": // Citizen (alternative)
                 return "Dashboard.aspx";
-            case "COLL":
-            case "R002":
+
+            case "R002": // Collector
+            case "COLL": // Collector (alternative)
                 return "Dashboard.aspx";
-            case "ADMN":
-            case "R004":
+
+            case "R003": // Company
+            case "COMP": // Company (alternative)
                 return "Dashboard.aspx";
+
+            case "R004": // Admin
+            case "ADMN": // Admin (alternative)
+                return "Dashboard.aspx";
+
             default:
-                return "Default.aspx";
+                // Check if there's a default dashboard
+                if (System.IO.File.Exists(Server.MapPath("Dashboard.aspx")))
+                {
+                    return "Dashboard.aspx";
+                }
+                else
+                {
+                    return "Default.aspx";
+                }
         }
     }
 
@@ -195,7 +247,7 @@ public partial class LoginPage : System.Web.UI.Page
                 using (SqlCommand cmd = new SqlCommand(query, conn))
                 {
                     object userIdParam = DBNull.Value;
-                    if (userId != null)
+                    if (!string.IsNullOrEmpty(userId))
                     {
                         userIdParam = userId;
                     }
@@ -227,7 +279,7 @@ public partial class LoginPage : System.Web.UI.Page
         ClientScript.RegisterStartupScript(this.GetType(), "toast", script, true);
     }
 
-    // NEW: Method to handle password reset link
+    // Method to handle password reset link
     protected void btnForgotPassword_Click(object sender, EventArgs e)
     {
         Response.Redirect("ForgotPassword.aspx");

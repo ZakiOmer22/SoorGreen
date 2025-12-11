@@ -1,286 +1,500 @@
 ﻿<%@ Page Title="My Rewards" Language="C#" MasterPageFile="~/Pages/Citizen/Site.Master" 
-    AutoEventWireup="true" CodeFile="MyRewards.aspx.cs" Inherits="SoorGreen.Citizen.MyRewards" %>
-<%@ Import Namespace="System.Web.Optimization" %>
-<asp:Content ID="Content5" ContentPlaceHolderID="HeadContent" runat="server">
-    <link href='<%= ResolveUrl("~/Content/Pages/Citizen/citizenmyrewards.css") %>' rel="stylesheet" />
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-</asp:Content>
+    AutoEventWireup="true" CodeFile="MyRewards.aspx.cs" Inherits="SoorGreen.Admin.MyRewards" %>
 
-<asp:Content ID="Content6" ContentPlaceHolderID="ScriptsContent" runat="server">
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <script src='<%= ResolveUrl("~/Scripts/Pages/Citizen/citizenmyrewards.js") %>' defer></script>
-    <script>
-        // Global variables accessible to JavaScript
-        var currentUserId = '<%= Session["UserID"] != null ? Session["UserID"].ToString() : "" %>';
-        var apiBaseUrl = '<%= ResolveUrl("~/") %>';
-    </script>
+<asp:Content ID="Content2" ContentPlaceHolderID="HeadContent" runat="server">
+    <link href='<%= ResolveUrl("~/Content/Pages/Citizen/citizenmyrewards.css") %>' rel="stylesheet" />
+    
+    <!-- Add Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Add Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
 </asp:Content>
 
 <asp:Content ID="Content1" ContentPlaceHolderID="TitleContent" runat="server">
     My Rewards - SoorGreen Citizen
 </asp:Content>
 
-<asp:Content ID="Content2" ContentPlaceHolderID="MainContent" runat="server">
-    <br />
-    <br />
-    <br />
-    <!-- Hidden fields for data -->
-    <asp:HiddenField ID="HiddenField1" runat="server" ClientIDMode="Static" />
-    <asp:HiddenField ID="HiddenField2" runat="server" ClientIDMode="Static" />
-    <asp:HiddenField ID="hfRewardsData" runat="server" ClientIDMode="Static" />
-    <asp:HiddenField ID="hfAchievementsData" runat="server" ClientIDMode="Static" />
-    <asp:HiddenField ID="hfXPHistoryData" runat="server" ClientIDMode="Static" />
-    <asp:HiddenField ID="hfUserStats" runat="server" ClientIDMode="Static" />
-    <asp:HiddenField ID="hfUserId" runat="server" ClientIDMode="Static" Value='<%# Session["UserID"] %>' />
-    
-    <!-- Loading Overlay -->
-    <div class="loading-overlay" id="loadingOverlay">
-        <div class="loading-spinner">
-            <div class="spinner"></div>
-            <p>Loading your rewards...</p>
-        </div>
-    </div>
-
+<asp:Content ID="MainContent" ContentPlaceHolderID="MainContent" runat="server">
     <div class="rewards-container">
-        <!-- Stats Cards with progress bar -->
-        <div class="stats-section">
-            <div class="stats-cards">
-                <div class="stat-card">
-                    <div class="stat-icon">
-                        <i class="fas fa-star"></i>
+        <!-- Page Header -->
+        <div class="page-header-glass">
+            <h1 class="page-title-glass">My Rewards</h1>
+            <p class="page-subtitle-glass">Track your XP credits and redemption history</p>
+            
+            <!-- Quick Actions -->
+            <div class="d-flex gap-3 mt-4">
+                <asp:LinkButton ID="btnRedeemPoints" runat="server" CssClass="action-btn primary"
+                    OnClientClick="showRedeemModal(); return false;">
+                    <i class="fas fa-exchange-alt me-2"></i> Redeem Points
+                </asp:LinkButton>
+                
+                <asp:LinkButton ID="btnRefresh" runat="server" CssClass="action-btn secondary"
+                    OnClick="btnRefresh_Click">
+                    <i class="fas fa-sync-alt me-2"></i> Refresh
+                </asp:LinkButton>
+                
+                <asp:LinkButton ID="btnExportRewards" runat="server" CssClass="action-btn secondary"
+                    OnClick="btnExportRewards_Click">
+                    <i class="fas fa-file-export me-2"></i> Export
+                </asp:LinkButton>
+            </div>
+        </div>
+
+        <!-- Stats Overview -->
+        <div class="stats-overview-grid">
+            <div class="stat-card-glass total">
+                <div class="d-flex align-items-start justify-content-between">
+                    <div class="stat-icon-glass">
+                        <i class="fas fa-coins"></i>
                     </div>
-                    <div class="stat-content">
-                        <div class="stat-value" id="totalXP">0</div>
-                        <div class="stat-label">Total XP</div>
+                    <div class="stat-trend-glass trend-up">
+                        <i class="fas fa-arrow-up"></i>
+                        <span>25%</span>
                     </div>
                 </div>
-                
-                <div class="stat-card">
-                    <div class="stat-icon">
-                        <i class="fas fa-trophy"></i>
+                <div class="stat-content-glass">
+                    <div class="stat-number-glass" id="statTotalCredits" runat="server">0</div>
+                    <div class="stat-label-glass">Total Earned</div>
+                </div>
+            </div>
+            
+            <div class="stat-card-glass available">
+                <div class="d-flex align-items-start justify-content-between">
+                    <div class="stat-icon-glass">
+                        <i class="fas fa-wallet"></i>
                     </div>
-                    <div class="stat-content">
-                        <div class="stat-value" id="currentLevel">1</div>
-                        <div class="stat-label">Current Level</div>
+                    <div class="stat-trend-glass trend-up">
+                        <i class="fas fa-arrow-up"></i>
+                        <span>15%</span>
                     </div>
                 </div>
-                
-                <div class="stat-card">
-                    <div class="stat-icon">
-                        <i class="fas fa-gift"></i>
+                <div class="stat-content-glass">
+                    <div class="stat-number-glass" id="statAvailableCredits" runat="server">0</div>
+                    <div class="stat-label-glass">Available</div>
+                </div>
+            </div>
+            
+            <div class="stat-card-glass monthly">
+                <div class="d-flex align-items-start justify-content-between">
+                    <div class="stat-icon-glass">
+                        <i class="fas fa-chart-line"></i>
                     </div>
-                    <div class="stat-content">
-                        <div class="stat-value" id="rewardsClaimed">0</div>
-                        <div class="stat-label">Rewards Claimed</div>
+                    <div class="stat-trend-glass trend-up">
+                        <i class="fas fa-arrow-up"></i>
+                        <span>32%</span>
                     </div>
                 </div>
+                <div class="stat-content-glass">
+                    <div class="stat-number-glass" id="statMonthlyCredits" runat="server">0</div>
+                    <div class="stat-label-glass">This Month</div>
+                </div>
+            </div>
+            
+            <div class="stat-card-glass pending">
+                <div class="d-flex align-items-start justify-content-between">
+                    <div class="stat-icon-glass">
+                        <i class="fas fa-clock"></i>
+                    </div>
+                    <div class="stat-trend-glass trend-up">
+                        <i class="fas fa-arrow-up"></i>
+                        <span>8%</span>
+                    </div>
+                </div>
+                <div class="stat-content-glass">
+                    <div class="stat-number-glass" id="statPendingRedemptions" runat="server">0</div>
+                    <div class="stat-label-glass">Pending</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Quick Actions -->
+        <div class="quick-actions-glass">
+            <div class="quick-actions-header">
+                <h3 class="quick-actions-title">Quick Actions</h3>
+                <asp:LinkButton ID="btnViewAll" runat="server" CssClass="action-btn secondary small"
+                    OnClick="btnViewAll_Click">
+                    View All
+                </asp:LinkButton>
+            </div>
+            
+            <div class="quick-actions-grid">
+                <div class="quick-action-card" onclick="showRedeemModal()">
+                    <i class="fas fa-exchange-alt"></i>
+                    <h4 class="quick-action-title">Redeem Points</h4>
+                    <p class="quick-action-desc">Convert XP credits to cash or vouchers</p>
+                </div>
                 
-                <div class="stat-card progress-card">
-                    <div class="stat-content">
-                        <div class="progress-header">
-                            <span class="stat-label">Level Progress</span>
-                            <span class="progress-percent" id="progressPercent">0%</span>
-                        </div>
-                        <div class="progress-bar-container">
-                            <div class="progress-bar">
-                                <div class="progress-fill" id="progressFill" style="width: 0%"></div>
+                <div class="quick-action-card" onclick="location.href='MyReports.aspx'">
+                    <i class="fas fa-trash-alt"></i>
+                    <h4 class="quick-action-title">Earn More</h4>
+                    <p class="quick-action-desc">Submit waste reports to earn XP</p>
+                </div>
+                
+                <div class="quick-action-card" onclick="location.href='RewardHistory.aspx'">
+                    <i class="fas fa-history"></i>
+                    <h4 class="quick-action-title">View History</h4>
+                    <p class="quick-action-desc">Check your complete reward history</p>
+                </div>
+                
+                <div class="quick-action-card" onclick="location.href='Referral.aspx'">
+                    <i class="fas fa-user-friends"></i>
+                    <h4 class="quick-action-title">Refer Friends</h4>
+                    <p class="quick-action-desc">Earn bonus XP by referring friends</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Rewards List -->
+        <div class="rewards-list-container">
+            <div class="rewards-list-header">
+                <h3 class="rewards-list-title">Recent Rewards</h3>
+                <div class="rewards-filters-glass">
+                    <asp:DropDownList ID="ddlTypeFilter" runat="server" CssClass="filter-select-glass"
+                        AutoPostBack="true" OnSelectedIndexChanged="ddlTypeFilter_SelectedIndexChanged">
+                        <asp:ListItem Value="all">All Types</asp:ListItem>
+                        <asp:ListItem Value="pickup">Pickup Rewards</asp:ListItem>
+                        <asp:ListItem Value="report">Report Rewards</asp:ListItem>
+                        <asp:ListItem Value="referral">Referral Bonus</asp:ListItem>
+                        <asp:ListItem Value="bonus">Special Bonus</asp:ListItem>
+                    </asp:DropDownList>
+                    
+                    <asp:DropDownList ID="ddlDateFilter" runat="server" CssClass="filter-select-glass"
+                        AutoPostBack="true" OnSelectedIndexChanged="ddlDateFilter_SelectedIndexChanged">
+                        <asp:ListItem Value="today">Today</asp:ListItem>
+                        <asp:ListItem Value="week">This Week</asp:ListItem>
+                        <asp:ListItem Value="month" Selected="True">This Month</asp:ListItem>
+                        <asp:ListItem Value="year">This Year</asp:ListItem>
+                        <asp:ListItem Value="all">All Time</asp:ListItem>
+                    </asp:DropDownList>
+                    
+                    <asp:TextBox ID="txtSearch" runat="server" CssClass="form-control-glass"
+                        placeholder="Search rewards..." AutoPostBack="true"
+                        OnTextChanged="txtSearch_TextChanged"></asp:TextBox>
+                </div>
+            </div>
+            
+            <!-- Rewards Cards -->
+            <asp:Panel ID="pnlRewardCards" runat="server" CssClass="rewards-cards-grid">
+                <asp:Repeater ID="rptRewards" runat="server">
+                    <ItemTemplate>
+                        <div class='reward-card-glass <%# GetTypeColor(Eval("TypeCategory").ToString()) %>'>
+                            <div class="reward-card-header">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <span class="reward-id"><%# Eval("RewardId") %></span>
+                                    <span class="reward-amount text-success">
+                                        +<%# FormatAmount(Eval("Amount")) %>
+                                    </span>
+                                </div>
+                                <span class='reward-type-badge <%# GetTypeColor(Eval("TypeCategory").ToString()) %>'>
+                                    <i class='<%# GetTypeIcon(Eval("TypeCategory").ToString()) %> me-1'></i>
+                                    <%# Eval("TypeCategory") %>
+                                </span>
+                            </div>
+                            
+                            <div class="reward-card-body">
+                                <div class="reward-details mt-3">
+                                    <div class="detail-item">
+                                        <span class="detail-label">Reference</span>
+                                        <span class="detail-value"><%# Eval("Reference") %></span>
+                                    </div>
+                                    <div class="detail-item">
+                                        <span class="detail-label">Type</span>
+                                        <span class="detail-value"><%# Eval("Type") %></span>
+                                    </div>
+                                    <div class="detail-item">
+                                        <span class="detail-label">Amount</span>
+                                        <span class="detail-value text-success font-weight-bold">
+                                            +<%# FormatAmount(Eval("Amount")) %>
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="reward-card-footer">
+                                <div class="reward-time">
+                                    <i class="fas fa-calendar"></i>
+                                    <span><%# FormatDateTime(Eval("CreatedDate")) %></span>
+                                </div>
                             </div>
                         </div>
-                        <div class="progress-text">
-                            <span id="currentXP">0</span> / <span id="nextLevelXP">100</span> XP to Level Up
+                    </ItemTemplate>
+                </asp:Repeater>
+            </asp:Panel>
+            
+            <!-- Empty State -->
+            <asp:Panel ID="pnlEmptyState" runat="server" CssClass="empty-state-glass" Visible="false">
+                <div class="empty-state-icon">
+                    <i class="fas fa-trophy"></i>
+                </div>
+                <h4 class="empty-state-title">No Rewards Found</h4>
+                <p class="empty-state-message">
+                    You haven't earned any XP credits yet. Start by submitting waste reports!
+                </p>
+                <asp:LinkButton ID="btnEarnFirstReward" runat="server" CssClass="action-btn primary"
+                    OnClick="btnEarnFirstReward_Click">
+                    <i class="fas fa-plus-circle me-2"></i> Earn Your First Reward
+                </asp:LinkButton>
+            </asp:Panel>
+            
+            <!-- Loading State -->
+            <asp:Panel ID="pnlLoading" runat="server" CssClass="text-center py-5" Visible="false">
+                <div class="loader-glass"></div>
+                <p class="text-muted mt-3">Loading rewards...</p>
+            </asp:Panel>
+        </div>
+
+        <!-- Redemptions Section -->
+        <div class="redemptions-container mt-4">
+            <div class="redemptions-header">
+                <h3 class="redemptions-title">Redemption History</h3>
+            </div>
+            
+            <asp:Panel ID="pnlRedemptions" runat="server" CssClass="redemptions-list">
+                <asp:Repeater ID="rptRedemptions" runat="server">
+                    <ItemTemplate>
+                        <div class='redemption-item <%# GetRedemptionStatusColor(Eval("Status").ToString()) %>'>
+                            <div class="redemption-header">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <span class="redemption-id"><%# Eval("RedemptionId") %></span>
+                                    <span class="redemption-amount">
+                                        <%# FormatAmount(Eval("Amount")) %>
+                                    </span>
+                                </div>
+                                <span class='redemption-status-badge <%# GetRedemptionStatusColor(Eval("Status").ToString()) %>'>
+                                    <i class='<%# GetRedemptionStatusIcon(Eval("Status").ToString()) %> me-1'></i>
+                                    <%# Eval("Status") %>
+                                </span>
+                            </div>
+                            
+                            <div class="redemption-body">
+                                <div class="redemption-details">
+                                    <div class="detail-row">
+                                        <span class="detail-label">Method:</span>
+                                        <span class="detail-value"><%# Eval("Method") %></span>
+                                    </div>
+                                    <div class="detail-row">
+                                        <span class="detail-label">Requested:</span>
+                                        <span class="detail-value"><%# FormatDateTime(Eval("RequestedAt")) %></span>
+                                    </div>
+                                    <div class="detail-row">
+                                        <span class="detail-label">Processed:</span>
+                                        <span class="detail-value">
+                                            <%# Eval("ProcessedAt") != DBNull.Value ? FormatDateTime(Eval("ProcessedAt")) : "Pending" %>
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </ItemTemplate>
+                </asp:Repeater>
+            </asp:Panel>
+            
+            <asp:Panel ID="pnlNoRedemptions" runat="server" CssClass="text-center py-4" Visible="false">
+                <div class="no-redemptions">
+                    <i class="fas fa-exchange-alt fa-3x text-muted mb-3"></i>
+                    <h5 class="text-muted">No Redemption History</h5>
+                    <p class="text-muted">You haven't made any redemption requests yet.</p>
+                </div>
+            </asp:Panel>
+        </div>
+        
+        <!-- Pagination -->
+        <div class="d-flex justify-content-between align-items-center mt-4">
+            <div class="text-muted">
+                Showing <asp:Label ID="lblStartCount" runat="server" Text="1"></asp:Label> - 
+                <asp:Label ID="lblEndCount" runat="server" Text="10"></asp:Label> of 
+                <asp:Label ID="lblTotalCount" runat="server" Text="0"></asp:Label> rewards
+            </div>
+            
+            <div class="d-flex gap-2">
+                <asp:LinkButton ID="btnPrevPage" runat="server" CssClass="action-btn secondary small"
+                    OnClick="btnPrevPage_Click">
+                    <i class="fas fa-chevron-left"></i>
+                </asp:LinkButton>
+                
+                <div class="d-flex gap-1">
+                    <asp:Repeater ID="rptPageNumbers" runat="server">
+                        <ItemTemplate>
+                            <asp:LinkButton ID="btnPage" runat="server" 
+                                CssClass='<%# Convert.ToInt32(Eval("PageNumber")) == Convert.ToInt32(Eval("CurrentPage")) ? "action-btn primary small" : "action-btn secondary small" %>'
+                                CommandArgument='<%# Eval("PageNumber") %>'
+                                OnClick="btnPage_Click"
+                                Text='<%# Eval("PageNumber") %>'></asp:LinkButton>
+                        </ItemTemplate>
+                    </asp:Repeater>
+                </div>
+                
+                <asp:LinkButton ID="btnNextPage" runat="server" CssClass="action-btn secondary small"
+                    OnClick="btnNextPage_Click">
+                    <i class="fas fa-chevron-right"></i>
+                </asp:LinkButton>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Redeem Modal -->
+    <div class="modal fade" id="redeemModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content report-modal-glass">
+                <div class="modal-header-glass">
+                    <h5 class="modal-title-glass">Redeem XP Credits</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body-glass">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group-modal mb-4">
+                                <label class="form-label-modal">Available Credits</label>
+                                <div class="available-credits-display">
+                                    <i class="fas fa-wallet text-success me-2"></i>
+                                    <span class="credit-amount" id="availableCredits">0</span>
+                                    <span class="credit-label">XP</span>
+                                </div>
+                            </div>
+                            
+                            <div class="form-group-modal mb-4">
+                                <label class="form-label-modal">Redemption Amount (XP)</label>
+                                <div class="input-group-modal">
+                                    <i class="fas fa-coins input-icon-modal"></i>
+                                    <asp:TextBox ID="txtRedemptionAmount" runat="server" CssClass="form-control-modal"
+                                        Text="100" TextMode="Number" min="100" step="50"></asp:TextBox>
+                                </div>
+                                <small class="text-muted">Minimum: 100 XP</small>
+                            </div>
+                            
+                            <div class="form-group-modal mb-4">
+                                <label class="form-label-modal">Redemption Method</label>
+                                <div class="input-group-modal">
+                                    <i class="fas fa-exchange-alt input-icon-modal"></i>
+                                    <asp:DropDownList ID="ddlRedemptionMethod" runat="server" CssClass="form-control-modal">
+                                        <asp:ListItem Value="bank">Bank Transfer</asp:ListItem>
+                                        <asp:ListItem Value="mobile">Mobile Money</asp:ListItem>
+                                        <asp:ListItem Value="voucher">E-Voucher</asp:ListItem>
+                                        <asp:ListItem Value="gift">Gift Card</asp:ListItem>
+                                    </asp:DropDownList>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-6">
+                            <div class="info-box-glass">
+                                <h6 class="mb-3"><i class="fas fa-info-circle me-2"></i>Redemption Details</h6>
+                                <div class="detail-row">
+                                    <span class="detail-label">Exchange Rate:</span>
+                                    <span class="detail-value">100 XP = ₹10</span>
+                                </div>
+                                <div class="detail-row">
+                                    <span class="detail-label">Processing Time:</span>
+                                    <span class="detail-value">24-72 hours</span>
+                                </div>
+                                <div class="detail-row">
+                                    <span class="detail-label">Minimum Amount:</span>
+                                    <span class="detail-value">100 XP</span>
+                                </div>
+                                <div class="detail-row">
+                                    <span class="detail-label">Processing Fee:</span>
+                                    <span class="detail-value">2%</span>
+                                </div>
+                                <div class="detail-row">
+                                    <span class="detail-label">Estimated Value:</span>
+                                    <span class="detail-value text-success" id="estimatedValue">₹0</span>
+                                </div>
+                            </div>
+                            
+                            <div class="form-group-modal mb-4">
+                                <label class="form-label-modal">Account Details</label>
+                                <div class="input-group-modal">
+                                    <i class="fas fa-user input-icon-modal"></i>
+                                    <asp:TextBox ID="txtAccountName" runat="server" CssClass="form-control-modal"
+                                        placeholder="Account Holder Name"></asp:TextBox>
+                                </div>
+                            </div>
+                            
+                            <div class="form-group-modal mb-4">
+                                <div class="input-group-modal">
+                                    <i class="fas fa-id-card input-icon-modal"></i>
+                                    <asp:TextBox ID="txtAccountNumber" runat="server" CssClass="form-control-modal"
+                                        placeholder="Account/Mobile Number"></asp:TextBox>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group-modal mb-4">
+                        <label class="form-label-modal">Additional Notes (Optional)</label>
+                        <div class="input-group-modal">
+                            <i class="fas fa-sticky-note input-icon-modal"></i>
+                            <asp:TextBox ID="txtRedemptionNotes" runat="server" CssClass="form-control-modal"
+                                TextMode="MultiLine" Rows="2"
+                                placeholder="Any special instructions or notes"></asp:TextBox>
                         </div>
                     </div>
                 </div>
-            </div>
-        </div>
-
-        <!-- Main Header with XP Badge -->
-        <div class="page-header">
-            <div class="header-text">
-                <h1 class="page-title">
-                    <i class="fas fa-award"></i> My Rewards
-                </h1>
-                <p class="page-subtitle">Earn XP and unlock amazing rewards for your eco-friendly actions</p>
-            </div>
-            <div class="xp-badge">
-                <div class="xp-badge-icon">
-                    <i class="fas fa-bolt"></i>
-                </div>
-                <div class="xp-badge-content">
-                    <div class="xp-label">Available XP</div>
-                    <div class="xp-value" id="userXP">0</div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Tabs Navigation -->
-        <div class="tabs-container">
-            <div class="tabs">
-                <button class="tab active" data-tab="rewards" onclick="switchTab('rewards'); return false;">
-                    <i class="fas fa-gift"></i>
-                    Available Rewards
-                </button>
-                <button class="tab" data-tab="achievements" onclick="switchTab('achievements'); return false;">
-                    <i class="fas fa-trophy"></i>
-                    Achievements
-                    <span class="badge" id="achievementsBadge">0</span>
-                </button>
-                <button class="tab" data-tab="history" onclick="switchTab('history'); return false;">
-                    <i class="fas fa-history"></i>
-                    XP History
-                </button>
-            </div>
-        </div>
-
-        <!-- Rewards Tab -->
-        <div class="tab-content active" id="rewardsTab">
-            <div class="section-header">
-                <div class="header-content">
-                    <h3 class="section-title">
-                        <i class="fas fa-crown"></i> Featured Rewards
-                    </h3>
-                    <p class="section-description">Special rewards with exclusive benefits</p>
-                </div>
-                <div class="header-actions">
-                    <div class="filter-dropdown">
-                        <select id="rewardFilter" onchange="filterRewards()">
-                            <option value="all">All Rewards</option>
-                            <option value="featured">Featured Only</option>
-                            <option value="affordable">Can Afford</option>
-                        </select>
-                    </div>
-                </div>
-            </div>
-            
-            <div class="rewards-grid" id="featuredRewardsGrid">
-                <div class="skeleton-grid">
-                    <div class="skeleton-card"></div>
-                    <div class="skeleton-card"></div>
-                    <div class="skeleton-card"></div>
-                </div>
-            </div>
-
-            <div class="section-header">
-                <div class="header-content">
-                    <h3 class="section-title">
-                        <i class="fas fa-gifts"></i> All Rewards
-                    </h3>
-                    <p class="section-description">Browse all available rewards</p>
-                </div>
-                <div class="sort-dropdown">
-                    <select id="rewardSort" onchange="sortRewards()">
-                        <option value="xp-asc">XP: Low to High</option>
-                        <option value="xp-desc">XP: High to Low</option>
-                        <option value="featured">Featured First</option>
-                    </select>
-                </div>
-            </div>
-            
-            <div class="rewards-grid" id="regularRewardsGrid">
-                <div class="skeleton-grid">
-                    <div class="skeleton-card"></div>
-                    <div class="skeleton-card"></div>
-                    <div class="skeleton-card"></div>
-                    <div class="skeleton-card"></div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Achievements Tab -->
-        <div class="tab-content" id="achievementsTab" style="display: none;">
-            <div class="section-header">
-                <div class="header-content">
-                    <h3 class="section-title">
-                        <i class="fas fa-medal"></i> Your Achievements
-                    </h3>
-                    <p class="section-description">Complete challenges and earn bonus XP</p>
-                </div>
-            </div>
-            
-            <div class="achievements-container">
-                <div class="achievements-stats">
-                    <div class="achievement-stat">
-                        <div class="stat-number" id="achievementsUnlocked">0</div>
-                        <div class="stat-label">Unlocked</div>
-                    </div>
-                    <div class="achievement-stat">
-                        <div class="stat-number" id="achievementsInProgress">0</div>
-                        <div class="stat-label">In Progress</div>
-                    </div>
-                    <div class="achievement-stat">
-                        <div class="stat-number" id="achievementsTotal">0</div>
-                        <div class="stat-label">Total Available</div>
-                    </div>
-                </div>
-                
-                <div class="achievements-grid" id="achievementsGrid">
-                    <div class="skeleton-grid">
-                        <div class="skeleton-card"></div>
-                        <div class="skeleton-card"></div>
-                        <div class="skeleton-card"></div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- History Tab -->
-        <div class="tab-content" id="historyTab" style="display: none;">
-            <div class="section-header">
-                <div class="header-content">
-                    <h3 class="section-title">
-                        <i class="fas fa-chart-line"></i> XP Transaction History
-                    </h3>
-                    <p class="section-description">Track your XP earnings and redemptions</p>
-                </div>
-                <div class="date-filter">
-                    <input type="text" id="dateRangeFilter" placeholder="Select date range">
-                    <button class="btn-filter" onclick="applyDateFilter()">
-                        <i class="fas fa-filter"></i>
-                    </button>
-                </div>
-            </div>
-            
-            <div class="transaction-history" id="xpHistoryList">
-                <div class="skeleton-history">
-                    <div class="skeleton-item"></div>
-                    <div class="skeleton-item"></div>
-                    <div class="skeleton-item"></div>
-                    <div class="skeleton-item"></div>
-                    <div class="skeleton-item"></div>
-                </div>
-            </div>
-            
-            <div class="load-more" id="loadMoreHistory" style="display: none;">
-                <button class="btn-load-more" onclick="loadMoreHistory()">
-                    <i class="fas fa-redo"></i> Load More
-                </button>
-            </div>
-        </div>
-    </div>
-
-    <!-- Claim Confirmation Modal -->
-    <div class="modal-overlay" id="claimConfirmationModal" style="display: none;">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h2><i class="fas fa-gift"></i> Claim Reward</h2>
-                <button class="btn-close-modal" onclick="closeClaimModal(); return false;">
-                    <i class="fas fa-times"></i>
-                </button>
-            </div>
-            <div class="modal-body">
-                <div id="claimConfirmationContent">
-                    <!-- Will be populated by JavaScript -->
-                </div>
-                <div class="modal-actions">
-                    <button class="btn btn-outline" onclick="closeClaimModal(); return false;">
-                        <i class="fas fa-times"></i> Cancel
-                    </button>
-                    <button class="btn btn-primary" id="confirmClaimBtn" onclick="confirmClaim(); return false;">
-                        <i class="fas fa-check"></i> Confirm Claim
-                    </button>
+                <div class="modal-footer-glass">
+                    <button type="button" class="action-btn secondary" data-bs-dismiss="modal">Cancel</button>
+                    <asp:Button ID="btnRedeem" runat="server" CssClass="action-btn primary"
+                        Text="Submit Redemption" OnClick="btnRedeem_Click" />
                 </div>
             </div>
         </div>
     </div>
+    
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <!-- JavaScript -->
+    <script type="text/javascript">
+        // Show redeem modal
+        function showRedeemModal() {
+            var modal = new bootstrap.Modal(document.getElementById('redeemModal'));
+            modal.show();
+            
+            // Load available credits
+            loadAvailableCredits();
+            
+            // Setup amount calculation
+            setupAmountCalculation();
+        }
+        
+        function loadAvailableCredits() {
+            // This would typically be an AJAX call to get available credits
+            // For now, show from the stat
+            var availableCredits = document.getElementById('<%= statAvailableCredits.ClientID %>').innerText;
+            document.getElementById('availableCredits').textContent = availableCredits;
+        }
+        
+        function setupAmountCalculation() {
+            var amountInput = document.getElementById('<%= txtRedemptionAmount.ClientID %>');
+            var estimatedValue = document.getElementById('estimatedValue');
+            
+            amountInput.addEventListener('input', function() {
+                calculateEstimatedValue();
+            });
+            
+            calculateEstimatedValue();
+        }
+        
+        function calculateEstimatedValue() {
+            var amountInput = document.getElementById('<%= txtRedemptionAmount.ClientID %>');
+            var estimatedValue = document.getElementById('estimatedValue');
+
+            var amount = parseFloat(amountInput.value) || 0;
+            var rate = 0.1; // 100 XP = ₹10, so 1 XP = ₹0.1
+            var fee = 0.02; // 2% fee
+
+            var grossValue = amount * rate;
+            var netValue = grossValue - (grossValue * fee);
+
+            estimatedValue.textContent = '₹' + netValue.toFixed(2);
+        }
+
+        // Initialize tooltips
+        document.addEventListener('DOMContentLoaded', function () {
+            var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+            var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+                return new bootstrap.Tooltip(tooltipTriggerEl);
+            });
+        });
+    </script>
 </asp:Content>

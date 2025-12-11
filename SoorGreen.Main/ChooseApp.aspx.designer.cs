@@ -24,13 +24,13 @@ namespace SoorGreen.Main
         protected global::System.Web.UI.HtmlControls.HtmlForm form1;
 
         /// <summary>
-        /// btnWebForm control.
+        /// btnWebForms control.
         /// </summary>
         /// <remarks>
         /// Auto-generated field.
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
-        protected global::System.Web.UI.WebControls.Button btnWebForm;
+        protected global::System.Web.UI.WebControls.Button btnWebForms;
 
         /// <summary>
         /// btnMVC control.
@@ -51,13 +51,22 @@ namespace SoorGreen.Main
         protected global::System.Web.UI.WebControls.Button btnAPI;
 
         /// <summary>
-        /// btnWebFormModal control.
+        /// btnCustom control.
         /// </summary>
         /// <remarks>
         /// Auto-generated field.
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
-        protected global::System.Web.UI.WebControls.Button btnWebFormModal;
+        protected global::System.Web.UI.WebControls.Button btnCustom;
+
+        /// <summary>
+        /// btnWinFormsModal control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Button btnWinFormsModal;
 
         /// <summary>
         /// btnMVCModal control.
@@ -76,5 +85,14 @@ namespace SoorGreen.Main
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
         protected global::System.Web.UI.WebControls.Button btnAPIModal;
+
+        /// <summary>
+        /// btnCustomModal control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Button btnCustomModal;
     }
 }

@@ -1229,7 +1229,7 @@
         </div>
         <div class="preloader-content">
             <div class="preloader-logo">
-                <image src="favicon.ico" />
+                <image src="favicon.ico" class="w-25 h-25" />
             </div>
             <h1 class="preloader-title">SoorGreen</h1>
             <p class="preloader-subtitle">Building Sustainable Cities Together</p>

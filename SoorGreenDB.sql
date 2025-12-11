@@ -73,6 +73,7 @@ CREATE TABLE WasteReports (
     Address NVARCHAR(300) NOT NULL,
     Lat DECIMAL(10,6),
     Lng DECIMAL(10,6),
+    Landmark NVARCHAR(200) NULL,
     PhotoUrl NVARCHAR(512),
     CreatedAt DATETIME DEFAULT GETDATE(),
     CONSTRAINT FK_WasteReports_Users FOREIGN KEY(UserId) REFERENCES Users(UserId),
@@ -195,6 +196,66 @@ CREATE TABLE SupportTickets (
     CreatedDate DATETIME NOT NULL DEFAULT GETDATE(),
     ResolvedDate DATETIME NULL
 );
+
+-- Collector Routes table
+CREATE TABLE CollectorRoutes (
+    RouteId NVARCHAR(50) PRIMARY KEY,
+    CollectorId CHAR(4) NOT NULL,
+    RouteDate DATETIME NOT NULL,
+    VehicleId NVARCHAR(50) NULL,
+    RouteType NVARCHAR(50) DEFAULT 'daily',
+    StartTime DATETIME NULL,
+    BreakTime DATETIME NULL,
+    EndTime DATETIME NULL,
+    TotalDistance DECIMAL(10,2) DEFAULT 0,
+    TotalWeight DECIMAL(10,2) DEFAULT 0,
+    Notes NVARCHAR(MAX) NULL,
+    Status NVARCHAR(20) DEFAULT 'Planned',
+    CreatedAt DATETIME DEFAULT GETDATE(),
+    LastUpdated DATETIME NULL,
+    CONSTRAINT FK_CollectorRoutes_Collector FOREIGN KEY(CollectorId) REFERENCES Users(UserId)
+);
+
+-- Collector Locations for real-time tracking
+CREATE TABLE CollectorLocations (
+    LocationId INT IDENTITY(1,1) PRIMARY KEY,
+    CollectorId CHAR(4) NOT NULL,
+    Lat DECIMAL(10,6) NOT NULL,
+    Lng DECIMAL(10,6) NOT NULL,
+    Timestamp DATETIME DEFAULT GETDATE(),
+    CONSTRAINT FK_CollectorLocations_Collector FOREIGN KEY(CollectorId) REFERENCES Users(UserId)
+);
+
+-- Vehicles table
+CREATE TABLE Vehicles (
+    VehicleId NVARCHAR(50) PRIMARY KEY,
+    VehicleType NVARCHAR(50) NOT NULL,
+    LicensePlate NVARCHAR(20) UNIQUE NOT NULL,
+    Capacity DECIMAL(10,2) NOT NULL, -- in kg
+    FuelType NVARCHAR(20) DEFAULT 'Diesel',
+    Status NVARCHAR(20) DEFAULT 'Active',
+    AssignedTo CHAR(4) NULL,
+    LastMaintenance DATE NULL,
+    NextMaintenance DATE NULL,
+    CreatedAt DATETIME DEFAULT GETDATE(),
+    CONSTRAINT FK_Vehicles_Collector FOREIGN KEY(AssignedTo) REFERENCES Users(UserId)
+);
+
+-- Route Optimizations table
+CREATE TABLE RouteOptimizations (
+    OptimizationId INT IDENTITY(1,1) PRIMARY KEY,
+    RouteId NVARCHAR(50) NOT NULL,
+    OptimizationType NVARCHAR(50) NOT NULL,
+    OriginalDistance DECIMAL(10,2) NOT NULL,
+    OptimizedDistance DECIMAL(10,2) NOT NULL,
+    TimeSaved INT NOT NULL, -- in minutes
+    FuelSaved DECIMAL(10,2) NOT NULL, -- in liters
+    OptimizationData NVARCHAR(MAX) NULL,
+    CreatedAt DATETIME DEFAULT GETDATE(),
+    CONSTRAINT FK_RouteOptimizations_Route FOREIGN KEY(RouteId) REFERENCES CollectorRoutes(RouteId)
+);
+
+
 -- ========================================
 -- 3. INDEXES
 -- ========================================
@@ -205,6 +266,9 @@ CREATE INDEX IX_RewardPoints_UserId ON RewardPoints(UserId);
 CREATE INDEX IX_Notifications_IsRead ON Notifications(IsRead);
 CREATE INDEX IX_ErrorLogs_CreatedAt ON ErrorLogs(CreatedAt);
 CREATE INDEX IX_ErrorLogs_ErrorType ON ErrorLogs(ErrorType);
+CREATE INDEX IX_CollectorRoutes_CollectorDate ON CollectorRoutes(CollectorId, RouteDate);
+CREATE INDEX IX_PickupRequests_CollectorStatus ON PickupRequests(CollectorId, Status);
+CREATE INDEX IX_PickupRequests_ScheduledDate ON PickupRequests(ScheduledAt);
 -- ========================================
 -- 4. VIEWS
 -- ========================================

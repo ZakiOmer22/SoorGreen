@@ -2,20 +2,25 @@
 
 <asp:Content ID="BodyContent" ContentPlaceHolderID="MainContent" runat="server">
     <style>
-        /* Fix for navbar spacing */
+        /* FIXED: Navbar spacing solution */
+        body {
+            padding-top: 60px !important; /* Reduced from 120px */
+        }
+
+        /* Remove the content-wrapper override if it exists */
         .content-wrapper {
-            padding-top: 120px !important;
+            padding-top: 0 !important;
         }
 
         .dashboard-section {
-            min-height: calc(100vh - 200px);
+            min-height: calc(100vh - 150px); /* Reduced height */
             display: flex;
             align-items: center;
             justify-content: center;
             position: relative;
             overflow: hidden;
             background: radial-gradient(ellipse at center, rgba(0, 212, 170, 0.1) 0%, transparent 70%);
-            padding: 50px 0;
+            padding: 30px 0; /* Reduced padding */
         }
 
         [data-theme="light"] .dashboard-section {
@@ -25,33 +30,33 @@
         .loading-card {
             background: var(--card-bg);
             border: 1px solid var(--card-border);
-            border-radius: 20px;
-            padding: 3rem;
+            border-radius: 15px; /* Reduced radius */
+            padding: 2rem; /* Reduced padding */
             transition: all 0.3s ease;
             backdrop-filter: blur(10px);
             color: var(--light);
             text-align: center;
             max-width: 500px;
             margin: 0 auto;
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2); /* Reduced shadow */
         }
 
         [data-theme="light"] .loading-card {
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
         }
 
         .progress-container {
             display: flex;
             flex-direction: column;
             align-items: center;
-            gap: 2rem;
+            gap: 1.5rem; /* Reduced gap */
         }
 
         .progress-spinner {
-            width: 80px;
-            height: 80px;
-            border: 4px solid var(--card-border);
-            border-left: 4px solid var(--primary);
+            width: 60px; /* Reduced size */
+            height: 60px;
+            border: 3px solid var(--card-border);
+            border-left: 3px solid var(--primary);
             border-radius: 50%;
             animation: spin 1s linear infinite;
         }
@@ -66,36 +71,38 @@
         .progress-step {
             display: flex;
             align-items: center;
-            gap: 1rem;
-            padding: 0.75rem 1rem;
+            gap: 0.75rem; /* Reduced gap */
+            padding: 0.5rem 0.75rem; /* Reduced padding */
             background: var(--card-bg);
-            border-radius: 10px;
+            border-radius: 8px; /* Reduced radius */
             border: 1px solid var(--card-border);
             transition: all 0.3s ease;
+            font-size: 0.9rem; /* Smaller font */
         }
 
-        .progress-step.active {
-            border-color: var(--primary);
-            background: rgba(0, 212, 170, 0.1);
-        }
+            .progress-step.active {
+                border-color: var(--primary);
+                background: rgba(0, 212, 170, 0.1);
+            }
 
-        .progress-step.completed {
-            border-color: #10b981;
-            background: rgba(16, 185, 129, 0.1);
-        }
+            .progress-step.completed {
+                border-color: #10b981;
+                background: rgba(16, 185, 129, 0.1);
+            }
 
         .step-icon {
-            width: 24px;
-            height: 24px;
+            width: 20px; /* Reduced size */
+            height: 20px;
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 0.75rem;
+            font-size: 0.7rem; /* Smaller font */
             background: var(--card-bg);
             border: 1px solid var(--card-border);
             color: var(--light);
             transition: all 0.3s ease;
+            flex-shrink: 0; /* Prevent shrinking */
         }
 
         .progress-step.active .step-icon {
@@ -113,62 +120,73 @@
         .step-text {
             flex: 1;
             text-align: left;
+            min-width: 0; /* Allow text to wrap */
         }
 
-        .step-text strong {
-            color: var(--light) !important;
-            display: block;
-            margin-bottom: 0.25rem;
-        }
+            .step-text strong {
+                color: var(--light) !important;
+                display: block;
+                margin-bottom: 0.125rem; /* Reduced margin */
+                font-size: 0.85rem; /* Smaller font */
+            }
 
-        .step-text small {
-            color: var(--light) !important;
-            opacity: 0.8;
-        }
+            .step-text small {
+                color: var(--light) !important;
+                opacity: 0.8;
+                font-size: 0.75rem; /* Smaller font */
+            }
 
         .user-info {
             background: var(--card-bg);
             border: 1px solid var(--card-border);
-            border-radius: 15px;
-            padding: 1.5rem;
-            margin-bottom: 2rem;
+            border-radius: 10px; /* Reduced radius */
+            padding: 1rem; /* Reduced padding */
+            margin-bottom: 1.5rem; /* Reduced margin */
             text-align: center;
         }
 
         .user-avatar {
-            width: 80px;
-            height: 80px;
+            width: 60px; /* Reduced size */
+            height: 60px;
             border-radius: 50%;
             background: linear-gradient(45deg, var(--primary), var(--secondary));
             display: flex;
             align-items: center;
             justify-content: center;
             color: white;
-            font-size: 2rem;
+            font-size: 1.5rem; /* Smaller font */
             font-weight: 600;
-            margin: 0 auto 1rem;
-            box-shadow: 0 8px 20px rgba(0, 212, 170, 0.3);
+            margin: 0 auto 0.75rem; /* Reduced margin */
+            box-shadow: 0 4px 15px rgba(0, 212, 170, 0.3); /* Reduced shadow */
         }
 
         .user-details h4 {
-            margin-bottom: 0.5rem;
+            margin-bottom: 0.25rem; /* Reduced margin */
             color: var(--light) !important;
+            font-size: 1.1rem; /* Smaller font */
         }
 
         .user-role {
             color: var(--primary) !important;
             font-weight: 600;
-            margin-bottom: 1rem;
+            margin-bottom: 0.5rem; /* Reduced margin */
+            font-size: 0.9rem; /* Smaller font */
         }
 
         .user-details .small {
             color: var(--light) !important;
             opacity: 0.8;
+            font-size: 0.8rem; /* Smaller font */
         }
 
         @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
         }
 
         .pulse {
@@ -176,18 +194,27 @@
         }
 
         @keyframes pulse {
-            0% { opacity: 1; }
-            50% { opacity: 0.7; }
-            100% { opacity: 1; }
+            0% {
+                opacity: 1;
+            }
+
+            50% {
+                opacity: 0.7;
+            }
+
+            100% {
+                opacity: 1;
+            }
         }
 
         .redirect-info {
-            margin-top: 2rem;
-            padding: 1rem;
+            margin-top: 1.5rem; /* Reduced margin */
+            padding: 0.75rem; /* Reduced padding */
             background: rgba(0, 212, 170, 0.1);
             border: 1px solid rgba(0, 212, 170, 0.3);
-            border-radius: 10px;
+            border-radius: 8px; /* Reduced radius */
             color: var(--primary);
+            font-size: 0.9rem; /* Smaller font */
         }
 
         [data-theme="light"] .redirect-info {
@@ -195,16 +222,16 @@
         }
 
         .countdown {
-            font-size: 1.5rem;
+            font-size: 1.25rem; /* Smaller font */
             font-weight: 600;
             color: var(--primary);
-            margin: 0.5rem 0;
+            margin: 0.25rem 0; /* Reduced margin */
         }
 
-        /* Simple Toast Notifications - Fixed */
+        /* Simple Toast Notifications */
         .toast-container {
             position: fixed;
-            top: 20px;
+            top: 70px; /* Lower to account for navbar */
             right: 20px;
             z-index: 9999;
         }
@@ -212,21 +239,22 @@
         .toast {
             background: var(--card-bg);
             border: 1px solid var(--card-border);
-            border-radius: 10px;
-            padding: 1rem;
+            border-radius: 8px; /* Reduced radius */
+            padding: 0.75rem; /* Reduced padding */
             margin-bottom: 0.5rem;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2); /* Reduced shadow */
             border-left: 4px solid var(--primary);
             color: var(--light);
             font-weight: 500;
-            max-width: 300px;
+            max-width: 280px; /* Smaller width */
             transform: translateX(400px);
             transition: all 0.3s ease;
             backdrop-filter: blur(10px);
+            font-size: 0.85rem; /* Smaller font */
         }
 
         [data-theme="light"] .toast {
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.15);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
         }
 
         .toast.show {
@@ -250,44 +278,46 @@
         }
 
         @media (max-width: 768px) {
-            .content-wrapper {
-                padding-top: 100px !important;
+            body {
+                padding-top: 50px !important; /* Even smaller on mobile */
             }
 
             .dashboard-section {
-                padding: 30px 0;
-                min-height: calc(100vh - 150px);
+                padding: 20px 0;
+                min-height: calc(100vh - 120px);
             }
 
             .loading-card {
-                padding: 2rem 1.5rem;
-                margin: 1rem;
+                padding: 1.5rem 1rem;
+                margin: 0.5rem;
             }
-            
+
             .progress-step {
-                padding: 0.5rem;
+                padding: 0.4rem;
+                font-size: 0.8rem;
             }
-            
+
             .progress-spinner {
-                width: 60px;
-                height: 60px;
+                width: 50px;
+                height: 50px;
             }
-            
+
             .user-avatar {
-                width: 60px;
-                height: 60px;
-                font-size: 1.5rem;
+                width: 50px;
+                height: 50px;
+                font-size: 1.25rem;
             }
 
             .toast-container {
-                top: 10px;
+                top: 60px; /* Adjust for mobile navbar */
                 right: 10px;
                 left: 10px;
             }
-            
+
             .toast {
                 max-width: none;
                 margin: 0 10px 0.5rem 10px;
+                font-size: 0.8rem;
             }
         }
 
@@ -295,8 +325,9 @@
         @keyframes fadeInUp {
             from {
                 opacity: 0;
-                transform: translateY(30px);
+                transform: translateY(20px);
             }
+
             to {
                 opacity: 1;
                 transform: translateY(0);
@@ -304,7 +335,7 @@
         }
 
         .loading-card {
-            animation: fadeInUp 0.6s ease-out;
+            animation: fadeInUp 0.4s ease-out;
         }
 
         /* Ensure proper text colors */
@@ -328,12 +359,12 @@
     <section class="dashboard-section">
         <div class="container">
             <div class="row justify-content-center">
-                <div class="col-lg-6">
+                <div class="col-lg-6 col-md-8 col-sm-10">
                     <div class="loading-card">
                         <!-- User Info -->
                         <asp:Panel ID="pnlUserInfo" runat="server" CssClass="user-info">
                             <div class="user-avatar" id="userAvatar" runat="server">
-                                <i class="fas fa-user"></i>
+                                <!-- Initials will be set by code-behind -->
                             </div>
                             <div class="user-details">
                                 <h4 id="userName" runat="server">Loading...</h4>
@@ -345,7 +376,7 @@
                         <!-- Progress Container -->
                         <div class="progress-container">
                             <div class="progress-spinner"></div>
-                            
+
                             <div class="progress-text">
                                 <div class="progress-step active" id="step1">
                                     <div class="step-icon">
@@ -393,109 +424,59 @@
     </section>
 
     <script>
-        // Simple toast notification function - Fixed
-        function showToast(message, type = 'info', duration = 3000) {
+        // Simple toast notification function
+        function showToast(message, type = 'info', duration = 5000) {
             const toastContainer = document.getElementById('toastContainer');
+            if (!toastContainer) return;
+
             const toast = document.createElement('div');
-            toast.className = `toast ${type}`;
-            toast.innerHTML = message;
+            toast.className = 'toast ' + type;
+
+            // Set icon based on type
+            let icon = 'fa-info-circle';
+            if (type === 'success') icon = 'fa-check-circle';
+            if (type === 'error') icon = 'fa-exclamation-circle';
+            if (type === 'warning') icon = 'fa-exclamation-triangle';
+
+            toast.innerHTML =
+                '<div class="d-flex align-items-center">' +
+                '<i class="fas ' + icon + ' me-2"></i>' +
+                '<span>' + message + '</span>' +
+                '</div>';
 
             toastContainer.appendChild(toast);
 
             // Show toast
-            setTimeout(() => toast.classList.add('show'), 100);
+            setTimeout(function () {
+                toast.classList.add('show');
+            }, 100);
 
             // Auto remove after duration
-            setTimeout(() => {
+            setTimeout(function () {
                 toast.classList.remove('show');
-                setTimeout(() => {
-                    if (toast.parentNode) {
-                        toast.parentNode.removeChild(toast);
+                setTimeout(function () {
+                    if (toast.parentNode === toastContainer) {
+                        toastContainer.removeChild(toast);
                     }
                 }, 300);
             }, duration);
+
+            // Click to dismiss
+            toast.addEventListener('click', function () {
+                toast.classList.remove('show');
+                setTimeout(function () {
+                    if (toast.parentNode === toastContainer) {
+                        toastContainer.removeChild(toast);
+                    }
+                }, 300);
+            });
         }
 
+        // Initial welcome message
         document.addEventListener('DOMContentLoaded', function () {
-            let countdown = 3;
-            const countdownElement = document.getElementById('countdown');
-            const steps = document.querySelectorAll('.progress-step');
-
-            // Show welcome toast
-            setTimeout(() => {
-                showToast('Welcome! Preparing your dashboard...', 'info');
-            }, 500);
-
-            // Function to update progress steps
-            function updateProgress(currentStep) {
-                for (let i = 0; i < steps.length; i++) {
-                    if (i < currentStep) {
-                        steps[i].classList.remove('active');
-                        steps[i].classList.add('completed');
-                        var stepIcon = steps[i].querySelector('.step-icon');
-                        if (stepIcon) {
-                            stepIcon.innerHTML = '<i class="fas fa-check"></i>';
-                        }
-                    } else if (i === currentStep) {
-                        steps[i].classList.add('active');
-                        steps[i].classList.remove('completed');
-                        var stepIcon = steps[i].querySelector('.step-icon');
-                        if (stepIcon) {
-                            stepIcon.innerHTML = '<i class="fas fa-sync fa-spin"></i>';
-                        }
-                    } else {
-                        steps[i].classList.remove('active', 'completed');
-                        var stepIcon = steps[i].querySelector('.step-icon');
-                        if (stepIcon) {
-                            stepIcon.innerHTML = '<i class="fas fa-clock"></i>';
-                        }
-                    }
-                }
-            }
-
-            // Start the progress animation
-            let currentStep = 0;
-            updateProgress(currentStep);
-
-            // Simulate progress steps
-            const progressInterval = setInterval(function () {
-                currentStep++;
-                updateProgress(currentStep);
-
-                if (currentStep === 1) {
-                    showToast('Account verified successfully!', 'success');
-                } else if (currentStep === 2) {
-                    showToast('Dashboard loaded successfully!', 'success');
-                }
-
-                if (currentStep >= steps.length) {
-                    clearInterval(progressInterval);
-                    startCountdown();
-                }
-            }, 1500);
-
-            // Countdown function
-            function startCountdown() {
-                showToast('Redirecting to your dashboard...', 'info');
-                const countdownInterval = setInterval(function () {
-                    countdown--;
-                    if (countdownElement) {
-                        countdownElement.textContent = countdown;
-                    }
-
-                    if (countdown <= 0) {
-                        clearInterval(countdownInterval);
-                        // The actual redirect will be handled by server-side
-                        showToast('Redirecting now!', 'success');
-                    }
-                }, 1000);
-            }
-
-            // Add pulsing animation to redirect info
-            const redirectInfo = document.querySelector('.redirect-info');
-            if (redirectInfo) {
-                redirectInfo.classList.add('pulse');
-            }
+            setTimeout(function () {
+                showToast('Welcome! Setting up your dashboard experience...', 'info', 10000);
+            }, 1000);
         });
     </script>
 </asp:Content>

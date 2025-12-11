@@ -9,79 +9,85 @@ namespace SoorGreen.Main
         {
             if (!IsPostBack)
             {
-                InitializePage();
+                Page.Title = "SoorGreen - Smart Waste Management Platform";
             }
         }
 
-        private void InitializePage()
+        protected void btnWebForms_Click(object sender, EventArgs e)
         {
-            Page.Title = "SoorGreen - Choose Application";
+            // Store in session to show after the window opens
+            Session["ShowAlert"] = "webforms";
+            Session["AlertMessage"] = "Opening Web Forms Admin Portal...\n\nURL: http://localhost:44381\nTeam: ZACKI ABDULKADIR OMER (Lead)";
+
+            string script = @"
+                <script>
+                    try {
+                        // Open FIRST, then show alert
+                        var newWindow = window.open('http://localhost:44381/', '_blank');
+                        
+                        // Check if popup was blocked
+                        if (!newWindow || newWindow.closed || typeof newWindow.closed == 'undefined') {
+                            alert('Popup blocked! Please allow popups for this site and try again.');
+                        } else {
+                            // Wait a moment then show alert in PARENT window
+                            setTimeout(function() {
+                                alert('Opening Web Forms Admin Portal...\\n\\nURL: http://localhost:44381\\nTeam: ZACKI ABDULKADIR OMER (Lead)');
+                            }, 300);
+                        }
+                    } catch (error) {
+                        console.error('Error:', error);
+                        alert('Error opening portal. Please check if the URL is accessible.');
+                    }
+                </script>";
+            ScriptManager.RegisterStartupScript(this, GetType(), "OpenWebForms", script, false);
         }
 
-        // WebForms Admin Panel button
-        protected void btnWebForm_Click(object sender, EventArgs e)
-        {
-            LaunchWithFallback(
-                "http://localhost:44381/Default.aspx?force=true",
-                "WebForms Admin Panel",
-                new[]
-                {
-                    "http://localhost:44381/Default.aspx",
-                    "http://localhost:44381/Home.aspx",
-                    "http://localhost:44381/"
-                }
-            );
-        }
-
-        // MVC Citizen Portal button
         protected void btnMVC_Click(object sender, EventArgs e)
         {
-            LaunchWithFallback(
-                "http://localhost:44305/Home/Index",
-                "MVC Citizen Portal",
-                new[] {
-                    "http://localhost:44305/",
-                    "http://localhost:44305/Home",
-                    "http://localhost:44305/Home/Index"
-                }
-            );
+            string script = @"
+                <script>
+                    try {
+                        // Open FIRST
+                        var newWindow = window.open('http://localhost:44305/', '_blank');
+                        
+                        // Check if popup was blocked
+                        if (!newWindow || newWindow.closed || typeof newWindow.closed == 'undefined') {
+                            alert('Popup blocked! Please allow popups for this site and try again.');
+                        } else {
+                            // Show alert AFTER opening
+                            setTimeout(function() {
+                                alert('Opening MVC Web Portal...\\n\\nURL: http://localhost:44305\\nTeam: ARAFAT OSMAN ADEN (Lead)');
+                            }, 300);
+                        }
+                    } catch (error) {
+                        console.error('Error:', error);
+                        alert('Error opening portal. Please check if the URL is accessible.');
+                    }
+                </script>";
+            ScriptManager.RegisterStartupScript(this, GetType(), "OpenMVC", script, false);
         }
 
-        // Modal button handlers
-        protected void btnWebFormModal_Click(object sender, EventArgs e) => btnWebForm_Click(sender, e);
-        protected void btnMVCModal_Click(object sender, EventArgs e) => btnMVC_Click(sender, e);
-
-        private void LaunchWithFallback(string primaryUrl, string appName, string[] fallbackUrls)
+        protected void btnAPI_Click(object sender, EventArgs e)
         {
-            string joinedFallbacks = string.Join("\\n", fallbackUrls);
-
-            string script = $@"
-                (function(){{
-                    var urls = ['{primaryUrl}', '{string.Join("','", fallbackUrls)}'];
-                    var opened = false;
-
-                    for(var i=0;i<urls.length;i++){{
-                        var win = window.open(urls[i].trim(), '_blank');
-                        if(win && !win.closed){{
-                            console.log('Opened: ' + urls[i]);
-                            opened = true;
-                            break;
-                        }}
-                    }}
-
-                    if(!opened){{
-                        var message = '{appName} could not be opened.\\n\\n' +
-                                      'Possible reasons:\\n' +
-                                      '• The project is not running\\n' +
-                                      '• IIS Express not started\\n' +
-                                      '• Browser blocked popups\\n\\n' +
-                                      'Primary URL:\\n' + '{primaryUrl}\\n\\n' +
-                                      'Fallback URLs:\\n' + '{joinedFallbacks}';
-                        alert(message);
-                    }}
-                }})();";
-
-            ScriptManager.RegisterStartupScript(this, GetType(), $"Launch{appName.Replace(" ", "")}", script, true);
+            string script = @"
+                <script>
+                    alert('Web API Service - NOT CREATED YET\\n\\nThis project will be created next.\\n\\nPort: 5000 or 5001\\n\\nTeam: To be assigned');
+                </script>";
+            ScriptManager.RegisterStartupScript(this, GetType(), "OpenAPI", script, false);
         }
+
+        protected void btnCustom_Click(object sender, EventArgs e)
+        {
+            string script = @"
+                <script>
+                    alert('Custom Solution - NOT CREATED YET\\n\\nThis project will be created after API.\\n\\nTeam: To be assigned');
+                </script>";
+            ScriptManager.RegisterStartupScript(this, GetType(), "OpenCustom", script, false);
+        }
+
+        protected void btnWebFormsModal_Click(object sender, EventArgs e) => btnWebForms_Click(sender, e);
+        protected void btnMVCModal_Click(object sender, EventArgs e) => btnMVC_Click(sender, e);
+        protected void btnAPIModal_Click(object sender, EventArgs e) => btnAPI_Click(sender, e);
+        protected void btnCustomModal_Click(object sender, EventArgs e) => btnCustom_Click(sender, e);
     }
 }

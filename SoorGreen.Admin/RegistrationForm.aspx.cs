@@ -2,25 +2,11 @@
 using System.Data.SqlClient;
 using System.Web.Configuration;
 using System.Web.UI.WebControls;
+using System.Security.Cryptography;
+using System.Text;
 
 public partial class RegistrationForm : System.Web.UI.Page
 {
-    // We'll find controls dynamically to avoid compilation issues
-    //private TextBox txtFullName => (TextBox)FindControl("txtFullName");
-    //private TextBox txtPhone => (TextBox)FindControl("txtPhone");
-    //private TextBox txtEmail => (TextBox)FindControl("txtEmail");
-    //private TextBox txtPassword => (TextBox)FindControl("txtPassword");
-    //private TextBox txtConfirmPassword => (TextBox)FindControl("txtConfirmPassword");
-    //private TextBox txtAddress => (TextBox)FindControl("txtAddress");
-    //private TextBox txtCompany => (TextBox)FindControl("txtCompany");
-    //private DropDownList ddlMunicipality => (DropDownList)FindControl("ddlMunicipality");
-    //private CheckBox cbTerms => (CheckBox)FindControl("cbTerms");
-    //private CheckBox cbNewsletter => (CheckBox)FindControl("cbNewsletter");
-    //private Label lblRole => (Label)FindControl("lblRole");
-    //private Label lblRoleName => (Label)FindControl("lblRoleName");
-    //private Panel pnlCitizenFields => (Panel)FindControl("pnlCitizenFields");
-    //private Panel pnlCollectorFields => (Panel)FindControl("pnlCollectorFields");
-
     protected void Page_Load(object sender, EventArgs e)
     {
         if (!IsPostBack)
@@ -73,20 +59,38 @@ public partial class RegistrationForm : System.Web.UI.Page
                 {
                     conn.Open();
 
+                    // Check for duplicate email before proceeding
+                    if (IsEmailExists(txtEmail.Text.Trim(), conn))
+                    {
+                        ShowToast("Email already exists. Please use a different email address.", "error");
+                        return;
+                    }
+
+                    // Check for duplicate phone before proceeding
+                    if (IsPhoneExists(txtPhone.Text.Trim(), conn))
+                    {
+                        ShowToast("Phone number already exists. Please use a different phone number.", "error");
+                        return;
+                    }
+
                     // Generate UserId
-                    string userId = GenerateUserId();
+                    string userId = GenerateUserId(conn);
                     string roleId = Session["SelectedRoleId"] as string ?? "CITZ";
 
-                    string query = @"INSERT INTO Users (UserId, FullName, Phone, Email, RoleId, IsVerified, CreatedAt, XP_Credits) 
-                                   VALUES (@UserId, @FullName, @Phone, @Email, @RoleId, 1, GETDATE(), 0)";
+                    // Hash the password
+                    string hashedPassword = HashPassword(txtPassword.Text);
+
+                    string query = @"INSERT INTO Users (UserId, FullName, Phone, Email, Password, RoleId, IsVerified, CreatedAt, XP_Credits) 
+                                   VALUES (@UserId, @FullName, @Phone, @Email, @Password, @RoleId, 1, GETDATE(), 0)";
 
                     using (SqlCommand cmd = new SqlCommand(query, conn))
                     {
                         cmd.Parameters.AddWithValue("@UserId", userId);
                         cmd.Parameters.AddWithValue("@FullName", txtFullName.Text.Trim());
-                        cmd.Parameters.AddWithValue("@Phone", txtPhone.Text.Trim()); // FIXED: Use actual phone field
+                        cmd.Parameters.AddWithValue("@Phone", txtPhone.Text.Trim());
                         cmd.Parameters.AddWithValue("@Email", txtEmail.Text.Trim());
-                        cmd.Parameters.AddWithValue("@RoleId", MapRoleId(roleId)); // Use mapped role ID
+                        cmd.Parameters.AddWithValue("@Password", hashedPassword);
+                        cmd.Parameters.AddWithValue("@RoleId", MapRoleId(roleId));
 
                         int result = cmd.ExecuteNonQuery();
 
@@ -100,27 +104,16 @@ public partial class RegistrationForm : System.Web.UI.Page
                             Session["IsVerified"] = true;
 
                             // Add welcome reward points
-                            AddWelcomeReward(userId);
+                            AddWelcomeReward(userId, conn);
 
                             // Log the registration
-                            // Using string.Format()
-                            LogAudit(userId, "User Registration", string.Format("New {0} registered: {1}", GetRoleName(roleId), txtFullName.Text));
+                            LogAudit(userId, "User Registration", string.Format("New {0} registered: {1}", GetRoleName(roleId), txtFullName.Text), conn);
 
-                            // Using string concatenation
-                            //LogAudit(userId, "User Registration", "New " + GetRoleName(roleId) + " registered: " + txtFullName.Text);
                             // Show success toast
                             ShowToast("Welcome to SoorGreen " + txtFullName.Text.Trim() + "! Your account has been created successfully.", "success");
 
-                            // Redirect based on role
-                            if (roleId == "ADMN")
-                            {
-                                Response.Redirect("AdminDashboard.aspx");
-                            }
-                            else
-                            {
-                                // Show success step for other roles
-                                ShowStep(3);
-                            }
+                            // Show success step
+                            ShowStep(3);
                         }
                         else
                         {
@@ -131,20 +124,21 @@ public partial class RegistrationForm : System.Web.UI.Page
             }
             catch (SqlException ex)
             {
-                if (ex.Number == 2627) // Unique constraint violation
+                // Handle duplicate key violations
+                if (ex.Number == 2627 || ex.Number == 2601)
                 {
                     ShowToast("Email or phone number already exists. Please use different credentials.", "error");
                 }
                 else
                 {
-                    ShowToast("Database error occurred: " + ex.Message + "Please try again.", "error");
-                    LogAudit(null, "Registration Error", "Database error: " + ex.Message);
+                    ShowToast("An error occurred during registration. Please try again.", "error");
+                    LogAudit(null, "Registration Error", "SQL Error: " + ex.Message, null);
                 }
             }
             catch (Exception ex)
             {
-                ShowToast("An unexpected error occurred: " + ex.Message, "error");
-                LogAudit(null, "Registration Error", "System error "+ ex.Message);
+                ShowToast("An unexpected error occurred. Please try again.", "error");
+                LogAudit(null, "Registration Error", "System Error: " + ex.Message, null);
             }
         }
     }
@@ -203,6 +197,28 @@ public partial class RegistrationForm : System.Web.UI.Page
         return true;
     }
 
+    private bool IsEmailExists(string email, SqlConnection conn)
+    {
+        string query = "SELECT COUNT(*) FROM Users WHERE Email = @Email";
+        using (SqlCommand cmd = new SqlCommand(query, conn))
+        {
+            cmd.Parameters.AddWithValue("@Email", email);
+            int count = (int)cmd.ExecuteScalar();
+            return count > 0;
+        }
+    }
+
+    private bool IsPhoneExists(string phone, SqlConnection conn)
+    {
+        string query = "SELECT COUNT(*) FROM Users WHERE Phone = @Phone";
+        using (SqlCommand cmd = new SqlCommand(query, conn))
+        {
+            cmd.Parameters.AddWithValue("@Phone", phone);
+            int count = (int)cmd.ExecuteScalar();
+            return count > 0;
+        }
+    }
+
     private bool IsValidEmail(string email)
     {
         try
@@ -216,15 +232,30 @@ public partial class RegistrationForm : System.Web.UI.Page
         }
     }
 
-    private string GenerateUserId()
+    private string GenerateUserId(SqlConnection conn)
     {
-        string prefix = Session["SelectedRoleId"] as string ?? "CITZ";
-        Random random = new Random();
-        // Generate exactly 4 characters as per your schema
-        return prefix.Substring(0, 2) + random.Next(10, 99);
+        string roleId = Session["SelectedRoleId"] as string ?? "CITZ";
+        string mappedRoleId = MapRoleId(roleId);
+
+        string prefix = "";
+        switch (mappedRoleId)
+        {
+            case "R001": prefix = "CI"; break; // Citizen
+            case "R002": prefix = "CL"; break; // Collector
+            case "R004": prefix = "AD"; break; // Admin
+            default: prefix = "US"; break;
+        }
+
+        // Generate a unique ID
+        string query = "SELECT ISNULL(MAX(CAST(SUBSTRING(UserId, 3, LEN(UserId)) AS INT)), 0) + 1 FROM Users WHERE UserId LIKE @Prefix + '%'";
+        using (SqlCommand cmd = new SqlCommand(query, conn))
+        {
+            cmd.Parameters.AddWithValue("@Prefix", prefix);
+            int nextId = (int)cmd.ExecuteScalar();
+            return prefix + nextId.ToString("D2");
+        }
     }
 
-    // Map role IDs to match your database
     private string MapRoleId(string roleCode)
     {
         switch (roleCode)
@@ -236,36 +267,41 @@ public partial class RegistrationForm : System.Web.UI.Page
         }
     }
 
-    private void AddWelcomeReward(string userId)
+    private string HashPassword(string password)
+    {
+        using (SHA256 sha256 = SHA256.Create())
+        {
+            byte[] bytes = sha256.ComputeHash(Encoding.UTF8.GetBytes(password));
+            StringBuilder builder = new StringBuilder();
+            for (int i = 0; i < bytes.Length; i++)
+            {
+                builder.Append(bytes[i].ToString("x2"));
+            }
+            return builder.ToString();
+        }
+    }
+
+    private void AddWelcomeReward(string userId, SqlConnection conn)
     {
         try
         {
-            string connectionString = WebConfigurationManager.ConnectionStrings["SoorGreenDBConnectionString"].ConnectionString;
+            // Generate reward ID
+            string rewardId = "RW" + new Random().Next(100, 999).ToString();
 
-            using (SqlConnection conn = new SqlConnection(connectionString))
-            {
-                conn.Open();
-                string query = @"INSERT INTO RewardPoints (RewardId, UserId, Amount, Type, Reference, CreatedAt) 
+            string query = @"INSERT INTO RewardPoints (RewardId, UserId, Amount, Type, Reference, CreatedAt) 
                            VALUES (@RewardId, @UserId, 100, 'Welcome Bonus', 'New User Registration', GETDATE())";
 
-                using (SqlCommand cmd = new SqlCommand(query, conn))
-                {
-                    cmd.Parameters.AddWithValue("@RewardId", GenerateRewardId());
-                    cmd.Parameters.AddWithValue("@UserId", userId);
-                    cmd.ExecuteNonQuery();
-                }
+            using (SqlCommand cmd = new SqlCommand(query, conn))
+            {
+                cmd.Parameters.AddWithValue("@RewardId", rewardId);
+                cmd.Parameters.AddWithValue("@UserId", userId);
+                cmd.ExecuteNonQuery();
             }
         }
         catch (Exception ex)
         {
-            LogAudit(userId, "Welcome Reward Failed", ex.Message);
+            LogAudit(userId, "Welcome Reward Failed", ex.Message, conn);
         }
-    }
-
-    private string GenerateRewardId()
-    {
-        Random random = new Random();
-        return "R" + random.Next(100, 999);
     }
 
     private string GetRoleName(string roleId)
@@ -279,26 +315,24 @@ public partial class RegistrationForm : System.Web.UI.Page
         }
     }
 
-    private void LogAudit(string userId, string action, string details)
+    private void LogAudit(string userId, string action, string details, SqlConnection conn)
     {
         try
         {
-            string connectionString = WebConfigurationManager.ConnectionStrings["SoorGreenDBConnectionString"].ConnectionString;
+            // Generate audit ID
+            string auditId = "AL" + new Random().Next(100, 999).ToString();
 
-            using (SqlConnection conn = new SqlConnection(connectionString))
+            string query = @"INSERT INTO AuditLogs (AuditId, UserId, Action, Details, Timestamp) 
+                           VALUES (@AuditId, @UserId, @Action, @Details, GETDATE())";
+
+            using (SqlCommand cmd = new SqlCommand(query, conn))
             {
-                conn.Open();
-                string query = @"INSERT INTO AuditLogs (AuditId, UserId, Action, Details, Timestamp) 
-                               VALUES (@AuditId, @UserId, @Action, @Details, GETDATE())";
-
-                using (SqlCommand cmd = new SqlCommand(query, conn))
-                {
-                    cmd.Parameters.AddWithValue("@AuditId", GenerateAuditId());
-                    cmd.Parameters.AddWithValue("@UserId", userId ?? (object)DBNull.Value);
-                    cmd.Parameters.AddWithValue("@Action", action);
-                    cmd.Parameters.AddWithValue("@Details", details);
-                    cmd.ExecuteNonQuery();
-                }
+                cmd.Parameters.AddWithValue("@AuditId", auditId);
+                cmd.Parameters.AddWithValue("@UserId", string.IsNullOrEmpty(userId) ? (object)DBNull.Value : userId);
+                cmd.Parameters.AddWithValue("@Action", action);
+                cmd.Parameters.AddWithValue("@Details", details);
+                cmd.ExecuteNonQuery();
+                Response.Redirect("Login.aspx");
             }
         }
         catch (Exception ex)
@@ -308,21 +342,19 @@ public partial class RegistrationForm : System.Web.UI.Page
         }
     }
 
-    private string GenerateAuditId()
-    {
-        Random random = new Random();
-        return "A" + random.Next(100, 999);
-    }
-
     private void ShowToast(string message, string type)
     {
-        string script = @"showToast('" + message.Replace("'", "\\'") + "', '" + type + "');";
+        // Escape single quotes in the message
+        string escapedMessage = message.Replace("'", "\\'");
+        // Fixed: Using string.Format instead of string interpolation
+        string script = string.Format("showToast('{0}', '{1}');", escapedMessage, type);
         ClientScript.RegisterStartupScript(this.GetType(), "toast", script, true);
     }
 
     private void ShowStep(int stepNumber)
     {
-        string script = string.Format(@"showStep({0});", stepNumber);
+        // Fixed: Using string.Format instead of string interpolation
+        string script = string.Format("showStep({0});", stepNumber);
         ClientScript.RegisterStartupScript(this.GetType(), "showStep", script, true);
     }
 }

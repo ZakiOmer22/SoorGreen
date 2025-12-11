@@ -188,48 +188,75 @@
             display: none;
         }
 
-        /* Toast Notifications */
+        /* Toast Notifications - FIXED VERSION */
         .toast-container {
             position: fixed;
             top: 20px;
             right: 20px;
             z-index: 9999;
+            min-width: 300px;
+            max-width: 400px;
         }
 
         .toast {
-            background: rgba(255, 255, 255, 0.95);
-            border-radius: 10px;
-            padding: 1rem 1.5rem;
-            margin-bottom: 1rem;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
-            border-left: 4px solid var(--primary);
-            color: #333;
-            font-weight: 500;
-            max-width: 350px;
-            transform: translateX(400px);
-            transition: all 0.3s ease;
+            background: var(--card-bg) !important;
+            border: 1px solid var(--card-border) !important;
+            border-radius: 10px !important;
+            padding: 1rem 1.5rem !important;
+            margin-bottom: 1rem !important;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3) !important;
+            color: var(--light) !important;
+            font-weight: 500 !important;
+            transform: translateX(400px) !important;
+            transition: all 0.3s ease !important;
+            backdrop-filter: blur(10px) !important;
+            opacity: 0 !important;
         }
 
         [data-theme="light"] .toast {
-            background: rgba(33, 37, 41, 0.95);
-            color: white;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            background: var(--card-bg) !important;
+            color: var(--light) !important;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1) !important;
         }
 
         .toast.show {
-            transform: translateX(0);
+            transform: translateX(0) !important;
+            opacity: 1 !important;
         }
 
         .toast.success {
-            border-left-color: #10b981;
+            border-left: 4px solid #10b981 !important;
+            background: linear-gradient(90deg, rgba(16, 185, 129, 0.1), var(--card-bg)) !important;
         }
 
         .toast.error {
-            border-left-color: #ef4444;
+            border-left: 4px solid #ef4444 !important;
+            background: linear-gradient(90deg, rgba(239, 68, 68, 0.1), var(--card-bg)) !important;
         }
 
         .toast.warning {
-            border-left-color: #f59e0b;
+            border-left: 4px solid #f59e0b !important;
+            background: linear-gradient(90deg, rgba(245, 158, 11, 0.1), var(--card-bg)) !important;
+        }
+
+        .toast.info {
+            border-left: 4px solid var(--primary) !important;
+            background: linear-gradient(90deg, rgba(0, 212, 170, 0.1), var(--card-bg)) !important;
+        }
+
+        .toast i {
+            color: inherit !important;
+            margin-right: 0.5rem !important;
+        }
+
+        .toast span {
+            color: var(--light) !important;
+            opacity: 1 !important;
+        }
+
+        .toast .d-flex {
+            display: flex !important;
+            align-items: center !important;
         }
 
         /* Text visibility fixes */
@@ -331,13 +358,15 @@
             }
             
             .toast-container {
-                top: 10px;
-                right: 10px;
-                left: 10px;
+                top: 10px !important;
+                right: 10px !important;
+                left: 10px !important;
+                max-width: calc(100% - 20px) !important;
             }
             
             .toast {
-                max-width: none;
+                max-width: 100% !important;
+                width: 100% !important;
             }
             
             .step {
@@ -484,8 +513,8 @@
                                     <h5 class="mb-3">Collector Information</h5>
                                     <div class="col-12">
                                         <label class="form-label">Company/Organization</label>
-                                        <asp:TextBox ID="txtCompany" runat="server" CssClass="form-control" 
-                                            placeholder="Enter company name"></asp:TextBox>
+                                            <asp:TextBox ID="txtCompany" runat="server" CssClass="form-control" 
+                                                placeholder="Enter company name"></asp:TextBox>
                                     </div>
                                 </asp:Panel>
 
@@ -592,28 +621,61 @@
     </section>
 
     <script>
-        // Toast notification function
+        // Toast notification function - FIXED VERSION
         function showToast(message, type = 'info') {
             const toastContainer = document.getElementById('toastContainer');
+            if (!toastContainer) return;
+
             const toast = document.createElement('div');
             toast.className = `toast ${type}`;
+
+            // Set icon based on type
+            let iconClass = 'fa-info-circle';
+            switch (type) {
+                case 'success': iconClass = 'fa-check-circle'; break;
+                case 'error': iconClass = 'fa-exclamation-circle'; break;
+                case 'warning': iconClass = 'fa-exclamation-triangle'; break;
+                default: iconClass = 'fa-info-circle'; break;
+            }
+
             toast.innerHTML = `
                 <div class="d-flex align-items-center">
-                    <i class="fas ${getToastIcon(type)} me-2"></i>
+                    <i class="fas ${iconClass} me-2"></i>
                     <span>${message}</span>
                 </div>
             `;
 
+            // Add to container
             toastContainer.appendChild(toast);
 
-            // Show toast
-            setTimeout(() => toast.classList.add('show'), 100);
-
-            // Remove toast after 5 seconds
+            // Show toast with animation
             setTimeout(() => {
-                toast.classList.remove('show');
-                setTimeout(() => toast.remove(), 300);
+                toast.classList.add('show');
+            }, 10);
+
+            // Auto-remove after 5 seconds
+            setTimeout(() => {
+                if (toast.parentNode === toastContainer) {
+                    toast.classList.remove('show');
+                    setTimeout(() => {
+                        if (toast.parentNode === toastContainer) {
+                            toastContainer.removeChild(toast);
+                        }
+                    }, 300);
+                }
             }, 5000);
+
+            // Add click to dismiss
+            toast.addEventListener('click', function () {
+                if (this.parentNode === toastContainer) {
+                    this.classList.remove('show');
+                    setTimeout(() => {
+                        if (this.parentNode === toastContainer) {
+                            toastContainer.removeChild(this);
+                        }
+                    }, 300);
+                }
+            });
         }
 
         function getToastIcon(type) {
@@ -632,7 +694,10 @@
             });
 
             // Show selected step
-            document.getElementById('step' + stepNumber).classList.add('active');
+            const stepElement = document.getElementById('step' + stepNumber);
+            if (stepElement) {
+                stepElement.classList.add('active');
+            }
 
             // Update step indicators
             document.querySelectorAll('.step').forEach((step, index) => {
@@ -651,22 +716,22 @@
             hideAllErrors();
 
             // Validate Full Name
-            const fullName = document.getElementById('<%= txtFullName.ClientID %>').value.trim();
-            if (!fullName) {
+            const fullName = document.getElementById('<%= txtFullName.ClientID %>');
+            if (!fullName || !fullName.value.trim()) {
                 showError('errorFullName', 'Full name is required');
                 isValid = false;
             }
 
             // Validate Phone
-            const phone = document.getElementById('<%= txtPhone.ClientID %>').value.trim();
-            if (!phone || !isValidPhone(phone)) {
+            const phone = document.getElementById('<%= txtPhone.ClientID %>');
+            if (!phone || !phone.value.trim() || !isValidPhone(phone.value.trim())) {
                 showError('errorPhone', 'Valid phone number is required');
                 isValid = false;
             }
 
             // Validate Email
-            const email = document.getElementById('<%= txtEmail.ClientID %>').value.trim();
-            if (!email || !isValidEmail(email)) {
+            const email = document.getElementById('<%= txtEmail.ClientID %>');
+            if (!email || !email.value.trim() || !isValidEmail(email.value.trim())) {
                 showError('errorEmail', 'Valid email address is required');
                 isValid = false;
             }
@@ -688,22 +753,22 @@
             hideAllErrors();
             
             // Validate Password
-            const password = document.getElementById('<%= txtPassword.ClientID %>').value;
-            if (!password || password.length < 6) {
+            const password = document.getElementById('<%= txtPassword.ClientID %>');
+            if (!password || !password.value || password.value.length < 6) {
                 showError('errorPassword', 'Password must be at least 6 characters');
                 isValid = false;
             }
             
             // Validate Confirm Password
-            const confirmPassword = document.getElementById('<%= txtConfirmPassword.ClientID %>').value;
-            if (password !== confirmPassword) {
+            const confirmPassword = document.getElementById('<%= txtConfirmPassword.ClientID %>');
+            if (password && confirmPassword && password.value !== confirmPassword.value) {
                 showError('errorConfirmPassword', 'Passwords do not match');
                 isValid = false;
             }
             
             // Validate Terms
-            const termsChecked = document.getElementById('<%= cbTerms.ClientID %>').checked;
-            if (!termsChecked) {
+            const termsChecked = document.getElementById('<%= cbTerms.ClientID %>');
+            if (!termsChecked || !termsChecked.checked) {
                 showError('errorTerms', 'You must accept the terms and conditions');
                 isValid = false;
             }
@@ -727,8 +792,10 @@
 
         function showError(errorId, message) {
             const errorElement = document.getElementById(errorId);
-            errorElement.textContent = message;
-            errorElement.style.display = 'block';
+            if (errorElement) {
+                errorElement.textContent = message;
+                errorElement.style.display = 'block';
+            }
         }
 
         function hideAllErrors() {
@@ -738,33 +805,43 @@
         }
 
         // Password strength indicator
-        document.getElementById('<%= txtPassword.ClientID %>').addEventListener('input', function () {
-            const password = this.value;
-            const strengthBar = document.getElementById('passwordStrengthBar');
-            let strength = 0;
+        const passwordField = document.getElementById('<%= txtPassword.ClientID %>');
+        if (passwordField) {
+            passwordField.addEventListener('input', function () {
+                const password = this.value;
+                const strengthBar = document.getElementById('passwordStrengthBar');
+                if (!strengthBar) return;
 
-            if (password.length >= 8) strength += 25;
-            if (/[A-Z]/.test(password)) strength += 25;
-            if (/[0-9]/.test(password)) strength += 25;
-            if (/[^A-Za-z0-9]/.test(password)) strength += 25;
+                let strength = 0;
 
-            strengthBar.className = 'password-strength-bar';
-            if (strength <= 25) {
-                strengthBar.classList.add('weak');
-            } else if (strength <= 50) {
-                strengthBar.classList.add('fair');
-            } else if (strength <= 75) {
-                strengthBar.classList.add('good');
-            } else {
-                strengthBar.classList.add('strong');
-            }
-        });
+                if (password.length >= 8) strength += 25;
+                if (/[A-Z]/.test(password)) strength += 25;
+                if (/[0-9]/.test(password)) strength += 25;
+                if (/[^A-Za-z0-9]/.test(password)) strength += 25;
+
+                strengthBar.className = 'password-strength-bar';
+                if (strength <= 25) {
+                    strengthBar.classList.add('weak');
+                } else if (strength <= 50) {
+                    strengthBar.classList.add('fair');
+                } else if (strength <= 75) {
+                    strengthBar.classList.add('good');
+                } else {
+                    strengthBar.classList.add('strong');
+                }
+            });
+        }
 
         // Password visibility toggle
         function togglePassword(fieldId) {
             const field = document.getElementById(fieldId);
+            if (!field) return;
+
             const toggle = field.nextElementSibling;
+            if (!toggle) return;
+
             const icon = toggle.querySelector('i');
+            if (!icon) return;
 
             if (field.type === 'password') {
                 field.type = 'text';

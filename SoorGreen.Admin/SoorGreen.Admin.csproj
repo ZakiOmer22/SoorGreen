@@ -47,6 +47,11 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="CrystalDecisions.CrystalReports.Engine, Version=13.0.4000.0, Culture=neutral, PublicKeyToken=692fbea5521e1304, processorArchitecture=MSIL" />
+    <Reference Include="CrystalDecisions.ReportSource, Version=13.0.4000.0, Culture=neutral, PublicKeyToken=692fbea5521e1304, processorArchitecture=MSIL" />
+    <Reference Include="CrystalDecisions.Shared, Version=13.0.4000.0, Culture=neutral, PublicKeyToken=692fbea5521e1304, processorArchitecture=MSIL" />
+    <Reference Include="CrystalDecisions.Web, Version=13.0.4000.0, Culture=neutral, PublicKeyToken=692fbea5521e1304, processorArchitecture=MSIL" />
+    <Reference Include="CrystalDecisions.Windows.Forms, Version=13.0.4000.0, Culture=neutral, PublicKeyToken=692fbea5521e1304, processorArchitecture=MSIL" />
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="System.ComponentModel.DataAnnotations" />
     <Reference Include="System" />
@@ -113,6 +118,14 @@
     <Content Include="About.aspx" />
     <Content Include="Admin Dashboard.aspx" />
     <Content Include="Content\Pages\about.css" />
+    <Content Include="Content\Pages\Collectors\collectorsroute.css" />
+    <Content Include="css\site-master.css" />
+    <Content Include="css\universal.css" />
+    <Content Include="Pages\Collectors\Dashboard.aspx" />
+    <Content Include="Pages\Collectors\DailyReport.aspx" />
+    <Content Include="Pages\Collectors\MyRoute.aspx" />
+    <Content Include="Pages\Collectors\PickupDetails.aspx" />
+    <Content Include="Pages\Collectors\WebForm1.aspx" />
     <Content Include="Scripts\Pages\about.js" />
     <Content Include="Content\Pages\Admin\adminauditlogs.css" />
     <Content Include="Content\Pages\Admin\admincitizens.css" />
@@ -241,6 +254,7 @@
     <None Include=".dockerignore">
       <DependentUpon>Dockerfile</DependentUpon>
     </None>
+    <Content Include="Pages\Collectors\Site.Master" />
     <None Include="Scripts\jquery-3.7.0.intellisense.js" />
     <Content Include="Scripts\jquery-3.7.0.js" />
     <Content Include="Scripts\jquery-3.7.0.min.js" />
@@ -520,7 +534,6 @@
     </Compile>
     <Compile Include="Pages\Citizen\Leaderboard.aspx.cs">
       <DependentUpon>Leaderboard.aspx</DependentUpon>
-      <SubType>ASPXCodeBehind</SubType>
     </Compile>
     <Compile Include="Pages\Citizen\Leaderboard.aspx.designer.cs">
       <DependentUpon>Leaderboard.aspx</DependentUpon>
@@ -625,6 +638,48 @@
     </Compile>
     <Compile Include="Pages\Citizen\UserProfile.aspx.designer.cs">
       <DependentUpon>UserProfile.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="Pages\Collectors\Dashboard.aspx.cs">
+      <DependentUpon>Dashboard.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="Pages\Collectors\Dashboard.aspx.designer.cs">
+      <DependentUpon>Dashboard.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="Pages\Collectors\DailyReport.aspx.cs">
+      <DependentUpon>DailyReport.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="Pages\Collectors\DailyReport.aspx.designer.cs">
+      <DependentUpon>DailyReport.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="Pages\Collectors\MyRoute.aspx.cs">
+      <DependentUpon>MyRoute.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="Pages\Collectors\MyRoute.aspx.designer.cs">
+      <DependentUpon>MyRoute.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="Pages\Collectors\PickupDetails.aspx.cs">
+      <DependentUpon>PickupDetails.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="Pages\Collectors\PickupDetails.aspx.designer.cs">
+      <DependentUpon>PickupDetails.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="Pages\Collectors\Site.Master.cs">
+      <DependentUpon>Site.Master</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="Pages\Collectors\Site.Master.designer.cs">
+      <DependentUpon>Site.Master</DependentUpon>
+    </Compile>
+    <Compile Include="Pages\Collectors\WebForm1.aspx.cs">
+      <DependentUpon>WebForm1.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="Pages\Collectors\WebForm1.aspx.designer.cs">
+      <DependentUpon>WebForm1.aspx</DependentUpon>
     </Compile>
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Register.aspx.cs">

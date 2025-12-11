@@ -1,151 +1,62 @@
 ﻿using System;
 using System.Data;
 using System.Data.SqlClient;
-using System.Web.Configuration;
 using System.Web.UI;
-using System.Web.Script.Serialization;
+using System.Web.UI.WebControls;
 using System.Collections.Generic;
-using System.Web.Services;
 
 namespace SoorGreen.Admin
 {
     public partial class PickupStatus : System.Web.UI.Page
     {
-        private string connectionString = WebConfigurationManager.ConnectionStrings["SoorGreenDBConnectionString"].ConnectionString;
+        private string currentUserId;
+        private string connectionString = System.Configuration.ConfigurationManager.ConnectionStrings["SoorGreenDBConnectionString"].ConnectionString;
+
+        // Pagination variables
+        private int currentPage = 1;
+        private int pageSize = 10;
+        private int totalItems = 0;
+
+        // Filter variables
+        private string statusFilter = "all";
+        private string dateFilter = "today";
+        private string searchQuery = "";
 
         protected void Page_Load(object sender, EventArgs e)
         {
             if (!IsPostBack)
             {
-                if (Session["UserID"] == null)
+                // Check if user is logged in
+                if (Session["UserId"] == null)
                 {
                     Response.Redirect("~/Login.aspx");
                     return;
                 }
 
-                // Debug: Check Session
-                System.Diagnostics.Debug.WriteLine("=== PAGE LOAD DEBUG ===");
-                System.Diagnostics.Debug.WriteLine("Session UserID: " + Session["UserID"]);
-                System.Diagnostics.Debug.WriteLine("Session Count: " + Session.Count);
+                currentUserId = Session["UserId"].ToString();
 
-                // Store user ID in hidden field for JavaScript
-                hfUserId.Value = Session["UserID"].ToString();
-                System.Diagnostics.Debug.WriteLine("UserID stored in hidden field: " + hfUserId.Value);
+                // Load initial data
+                LoadPickupStats();
+                LoadPickups();
 
-                // Load data
-                LoadPickupsData();
+                // REMOVED: LoadPriorities() - No Priority column in table
+            }
+            else
+            {
+                // Restore values from session
+                if (Session["UserId"] != null)
+                {
+                    currentUserId = Session["UserId"].ToString();
+                }
 
-                System.Diagnostics.Debug.WriteLine("=== END PAGE LOAD ===");
+                if (Session["CurrentPage"] != null)
+                {
+                    currentPage = (int)Session["CurrentPage"];
+                }
             }
         }
 
-        private void LoadPickupsData()
-        {
-            try
-            {
-                if (Session["UserID"] == null)
-                {
-                    System.Diagnostics.Debug.WriteLine("Session UserID is null in LoadPickupsData!");
-                    hfActivePickups.Value = "[]";
-                    hfPickupHistory.Value = "[]";
-                    hfStatsData.Value = "{\"TotalPickups\":0,\"ActivePickups\":0,\"CompletedPickups\":0,\"SuccessRate\":\"0%\",\"TotalXP\":0}";
-                    return;
-                }
-
-                string userId = Session["UserID"].ToString();
-                System.Diagnostics.Debug.WriteLine("=== LOADING PICKUP DATA ===");
-                System.Diagnostics.Debug.WriteLine("UserID from Session: " + userId);
-                System.Diagnostics.Debug.WriteLine("UserID Type: " + userId.GetType().Name);
-                System.Diagnostics.Debug.WriteLine("UserID Length: " + userId.Length);
-
-                // Check if userId is valid
-                if (string.IsNullOrEmpty(userId))
-                {
-                    System.Diagnostics.Debug.WriteLine("UserID is null or empty!");
-                    hfActivePickups.Value = "[]";
-                    hfPickupHistory.Value = "[]";
-                    hfStatsData.Value = "{\"TotalPickups\":0,\"ActivePickups\":0,\"CompletedPickups\":0,\"SuccessRate\":\"0%\",\"TotalXP\":0}";
-                    return;
-                }
-
-                // Load active pickups
-                var activePickups = LoadActivePickups(userId);
-                System.Diagnostics.Debug.WriteLine("Active pickups count from DB: " + activePickups.Count);
-
-                // Load pickup history
-                var pickupHistory = LoadPickupHistory(userId);
-                System.Diagnostics.Debug.WriteLine("Pickup history count from DB: " + pickupHistory.Count);
-
-                // Load stats
-                var stats = LoadPickupStats(userId);
-                System.Diagnostics.Debug.WriteLine("Stats loaded: " + new JavaScriptSerializer().Serialize(stats));
-
-                // TEMPORARY: Add sample data for testing UI
-                if (activePickups.Count == 0)
-                {
-                    System.Diagnostics.Debug.WriteLine("Adding sample active pickup for testing UI...");
-                    activePickups.Add(new
-                    {
-                        PickupId = "PU-" + Guid.NewGuid().ToString().Substring(0, 8).ToUpper(),
-                        WasteType = "Plastic",
-                        Weight = "5.0",
-                        Address = "123 Green Street, Eco City",
-                        Status = "Scheduled",
-                        ScheduledDate = DateTime.Now.AddDays(1).ToString("yyyy-MM-dd HH:mm"),
-                        CreatedDate = DateTime.Now.ToString("yyyy-MM-dd HH:mm"),
-                        CollectorName = "John Collector",
-                        XPEarned = "50",
-                        Description = "Plastic bottles and containers",
-                        Instructions = "Please separate PET bottles from other plastics"
-                    });
-                }
-
-                if (pickupHistory.Count == 0)
-                {
-                    System.Diagnostics.Debug.WriteLine("Adding sample history pickup for testing UI...");
-                    pickupHistory.Add(new
-                    {
-                        PickupId = "PU-" + Guid.NewGuid().ToString().Substring(0, 8).ToUpper(),
-                        WasteType = "Paper",
-                        Weight = "3.5",
-                        Address = "456 Recycling Avenue, Green Town",
-                        Status = "Completed",
-                        ScheduledDate = DateTime.Now.AddDays(-2).ToString("yyyy-MM-dd HH:mm"),
-                        CompletedDate = DateTime.Now.AddDays(-1).ToString("yyyy-MM-dd HH:mm"),
-                        CreatedDate = DateTime.Now.AddDays(-3).ToString("yyyy-MM-dd HH:mm"),
-                        CollectorName = "Jane Collector",
-                        XPEarned = "35",
-                        Description = "Office paper and cardboard",
-                        Instructions = "Keep dry and bundled"
-                    });
-                }
-
-                // Serialize data to hidden fields
-                hfActivePickups.Value = new JavaScriptSerializer().Serialize(activePickups);
-                hfPickupHistory.Value = new JavaScriptSerializer().Serialize(pickupHistory);
-                hfStatsData.Value = new JavaScriptSerializer().Serialize(stats);
-
-                // Debug output
-                System.Diagnostics.Debug.WriteLine("Active Pickups JSON: " + hfActivePickups.Value);
-                System.Diagnostics.Debug.WriteLine("Pickup History JSON: " + hfPickupHistory.Value);
-                System.Diagnostics.Debug.WriteLine("Stats JSON: " + hfStatsData.Value);
-                System.Diagnostics.Debug.WriteLine("=== DATA LOADED SUCCESSFULLY ===");
-            }
-            catch (Exception ex)
-            {
-                System.Diagnostics.Debug.WriteLine("=== ERROR IN LOADPICKUPSDATA ===");
-                System.Diagnostics.Debug.WriteLine("Error loading pickups data: " + ex.Message);
-                System.Diagnostics.Debug.WriteLine("Stack Trace: " + ex.StackTrace);
-                System.Diagnostics.Debug.WriteLine("=== END ERROR ===");
-
-                // Set empty data for error case
-                hfActivePickups.Value = "[]";
-                hfPickupHistory.Value = "[]";
-                hfStatsData.Value = "{\"TotalPickups\":0,\"ActivePickups\":0,\"CompletedPickups\":0,\"SuccessRate\":\"0%\",\"TotalXP\":0}";
-            }
-        }
-
-        private void CheckDatabaseStructure(string userId)
+        private void LoadPickupStats()
         {
             try
             {
@@ -153,34 +64,377 @@ namespace SoorGreen.Admin
                 {
                     conn.Open();
 
-                    // Check if tables have correct columns
-                    string checkQuery = @"
-                        -- Check columns in PickupRequests
-                        SELECT 'PickupRequests' as TableName, COLUMN_NAME, DATA_TYPE 
-                        FROM INFORMATION_SCHEMA.COLUMNS 
-                        WHERE TABLE_NAME = 'PickupRequests'
-                        
-                        UNION ALL
-                        
-                        -- Check columns in WasteReports
-                        SELECT 'WasteReports' as TableName, COLUMN_NAME, DATA_TYPE 
-                        FROM INFORMATION_SCHEMA.COLUMNS 
-                        WHERE TABLE_NAME = 'WasteReports'
-                        
-                        UNION ALL
-                        
-                        -- Check if user exists
-                        SELECT 'Users' as TableName, 'UserCount' as COLUMN_NAME, CAST(COUNT(*) as VARCHAR) as DATA_TYPE
-                        FROM Users WHERE UserId = @UserId";
+                    // Get pending pickups count
+                    string pendingQuery = @"
+                        SELECT COUNT(*) 
+                        FROM PickupRequests pr
+                        INNER JOIN WasteReports wr ON pr.ReportId = wr.ReportId
+                        WHERE wr.UserId = @UserId AND pr.Status = 'Requested'";
 
-                    using (SqlCommand cmd = new SqlCommand(checkQuery, conn))
+                    using (SqlCommand cmd = new SqlCommand(pendingQuery, conn))
                     {
-                        cmd.Parameters.AddWithValue("@UserId", userId);
+                        cmd.Parameters.AddWithValue("@UserId", currentUserId);
+                        var result = cmd.ExecuteScalar();
+                        statPending.InnerText = result != DBNull.Value ? result.ToString() : "0";
+                    }
+
+                    // Get scheduled pickups count
+                    string scheduledQuery = @"
+                        SELECT COUNT(*) 
+                        FROM PickupRequests pr
+                        INNER JOIN WasteReports wr ON pr.ReportId = wr.ReportId
+                        WHERE wr.UserId = @UserId AND pr.Status = 'Scheduled'";
+
+                    using (SqlCommand cmd = new SqlCommand(scheduledQuery, conn))
+                    {
+                        cmd.Parameters.AddWithValue("@UserId", currentUserId);
+                        var result = cmd.ExecuteScalar();
+                        statScheduled.InnerText = result != DBNull.Value ? result.ToString() : "0";
+                    }
+
+                    // Get in-progress pickups count
+                    string inProgressQuery = @"
+                        SELECT COUNT(*) 
+                        FROM PickupRequests pr
+                        INNER JOIN WasteReports wr ON pr.ReportId = wr.ReportId
+                        WHERE wr.UserId = @UserId AND pr.Status = 'InProgress'";
+
+                    using (SqlCommand cmd = new SqlCommand(inProgressQuery, conn))
+                    {
+                        cmd.Parameters.AddWithValue("@UserId", currentUserId);
+                        var result = cmd.ExecuteScalar();
+                        statInProgress.InnerText = result != DBNull.Value ? result.ToString() : "0";
+                    }
+
+                    // Get completed pickups count
+                    string completedQuery = @"
+                        SELECT COUNT(*) 
+                        FROM PickupRequests pr
+                        INNER JOIN WasteReports wr ON pr.ReportId = wr.ReportId
+                        WHERE wr.UserId = @UserId AND pr.Status = 'Collected'";
+
+                    using (SqlCommand cmd = new SqlCommand(completedQuery, conn))
+                    {
+                        cmd.Parameters.AddWithValue("@UserId", currentUserId);
+                        var result = cmd.ExecuteScalar();
+                        statCompleted.InnerText = result != DBNull.Value ? result.ToString() : "0";
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine("LoadPickupStats Error: " + ex.Message);
+            }
+        }
+
+        private void LoadPickups()
+        {
+            try
+            {
+                using (SqlConnection conn = new SqlConnection(connectionString))
+                {
+                    conn.Open();
+
+                    // Build query with filters
+                    string query = BuildPickupQuery();
+
+                    // First, get total count for pagination
+                    string countQuery = "SELECT COUNT(*) FROM (" + query + ") AS SubQuery";
+                    using (SqlCommand countCmd = new SqlCommand(countQuery, conn))
+                    {
+                        AddQueryParameters(countCmd);
+                        totalItems = Convert.ToInt32(countCmd.ExecuteScalar());
+                    }
+
+                    // Now get paginated data
+                    query = "SELECT * FROM (" + query + ") AS FilteredPickups ORDER BY ScheduledDate DESC OFFSET @Offset ROWS FETCH NEXT @PageSize ROWS ONLY";
+
+                    using (SqlCommand cmd = new SqlCommand(query, conn))
+                    {
+                        AddQueryParameters(cmd);
+                        cmd.Parameters.AddWithValue("@Offset", (currentPage - 1) * pageSize);
+                        cmd.Parameters.AddWithValue("@PageSize", pageSize);
+
+                        using (SqlDataAdapter da = new SqlDataAdapter(cmd))
+                        {
+                            DataTable dt = new DataTable();
+                            da.Fill(dt);
+
+                            if (dt.Rows.Count > 0)
+                            {
+                                rptPickups.DataSource = dt;
+                                rptPickups.DataBind();
+                                pnlPickupCards.Visible = true;
+                                pnlEmptyState.Visible = false;
+                            }
+                            else
+                            {
+                                pnlPickupCards.Visible = false;
+                                pnlEmptyState.Visible = true;
+                            }
+
+                            // Update pagination labels
+                            UpdatePaginationLabels();
+                            LoadPageNumbers();
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine("LoadPickups Error: " + ex.Message);
+                pnlPickupCards.Visible = false;
+                pnlEmptyState.Visible = true;
+            }
+        }
+
+        private string BuildPickupQuery()
+        {
+            // FIXED: Removed Priority column since it doesn't exist in schema
+            string baseQuery = @"
+                SELECT 
+                    pr.PickupId,
+                    wr.ReportId,
+                    wr.EstimatedKg as Weight,
+                    wr.Address,
+                    wr.PhotoUrl,
+                    wt.Name as WasteType,
+                    pr.Status as PickupStatus,
+                    pr.ScheduledAt as ScheduledDate,
+                    pr.CompletedAt as CompletedDate,
+                    c.FullName as CollectorName,
+                    c.Phone as CollectorPhone,
+                    (wr.EstimatedKg * wt.CreditPerKg) as EstimatedReward,
+                    CASE 
+                        WHEN pr.Status = 'Requested' THEN 'pending'
+                        WHEN pr.Status = 'Scheduled' THEN 'scheduled'
+                        WHEN pr.Status = 'InProgress' THEN 'inprogress'
+                        WHEN pr.Status = 'Collected' THEN 'completed'
+                        WHEN pr.Status = 'Cancelled' THEN 'cancelled'
+                        ELSE 'pending'
+                    END as StatusDisplay
+                FROM PickupRequests pr
+                INNER JOIN WasteReports wr ON pr.ReportId = wr.ReportId
+                INNER JOIN WasteTypes wt ON wr.WasteTypeId = wt.WasteTypeId
+                LEFT JOIN Users c ON pr.CollectorId = c.UserId
+                WHERE wr.UserId = @UserId";
+
+            // Apply status filter
+            if (!string.IsNullOrEmpty(statusFilter) && statusFilter != "all")
+            {
+                baseQuery += " AND pr.Status = @StatusFilter";
+            }
+
+            // Apply date filter
+            if (!string.IsNullOrEmpty(dateFilter))
+            {
+                switch (dateFilter)
+                {
+                    case "today":
+                        baseQuery += " AND CAST(pr.ScheduledAt AS DATE) = CAST(GETDATE() AS DATE)";
+                        break;
+                    case "week":
+                        baseQuery += " AND pr.ScheduledAt >= DATEADD(DAY, -7, GETDATE())";
+                        break;
+                    case "month":
+                        baseQuery += " AND pr.ScheduledAt >= DATEADD(MONTH, -1, GETDATE())";
+                        break;
+                    case "year":
+                        baseQuery += " AND pr.ScheduledAt >= DATEADD(YEAR, -1, GETDATE())";
+                        break;
+                    case "upcoming":
+                        baseQuery += " AND pr.ScheduledAt >= GETDATE() AND pr.Status IN ('Scheduled', 'InProgress')";
+                        break;
+                    case "past":
+                        baseQuery += " AND pr.ScheduledAt < GETDATE()";
+                        break;
+                }
+            }
+
+            // Apply search filter
+            if (!string.IsNullOrEmpty(searchQuery))
+            {
+                baseQuery += " AND (pr.PickupId LIKE @SearchQuery OR wr.ReportId LIKE @SearchQuery OR wr.Address LIKE @SearchQuery OR c.FullName LIKE @SearchQuery)";
+            }
+
+            return baseQuery;
+        }
+
+        private void AddQueryParameters(SqlCommand cmd)
+        {
+            cmd.Parameters.AddWithValue("@UserId", currentUserId);
+
+            if (!string.IsNullOrEmpty(statusFilter) && statusFilter != "all")
+            {
+                cmd.Parameters.AddWithValue("@StatusFilter", statusFilter);
+            }
+
+            if (!string.IsNullOrEmpty(searchQuery))
+            {
+                cmd.Parameters.AddWithValue("@SearchQuery", "%" + searchQuery + "%");
+            }
+        }
+
+        private void UpdatePaginationLabels()
+        {
+            int start = ((currentPage - 1) * pageSize) + 1;
+            int end = Math.Min(currentPage * pageSize, totalItems);
+
+            lblStartCount.Text = start.ToString();
+            lblEndCount.Text = end.ToString();
+            lblTotalCount.Text = totalItems.ToString();
+
+            // Enable/disable navigation buttons
+            btnPrevPage.Enabled = currentPage > 1;
+            btnNextPage.Enabled = currentPage < Math.Ceiling((double)totalItems / pageSize);
+        }
+
+        private void LoadPageNumbers()
+        {
+            int totalPages = (int)Math.Ceiling((double)totalItems / pageSize);
+
+            // Show max 5 page numbers
+            int startPage = Math.Max(1, currentPage - 2);
+            int endPage = Math.Min(totalPages, startPage + 4);
+
+            if (endPage - startPage < 4)
+            {
+                startPage = Math.Max(1, endPage - 4);
+            }
+
+            var pageNumbers = new List<dynamic>();
+            for (int i = startPage; i <= endPage; i++)
+            {
+                pageNumbers.Add(new { PageNumber = i, CurrentPage = currentPage });
+            }
+
+            rptPageNumbers.DataSource = pageNumbers;
+            rptPageNumbers.DataBind();
+        }
+
+        protected void ddlStatusFilter_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            statusFilter = ddlStatusFilter.SelectedValue;
+            currentPage = 1;
+            Session["CurrentPage"] = currentPage;
+            LoadPickups();
+        }
+
+        protected void ddlDateFilter_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            dateFilter = ddlDateFilter.SelectedValue;
+            currentPage = 1;
+            Session["CurrentPage"] = currentPage;
+            LoadPickups();
+        }
+
+        protected void txtSearch_TextChanged(object sender, EventArgs e)
+        {
+            searchQuery = txtSearch.Text.Trim();
+            currentPage = 1;
+            Session["CurrentPage"] = currentPage;
+            LoadPickups();
+        }
+
+        protected void btnPrevPage_Click(object sender, EventArgs e)
+        {
+            if (currentPage > 1)
+            {
+                currentPage--;
+                Session["CurrentPage"] = currentPage;
+                LoadPickups();
+            }
+        }
+
+        protected void btnNextPage_Click(object sender, EventArgs e)
+        {
+            int totalPages = (int)Math.Ceiling((double)totalItems / pageSize);
+            if (currentPage < totalPages)
+            {
+                currentPage++;
+                Session["CurrentPage"] = currentPage;
+                LoadPickups();
+            }
+        }
+
+        protected void btnPage_Click(object sender, EventArgs e)
+        {
+            LinkButton btn = (LinkButton)sender;
+            currentPage = Convert.ToInt32(btn.CommandArgument);
+            Session["CurrentPage"] = currentPage;
+            LoadPickups();
+        }
+
+        protected void rptPickups_ItemCommand(object source, RepeaterCommandEventArgs e)
+        {
+            string pickupId = e.CommandArgument.ToString();
+
+            switch (e.CommandName)
+            {
+                case "ViewDetails":
+                    ViewPickupDetails(pickupId);
+                    break;
+
+                case "Reschedule":
+                    ReschedulePickup(pickupId);
+                    break;
+
+                case "Cancel":
+                    CancelPickup(pickupId);
+                    break;
+
+                case "ContactCollector":
+                    ContactCollector(pickupId);
+                    break;
+            }
+        }
+
+        private void ViewPickupDetails(string pickupId)
+        {
+            try
+            {
+                using (SqlConnection conn = new SqlConnection(connectionString))
+                {
+                    conn.Open();
+
+                    string query = @"
+                        SELECT 
+                            pr.*,
+                            wr.ReportId,
+                            wr.EstimatedKg,
+                            wr.Address,
+                            wr.PhotoUrl,
+                            wt.Name as WasteType,
+                            c.FullName as CollectorName,
+                            c.Phone as CollectorPhone,
+                            c.Email as CollectorEmail,
+                            (wr.EstimatedKg * wt.CreditPerKg) as EstimatedReward
+                        FROM PickupRequests pr
+                        INNER JOIN WasteReports wr ON pr.ReportId = wr.ReportId
+                        INNER JOIN WasteTypes wt ON wr.WasteTypeId = wt.WasteTypeId
+                        LEFT JOIN Users c ON pr.CollectorId = c.UserId
+                        WHERE pr.PickupId = @PickupId AND wr.UserId = @UserId";
+
+                    using (SqlCommand cmd = new SqlCommand(query, conn))
+                    {
+                        cmd.Parameters.AddWithValue("@PickupId", pickupId);
+                        cmd.Parameters.AddWithValue("@UserId", currentUserId);
+
                         using (SqlDataReader reader = cmd.ExecuteReader())
                         {
-                            while (reader.Read())
+                            if (reader.Read())
                             {
-                                System.Diagnostics.Debug.WriteLine("Table: " + reader["TableName"] + ", Column: " + reader["COLUMN_NAME"] + ", Type: " + reader["DATA_TYPE"]);
+                                string details = "Pickup ID: " + reader["PickupId"] + "\n" +
+                                                "Report ID: " + reader["ReportId"] + "\n" +
+                                                "Waste Type: " + reader["WasteType"] + "\n" +
+                                                "Weight: " + reader["EstimatedKg"] + " kg\n" +
+                                                "Address: " + reader["Address"] + "\n" +
+                                                "Status: " + reader["Status"] + "\n" +
+                                                "Scheduled: " + (reader["ScheduledAt"] != DBNull.Value ? ((DateTime)reader["ScheduledAt"]).ToString("MMM dd, yyyy HH:mm") : "Not Scheduled") + "\n" +
+                                                "Collector: " + (reader["CollectorName"] != DBNull.Value ? reader["CollectorName"] + " (" + reader["CollectorPhone"] + ")" : "Not Assigned") + "\n" +
+                                                "Estimated Reward: " + reader["EstimatedReward"] + " XP";
+
+                                ShowMessage(details, "info");
                             }
                         }
                     }
@@ -188,563 +442,287 @@ namespace SoorGreen.Admin
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine("Error checking database structure: " + ex.Message);
+                ShowMessage("Error loading pickup details: " + ex.Message, "error");
             }
         }
 
-        private List<object> LoadActivePickups(string userId)
+        private void ReschedulePickup(string pickupId)
         {
-            var pickups = new List<object>();
-
-            using (SqlConnection conn = new SqlConnection(connectionString))
+            try
             {
-                try
+                using (SqlConnection conn = new SqlConnection(connectionString))
                 {
                     conn.Open();
-                    System.Diagnostics.Debug.WriteLine(string.Format("Database connection opened for user: {0}", userId));
 
-                    // First, let's test with a simpler query
-                    string testQuery = "SELECT TOP 1 UserId FROM Users WHERE UserId = @UserId";
-                    using (SqlCommand testCmd = new SqlCommand(testQuery, conn))
+                    // Check if pickup can be rescheduled
+                    string checkQuery = "SELECT Status FROM PickupRequests WHERE PickupId = @PickupId";
+
+                    using (SqlCommand cmd = new SqlCommand(checkQuery, conn))
                     {
-                        testCmd.Parameters.AddWithValue("@UserId", userId);
-                        var testResult = testCmd.ExecuteScalar();
-                        System.Diagnostics.Debug.WriteLine("Test query result: " + (testResult != null ? testResult.ToString() : "null"));
+                        cmd.Parameters.AddWithValue("@PickupId", pickupId);
+                        object result = cmd.ExecuteScalar();
+                        string status = result != null ? result.ToString() : "";
+
+                        if (status == "Collected" || status == "Cancelled")
+                        {
+                            ShowMessage("Cannot reschedule a completed or cancelled pickup.", "error");
+                            return;
+                        }
                     }
 
+                    // Redirect to reschedule page with pickup ID
+                    Response.Redirect("~/Pages/Citizen/ReschedulePickup.aspx?pickupId=" + pickupId);
+                }
+            }
+            catch (Exception ex)
+            {
+                ShowMessage("Error checking pickup status: " + ex.Message, "error");
+            }
+        }
+
+        private void CancelPickup(string pickupId)
+        {
+            try
+            {
+                using (SqlConnection conn = new SqlConnection(connectionString))
+                {
+                    conn.Open();
+
+                    // Check if pickup can be cancelled
+                    string checkQuery = "SELECT Status FROM PickupRequests WHERE PickupId = @PickupId";
+
+                    using (SqlCommand cmd = new SqlCommand(checkQuery, conn))
+                    {
+                        cmd.Parameters.AddWithValue("@PickupId", pickupId);
+                        object result = cmd.ExecuteScalar();
+                        string status = result != null ? result.ToString() : "";
+
+                        if (status == "Collected")
+                        {
+                            ShowMessage("Cannot cancel a completed pickup.", "error");
+                            return;
+                        }
+
+                        if (status == "Cancelled")
+                        {
+                            ShowMessage("Pickup is already cancelled.", "info");
+                            return;
+                        }
+                    }
+
+                    // Update pickup status to cancelled
+                    string updateQuery = "UPDATE PickupRequests SET Status = 'Cancelled' WHERE PickupId = @PickupId";
+
+                    using (SqlCommand cmd = new SqlCommand(updateQuery, conn))
+                    {
+                        cmd.Parameters.AddWithValue("@PickupId", pickupId);
+
+                        int rowsAffected = cmd.ExecuteNonQuery();
+
+                        if (rowsAffected > 0)
+                        {
+                            ShowMessage("Pickup cancelled successfully!", "success");
+                            LoadPickupStats();
+                            LoadPickups();
+                        }
+                        else
+                        {
+                            ShowMessage("Failed to cancel pickup.", "error");
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                ShowMessage("Error cancelling pickup: " + ex.Message, "error");
+            }
+        }
+
+        private void ContactCollector(string pickupId)
+        {
+            try
+            {
+                using (SqlConnection conn = new SqlConnection(connectionString))
+                {
+                    conn.Open();
+
                     string query = @"
-                        SELECT 
-                            pr.PickupId,
-                            wt.Name as WasteType,
-                            wr.EstimatedKg as Weight,
-                            wr.Address,
-                            pr.Status,
-                            pr.ScheduledDate,
-                            pr.CreatedAt as CreatedDate,
-                            u.Name as CollectorName,
-                            wr.XPEarned,
-                            wr.Description,
-                            wr.Instructions
+                        SELECT c.FullName, c.Phone, c.Email 
                         FROM PickupRequests pr
-                        INNER JOIN WasteReports wr ON pr.ReportId = wr.ReportId
-                        INNER JOIN WasteTypes wt ON wr.WasteTypeId = wt.WasteTypeId
-                        LEFT JOIN Users u ON pr.CollectorId = u.UserId
-                        WHERE wr.UserId = @UserId 
-                        AND pr.Status IN ('Requested', 'Scheduled', 'Assigned', 'In Progress')
-                        ORDER BY pr.ScheduledDate ASC";
+                        LEFT JOIN Users c ON pr.CollectorId = c.UserId
+                        WHERE pr.PickupId = @PickupId";
 
                     using (SqlCommand cmd = new SqlCommand(query, conn))
                     {
-                        cmd.Parameters.AddWithValue("@UserId", userId);
-
-                        System.Diagnostics.Debug.WriteLine(string.Format("Executing query for active pickups"));
-                        System.Diagnostics.Debug.WriteLine(string.Format("User ID parameter: {0}", userId));
+                        cmd.Parameters.AddWithValue("@PickupId", pickupId);
 
                         using (SqlDataReader reader = cmd.ExecuteReader())
                         {
-                            int recordCount = 0;
-                            while (reader.Read())
+                            if (reader.Read())
                             {
-                                recordCount++;
+                                string collectorName = reader["FullName"] != DBNull.Value ? reader["FullName"].ToString() : "";
+                                string collectorPhone = reader["Phone"] != DBNull.Value ? reader["Phone"].ToString() : "";
+                                string collectorEmail = reader["Email"] != DBNull.Value ? reader["Email"].ToString() : "";
 
-                                // Safely handle null values
-                                object weight = reader["Weight"];
-                                object scheduledDate = reader["ScheduledDate"];
-                                object collectorName = reader["CollectorName"];
-                                object xpEarned = reader["XPEarned"];
-                                object description = reader["Description"];
-                                object instructions = reader["Instructions"];
-
-                                pickups.Add(new
+                                if (!string.IsNullOrEmpty(collectorPhone))
                                 {
-                                    PickupId = reader["PickupId"].ToString(),
-                                    WasteType = reader["WasteType"].ToString(),
-                                    Weight = weight != DBNull.Value ? Convert.ToDecimal(weight).ToString("F1") : "0",
-                                    Address = reader["Address"].ToString(),
-                                    Status = reader["Status"].ToString(),
-                                    ScheduledDate = scheduledDate != DBNull.Value ? Convert.ToDateTime(scheduledDate).ToString("yyyy-MM-dd HH:mm") : null,
-                                    CreatedDate = Convert.ToDateTime(reader["CreatedDate"]).ToString("yyyy-MM-dd HH:mm"),
-                                    CollectorName = collectorName != DBNull.Value ? collectorName.ToString() : null,
-                                    XPEarned = xpEarned != DBNull.Value ? Convert.ToInt32(xpEarned).ToString() : "0",
-                                    Description = description != DBNull.Value ? description.ToString() : "",
-                                    Instructions = instructions != DBNull.Value ? instructions.ToString() : ""
-                                });
+                                    string message = "Collector: " + collectorName + "\n" +
+                                                   "Phone: " + collectorPhone + "\n" +
+                                                   "Email: " + collectorEmail + "\n\n" +
+                                                   "You can contact them directly for any pickup-related questions.";
 
-                                System.Diagnostics.Debug.WriteLine(string.Format("Record {0}: PickupId={1}, WasteType={2}, Status={3}",
-                                    recordCount, reader["PickupId"], reader["WasteType"], reader["Status"]));
-                            }
-                            System.Diagnostics.Debug.WriteLine(string.Format("Total active pickups loaded: {0}", recordCount));
-
-                            if (recordCount == 0)
-                            {
-                                System.Diagnostics.Debug.WriteLine("No active pickups found in database for user: " + userId);
-
-                                // Try a simpler query to see if there's any data
-                                string simpleQuery = "SELECT COUNT(*) FROM WasteReports WHERE UserId = @UserId";
-                                using (SqlCommand simpleCmd = new SqlCommand(simpleQuery, conn))
+                                    ShowMessage(message, "info");
+                                }
+                                else
                                 {
-                                    simpleCmd.Parameters.AddWithValue("@UserId", userId);
-                                    int wasteReports = Convert.ToInt32(simpleCmd.ExecuteScalar());
-                                    System.Diagnostics.Debug.WriteLine("Total WasteReports for user: " + wasteReports);
+                                    ShowMessage("No collector assigned to this pickup yet.", "info");
                                 }
                             }
                         }
                     }
                 }
-                catch (Exception ex)
-                {
-                    System.Diagnostics.Debug.WriteLine(string.Format("Error in LoadActivePickups: {0}", ex.Message));
-                    System.Diagnostics.Debug.WriteLine(string.Format("Stack Trace: {0}", ex.StackTrace));
-
-                    // Log detailed error using old syntax
-                    SqlException sqlEx = ex as SqlException;
-                    if (sqlEx != null)
-                    {
-                        System.Diagnostics.Debug.WriteLine("SQL Error Number: " + sqlEx.Number);
-                        System.Diagnostics.Debug.WriteLine("SQL Procedure: " + sqlEx.Procedure);
-                        System.Diagnostics.Debug.WriteLine("SQL Line Number: " + sqlEx.LineNumber);
-                    }
-                }
-            }
-
-            return pickups;
-        }
-
-        private List<object> LoadPickupHistory(string userId)
-        {
-            var pickups = new List<object>();
-
-            using (SqlConnection conn = new SqlConnection(connectionString))
-            {
-                try
-                {
-                    conn.Open();
-                    System.Diagnostics.Debug.WriteLine(string.Format("Database connection opened for history for user: {0}", userId));
-
-                    string query = @"
-                        SELECT 
-                            pr.PickupId,
-                            wt.Name as WasteType,
-                            wr.EstimatedKg as Weight,
-                            wr.Address,
-                            pr.Status,
-                            pr.ScheduledDate,
-                            pr.CompletedDate,
-                            pr.CreatedAt as CreatedDate,
-                            u.Name as CollectorName,
-                            wr.XPEarned,
-                            wr.Description,
-                            wr.Instructions
-                        FROM PickupRequests pr
-                        INNER JOIN WasteReports wr ON pr.ReportId = wr.ReportId
-                        INNER JOIN WasteTypes wt ON wr.WasteTypeId = wt.WasteTypeId
-                        LEFT JOIN Users u ON pr.CollectorId = u.UserId
-                        WHERE wr.UserId = @UserId 
-                        AND pr.Status IN ('Completed', 'Cancelled')
-                        ORDER BY pr.CompletedDate DESC";
-
-                    using (SqlCommand cmd = new SqlCommand(query, conn))
-                    {
-                        cmd.Parameters.AddWithValue("@UserId", userId);
-
-                        System.Diagnostics.Debug.WriteLine(string.Format("Executing query for pickup history"));
-                        System.Diagnostics.Debug.WriteLine(string.Format("User ID parameter: {0}", userId));
-
-                        using (SqlDataReader reader = cmd.ExecuteReader())
-                        {
-                            int recordCount = 0;
-                            while (reader.Read())
-                            {
-                                recordCount++;
-
-                                // Safely handle null values
-                                object weight = reader["Weight"];
-                                object scheduledDate = reader["ScheduledDate"];
-                                object completedDate = reader["CompletedDate"];
-                                object collectorName = reader["CollectorName"];
-                                object xpEarned = reader["XPEarned"];
-                                object description = reader["Description"];
-                                object instructions = reader["Instructions"];
-
-                                pickups.Add(new
-                                {
-                                    PickupId = reader["PickupId"].ToString(),
-                                    WasteType = reader["WasteType"].ToString(),
-                                    Weight = weight != DBNull.Value ? Convert.ToDecimal(weight).ToString("F1") : "0",
-                                    Address = reader["Address"].ToString(),
-                                    Status = reader["Status"].ToString(),
-                                    ScheduledDate = scheduledDate != DBNull.Value ? Convert.ToDateTime(scheduledDate).ToString("yyyy-MM-dd HH:mm") : null,
-                                    CompletedDate = completedDate != DBNull.Value ? Convert.ToDateTime(completedDate).ToString("yyyy-MM-dd HH:mm") : null,
-                                    CreatedDate = Convert.ToDateTime(reader["CreatedDate"]).ToString("yyyy-MM-dd HH:mm"),
-                                    CollectorName = collectorName != DBNull.Value ? collectorName.ToString() : null,
-                                    XPEarned = xpEarned != DBNull.Value ? Convert.ToInt32(xpEarned).ToString() : "0",
-                                    Description = description != DBNull.Value ? description.ToString() : "",
-                                    Instructions = instructions != DBNull.Value ? instructions.ToString() : ""
-                                });
-
-                                System.Diagnostics.Debug.WriteLine(string.Format("Record {0}: PickupId={1}, Status={2}, CompletedDate={3}",
-                                    recordCount, reader["PickupId"], reader["Status"],
-                                    completedDate != DBNull.Value ? Convert.ToDateTime(completedDate).ToString("yyyy-MM-dd HH:mm") : "null"));
-                            }
-                            System.Diagnostics.Debug.WriteLine(string.Format("Total history pickups loaded: {0}", recordCount));
-
-                            if (recordCount == 0)
-                            {
-                                System.Diagnostics.Debug.WriteLine("No history pickups found in database for user: " + userId);
-                            }
-                        }
-                    }
-                }
-                catch (Exception ex)
-                {
-                    System.Diagnostics.Debug.WriteLine(string.Format("Error in LoadPickupHistory: {0}", ex.Message));
-                    System.Diagnostics.Debug.WriteLine(string.Format("Stack Trace: {0}", ex.StackTrace));
-
-                    // Log detailed error using old syntax
-                    SqlException sqlEx = ex as SqlException;
-                    if (sqlEx != null)
-                    {
-                        System.Diagnostics.Debug.WriteLine("SQL Error Number: " + sqlEx.Number);
-                        System.Diagnostics.Debug.WriteLine("SQL Procedure: " + sqlEx.Procedure);
-                        System.Diagnostics.Debug.WriteLine("SQL Line Number: " + sqlEx.LineNumber);
-                    }
-                }
-            }
-
-            return pickups;
-        }
-
-        private object LoadPickupStats(string userId)
-        {
-            var stats = new
-            {
-                TotalPickups = 0,
-                ActivePickups = 0,
-                CompletedPickups = 0,
-                SuccessRate = "0%",
-                TotalXP = 0
-            };
-
-            using (SqlConnection conn = new SqlConnection(connectionString))
-            {
-                try
-                {
-                    conn.Open();
-                    System.Diagnostics.Debug.WriteLine(string.Format("Database connection opened for stats for user: {0}", userId));
-
-                    string query = @"
-                        WITH PickupSummary AS (
-                            SELECT 
-                                pr.Status,
-                                wr.XPEarned,
-                                CASE WHEN pr.Status = 'Completed' THEN 1 ELSE 0 END as IsSuccessful
-                            FROM PickupRequests pr
-                            INNER JOIN WasteReports wr ON pr.ReportId = wr.ReportId
-                            WHERE wr.UserId = @UserId
-                        )
-                        SELECT 
-                            COUNT(*) as TotalPickups,
-                            SUM(CASE WHEN Status IN ('Requested', 'Scheduled', 'Assigned', 'In Progress') THEN 1 ELSE 0 END) as ActivePickups,
-                            SUM(CASE WHEN Status = 'Completed' THEN 1 ELSE 0 END) as CompletedPickups,
-                            CASE 
-                                WHEN COUNT(*) > 0 THEN 
-                                    CONVERT(VARCHAR(10), (SUM(IsSuccessful) * 100.0 / COUNT(*))) + '%'
-                                ELSE '0%' 
-                            END as SuccessRate,
-                            SUM(ISNULL(XPEarned, 0)) as TotalXP
-                        FROM PickupSummary";
-
-                    using (SqlCommand cmd = new SqlCommand(query, conn))
-                    {
-                        cmd.Parameters.AddWithValue("@UserId", userId);
-
-                        System.Diagnostics.Debug.WriteLine(string.Format("Executing query for stats"));
-                        System.Diagnostics.Debug.WriteLine(string.Format("User ID parameter: {0}", userId));
-
-                        using (SqlDataReader reader = cmd.ExecuteReader())
-                        {
-                            if (reader.Read())
-                            {
-                                // Safely handle null values
-                                object totalPickups = reader["TotalPickups"];
-                                object activePickups = reader["ActivePickups"];
-                                object completedPickups = reader["CompletedPickups"];
-                                object successRate = reader["SuccessRate"];
-                                object totalXP = reader["TotalXP"];
-
-                                stats = new
-                                {
-                                    TotalPickups = totalPickups != DBNull.Value ? Convert.ToInt32(totalPickups) : 0,
-                                    ActivePickups = activePickups != DBNull.Value ? Convert.ToInt32(activePickups) : 0,
-                                    CompletedPickups = completedPickups != DBNull.Value ? Convert.ToInt32(completedPickups) : 0,
-                                    SuccessRate = successRate != DBNull.Value ? successRate.ToString() : "0%",
-                                    TotalXP = totalXP != DBNull.Value ? Convert.ToInt32(totalXP) : 0
-                                };
-
-                                System.Diagnostics.Debug.WriteLine(string.Format(
-                                    "Stats loaded: TotalPickups={0}, ActivePickups={1}, CompletedPickups={2}, SuccessRate={3}, TotalXP={4}",
-                                    stats.TotalPickups, stats.ActivePickups, stats.CompletedPickups, stats.SuccessRate, stats.TotalXP));
-                            }
-                            else
-                            {
-                                System.Diagnostics.Debug.WriteLine("No stats data found for user: " + userId);
-                            }
-                        }
-                    }
-                }
-                catch (Exception ex)
-                {
-                    System.Diagnostics.Debug.WriteLine(string.Format("Error in LoadPickupStats: {0}", ex.Message));
-                    System.Diagnostics.Debug.WriteLine(string.Format("Stack Trace: {0}", ex.StackTrace));
-
-                    // Log detailed error using old syntax
-                    SqlException sqlEx = ex as SqlException;
-                    if (sqlEx != null)
-                    {
-                        System.Diagnostics.Debug.WriteLine("SQL Error Number: " + sqlEx.Number);
-                        System.Diagnostics.Debug.WriteLine("SQL Procedure: " + sqlEx.Procedure);
-                        System.Diagnostics.Debug.WriteLine("SQL Line Number: " + sqlEx.LineNumber);
-                    }
-                }
-            }
-
-            return stats;
-        }
-
-        // WebMethod for AJAX calls
-        [WebMethod]
-        public static string RefreshPickupData(string userId)
-        {
-            try
-            {
-                var connectionString = WebConfigurationManager.ConnectionStrings["SoorGreenDBConnectionString"].ConnectionString;
-                var js = new JavaScriptSerializer();
-
-                // Load data using static helper methods
-                var activePickups = LoadActivePickupsStatic(userId, connectionString);
-                var pickupHistory = LoadPickupHistoryStatic(userId, connectionString);
-                var stats = LoadPickupStatsStatic(userId, connectionString);
-
-                var result = new
-                {
-                    ActivePickups = activePickups,
-                    PickupHistory = pickupHistory,
-                    Stats = stats,
-                    Success = true
-                };
-
-                return js.Serialize(result);
             }
             catch (Exception ex)
             {
-                return "{\"Success\":false,\"error\":\"" + ex.Message.Replace("\"", "'") + "\"}";
+                ShowMessage("Error loading collector details: " + ex.Message, "error");
             }
         }
 
-        // Static helper methods for WebMethod
-        private static List<object> LoadActivePickupsStatic(string userId, string connectionString)
+        protected void btnNewPickup_Click(object sender, EventArgs e)
         {
-            var pickups = new List<object>();
-
-            using (SqlConnection conn = new SqlConnection(connectionString))
-            {
-                try
-                {
-                    conn.Open();
-
-                    string query = @"
-                    SELECT 
-                        pr.PickupId,
-                        wt.Name as WasteType,
-                        wr.EstimatedKg as Weight,
-                        wr.Address,
-                        pr.Status,
-                        pr.ScheduledDate,
-                        pr.CreatedAt as CreatedDate,
-                        u.Name as CollectorName,
-                        wr.XPEarned,
-                        wr.Description,
-                        wr.Instructions
-                    FROM PickupRequests pr
-                    INNER JOIN WasteReports wr ON pr.ReportId = wr.ReportId
-                    INNER JOIN WasteTypes wt ON wr.WasteTypeId = wt.WasteTypeId
-                    LEFT JOIN Users u ON pr.CollectorId = u.UserId
-                    WHERE wr.UserId = @UserId 
-                    AND pr.Status IN ('Requested', 'Scheduled', 'Assigned', 'In Progress')
-                    ORDER BY pr.ScheduledDate ASC";
-
-                    using (SqlCommand cmd = new SqlCommand(query, conn))
-                    {
-                        cmd.Parameters.AddWithValue("@UserId", userId);
-
-                        using (SqlDataReader reader = cmd.ExecuteReader())
-                        {
-                            while (reader.Read())
-                            {
-                                pickups.Add(new
-                                {
-                                    PickupId = reader["PickupId"].ToString(),
-                                    WasteType = reader["WasteType"].ToString(),
-                                    Weight = reader["Weight"] != DBNull.Value ? Convert.ToDecimal(reader["Weight"]).ToString("F1") : "0",
-                                    Address = reader["Address"].ToString(),
-                                    Status = reader["Status"].ToString(),
-                                    ScheduledDate = reader["ScheduledDate"] != DBNull.Value ? Convert.ToDateTime(reader["ScheduledDate"]).ToString("yyyy-MM-dd HH:mm") : null,
-                                    CreatedDate = Convert.ToDateTime(reader["CreatedDate"]).ToString("yyyy-MM-dd HH:mm"),
-                                    CollectorName = reader["CollectorName"] != DBNull.Value ? reader["CollectorName"].ToString() : null,
-                                    XPEarned = reader["XPEarned"] != DBNull.Value ? Convert.ToInt32(reader["XPEarned"]).ToString() : "0",
-                                    Description = reader["Description"] != DBNull.Value ? reader["Description"].ToString() : "",
-                                    Instructions = reader["Instructions"] != DBNull.Value ? reader["Instructions"].ToString() : ""
-                                });
-                            }
-                        }
-                    }
-                }
-                catch (Exception ex)
-                {
-                    System.Diagnostics.Debug.WriteLine("Error in LoadActivePickupsStatic: " + ex.Message);
-                    // Return empty list on error
-                }
-            }
-
-            return pickups;
+            // Redirect to MyReports page to create a new report first
+            Response.Redirect("~/Pages/Citizen/MyReports.aspx");
         }
 
-        private static List<object> LoadPickupHistoryStatic(string userId, string connectionString)
+        protected void btnRefresh_Click(object sender, EventArgs e)
         {
-            var pickups = new List<object>();
-
-            using (SqlConnection conn = new SqlConnection(connectionString))
-            {
-                try
-                {
-                    conn.Open();
-
-                    string query = @"
-                    SELECT 
-                        pr.PickupId,
-                        wt.Name as WasteType,
-                        wr.EstimatedKg as Weight,
-                        wr.Address,
-                        pr.Status,
-                        pr.ScheduledDate,
-                        pr.CompletedDate,
-                        pr.CreatedAt as CreatedDate,
-                        u.Name as CollectorName,
-                        wr.XPEarned,
-                        wr.Description,
-                        wr.Instructions
-                    FROM PickupRequests pr
-                    INNER JOIN WasteReports wr ON pr.ReportId = wr.ReportId
-                    INNER JOIN WasteTypes wt ON wr.WasteTypeId = wt.WasteTypeId
-                    LEFT JOIN Users u ON pr.CollectorId = u.UserId
-                    WHERE wr.UserId = @UserId 
-                    AND pr.Status IN ('Completed', 'Cancelled')
-                    ORDER BY pr.CompletedDate DESC";
-
-                    using (SqlCommand cmd = new SqlCommand(query, conn))
-                    {
-                        cmd.Parameters.AddWithValue("@UserId", userId);
-
-                        using (SqlDataReader reader = cmd.ExecuteReader())
-                        {
-                            while (reader.Read())
-                            {
-                                pickups.Add(new
-                                {
-                                    PickupId = reader["PickupId"].ToString(),
-                                    WasteType = reader["WasteType"].ToString(),
-                                    Weight = reader["Weight"] != DBNull.Value ? Convert.ToDecimal(reader["Weight"]).ToString("F1") : "0",
-                                    Address = reader["Address"].ToString(),
-                                    Status = reader["Status"].ToString(),
-                                    ScheduledDate = reader["ScheduledDate"] != DBNull.Value ? Convert.ToDateTime(reader["ScheduledDate"]).ToString("yyyy-MM-dd HH:mm") : null,
-                                    CompletedDate = reader["CompletedDate"] != DBNull.Value ? Convert.ToDateTime(reader["CompletedDate"]).ToString("yyyy-MM-dd HH:mm") : null,
-                                    CreatedDate = Convert.ToDateTime(reader["CreatedDate"]).ToString("yyyy-MM-dd HH:mm"),
-                                    CollectorName = reader["CollectorName"] != DBNull.Value ? reader["CollectorName"].ToString() : null,
-                                    XPEarned = reader["XPEarned"] != DBNull.Value ? Convert.ToInt32(reader["XPEarned"]).ToString() : "0",
-                                    Description = reader["Description"] != DBNull.Value ? reader["Description"].ToString() : "",
-                                    Instructions = reader["Instructions"] != DBNull.Value ? reader["Instructions"].ToString() : ""
-                                });
-                            }
-                        }
-                    }
-                }
-                catch (Exception ex)
-                {
-                    System.Diagnostics.Debug.WriteLine("Error in LoadPickupHistoryStatic: " + ex.Message);
-                    // Return empty list on error
-                }
-            }
-
-            return pickups;
+            LoadPickupStats();
+            LoadPickups();
+            ShowMessage("Data refreshed successfully!", "success");
         }
 
-        private static object LoadPickupStatsStatic(string userId, string connectionString)
+        protected void btnExportPickups_Click(object sender, EventArgs e)
         {
-            var stats = new
+            ShowMessage("Export feature coming soon!", "info");
+        }
+
+        protected void btnViewAll_Click(object sender, EventArgs e)
+        {
+            // Reset filters to show all
+            ddlStatusFilter.SelectedValue = "all";
+            ddlDateFilter.SelectedValue = "all";
+            txtSearch.Text = "";
+
+            statusFilter = "all";
+            dateFilter = "all";
+            searchQuery = "";
+            currentPage = 1;
+
+            LoadPickups();
+        }
+
+        public string GetStatusIcon(string status)
+        {
+            switch (status.ToLower())
             {
-                TotalPickups = 0,
-                ActivePickups = 0,
-                CompletedPickups = 0,
-                SuccessRate = "0%",
-                TotalXP = 0
-            };
+                case "requested":
+                case "pending": return "fas fa-clock";
+                case "scheduled": return "fas fa-calendar-check";
+                case "inprogress": return "fas fa-truck-loading";
+                case "collected":
+                case "completed": return "fas fa-check-circle";
+                case "cancelled": return "fas fa-times-circle";
+                default: return "fas fa-question-circle";
+            }
+        }
 
-            using (SqlConnection conn = new SqlConnection(connectionString))
+        public string GetStatusColor(string status)
+        {
+            switch (status.ToLower())
             {
-                try
-                {
-                    conn.Open();
+                case "requested":
+                case "pending": return "warning";
+                case "scheduled": return "info";
+                case "inprogress": return "primary";
+                case "collected":
+                case "completed": return "success";
+                case "cancelled": return "danger";
+                default: return "secondary";
+            }
+        }
 
-                    string query = @"
-                    WITH PickupSummary AS (
-                        SELECT 
-                            pr.Status,
-                            wr.XPEarned,
-                            CASE WHEN pr.Status = 'Completed' THEN 1 ELSE 0 END as IsSuccessful
-                        FROM PickupRequests pr
-                        INNER JOIN WasteReports wr ON pr.ReportId = wr.ReportId
-                        WHERE wr.UserId = @UserId
-                    )
-                    SELECT 
-                        COUNT(*) as TotalPickups,
-                        SUM(CASE WHEN Status IN ('Requested', 'Scheduled', 'Assigned', 'In Progress') THEN 1 ELSE 0 END) as ActivePickups,
-                        SUM(CASE WHEN Status = 'Completed' THEN 1 ELSE 0 END) as CompletedPickups,
-                        CASE 
-                            WHEN COUNT(*) > 0 THEN 
-                                CONVERT(VARCHAR(10), (SUM(IsSuccessful) * 100.0 / COUNT(*))) + '%'
-                            ELSE '0%' 
-                        END as SuccessRate,
-                        SUM(ISNULL(XPEarned, 0)) as TotalXP
-                    FROM PickupSummary";
+        // REMOVED: GetPriorityIcon() - No Priority column in table
 
-                    using (SqlCommand cmd = new SqlCommand(query, conn))
-                    {
-                        cmd.Parameters.AddWithValue("@UserId", userId);
+        public bool CanReschedule(string status)
+        {
+            return status.ToLower() != "collected" && status.ToLower() != "cancelled";
+        }
 
-                        using (SqlDataReader reader = cmd.ExecuteReader())
-                        {
-                            if (reader.Read())
-                            {
-                                stats = new
-                                {
-                                    TotalPickups = reader["TotalPickups"] != DBNull.Value ? Convert.ToInt32(reader["TotalPickups"]) : 0,
-                                    ActivePickups = reader["ActivePickups"] != DBNull.Value ? Convert.ToInt32(reader["ActivePickups"]) : 0,
-                                    CompletedPickups = reader["CompletedPickups"] != DBNull.Value ? Convert.ToInt32(reader["CompletedPickups"]) : 0,
-                                    SuccessRate = reader["SuccessRate"] != DBNull.Value ? reader["SuccessRate"].ToString() : "0%",
-                                    TotalXP = reader["TotalXP"] != DBNull.Value ? Convert.ToInt32(reader["TotalXP"]) : 0
-                                };
-                            }
-                        }
-                    }
-                }
-                catch (Exception ex)
-                {
-                    System.Diagnostics.Debug.WriteLine("Error in LoadPickupStatsStatic: " + ex.Message);
-                    // Return default stats on error
-                }
+        public bool CanCancel(string status)
+        {
+            return status.ToLower() != "collected" && status.ToLower() != "cancelled";
+        }
+
+        public bool HasCollector(string collectorName)
+        {
+            return !string.IsNullOrEmpty(collectorName);
+        }
+
+        public string FormatDateTime(object date)
+        {
+            if (date == DBNull.Value || date == null)
+                return "Not Scheduled";
+
+            DateTime dt = (DateTime)date;
+            return dt.ToString("MMM dd, yyyy HH:mm");
+        }
+
+        private void ShowMessage(string message, string type)
+        {
+            string icon = "exclamation-circle";
+            string upperType = type.ToUpper();
+
+            switch (type.ToLower())
+            {
+                case "success":
+                    icon = "check-circle";
+                    break;
+                case "warning":
+                    icon = "exclamation-triangle";
+                    break;
+                case "error":
+                    icon = "exclamation-circle";
+                    break;
+                case "info":
+                    icon = "info-circle";
+                    break;
             }
 
-            return stats;
+            string script = @"
+                var messagePanel = document.querySelector('.message-panel') || (function() {
+                    var div = document.createElement('div');
+                    div.className = 'message-panel';
+                    document.body.appendChild(div);
+                    return div;
+                })();
+                
+                messagePanel.innerHTML = `
+                    <div class='message-alert " + type + @" show'>
+                        <i class='fas fa-" + icon + @"'></i>
+                        <div>
+                            <strong>" + upperType + @"</strong>
+                            <p class='mb-0'>" + message.Replace("'", "\\'") + @"</p>
+                        </div>
+                    </div>
+                `;
+                messagePanel.style.display = 'block';
+                
+                setTimeout(function() {
+                    messagePanel.style.display = 'none';
+                }, 5000);
+            ";
+
+            ScriptManager.RegisterStartupScript(this, GetType(), "ShowMessage_" + Guid.NewGuid().ToString(), script, true);
         }
     }
 }

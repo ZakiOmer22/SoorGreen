@@ -1,366 +1,513 @@
-﻿<%@ Page Title="Leaderboard" Language="C#" MasterPageFile="~/Pages/Citizen/Site.Master"
-    AutoEventWireup="true" CodeFile="Leaderboard.aspx.cs" Inherits="SoorGreen.Citizen.Leaderboard" %>
+﻿<%@ Page Title="Leaderboard" Language="C#" MasterPageFile="~/Pages/Citizen/Site.Master" 
+    AutoEventWireup="true" CodeFile="Leaderboard.aspx.cs" Inherits="SoorGreen.Admin.Leaderboard" %>
 
-<asp:Content ID="Content3" ContentPlaceHolderID="HeadContent" runat="server">
+<asp:Content ID="Content2" ContentPlaceHolderID="HeadContent" runat="server">
     <link href='<%= ResolveUrl("~/Content/Pages/Citizen/citizenleaderboard.css") %>' rel="stylesheet" />
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
-</asp:Content>
-
-<asp:Content ID="Content4" ContentPlaceHolderID="ScriptsContent" runat="server">
-    <script src='<%= ResolveUrl("~/Scripts/Pages/Citizen/citizenleaderboard.js") %>'></script>
+    
+    <!-- Add Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Add Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
 </asp:Content>
 
 <asp:Content ID="Content1" ContentPlaceHolderID="TitleContent" runat="server">
     Leaderboard - SoorGreen Citizen
 </asp:Content>
 
-<asp:Content ID="Content2" ContentPlaceHolderID="MainContent" runat="server">
-    <br />
-    <br />
-    <br />
-    <br />
-    <asp:HiddenField ID="hfLeaderboardData" runat="server" Value="[]" />
-    <asp:HiddenField ID="hfStatsData" runat="server" Value="{}" />
-    <asp:HiddenField ID="hfAchievementsData" runat="server" Value="[]" />
-    <asp:HiddenField ID="hfCurrentTab" runat="server" Value="global" />
-    <asp:HiddenField ID="hfCurrentPeriod" runat="server" Value="all" />
-    <asp:Literal ID="litLeaderboardData" runat="server"></asp:Literal>
-
-
+<asp:Content ID="MainContent" ContentPlaceHolderID="MainContent" runat="server">
     <div class="leaderboard-container">
-        <!-- Header with Breadcrumbs -->
-        <div class="page-header-wrapper">
-            <nav class="breadcrumb">
-                <a href="Dashboard.aspx"><i class="fas fa-home"></i>Dashboard</a>
-                <i class="fas fa-chevron-right"></i>
-                <span class="active">Leaderboard</span>
-            </nav>
-
-            <div class="page-header">
-                <div class="header-text">
-                    <h1 class="page-title">
-                        <i class="fas fa-trophy"></i>
-                         Leaderboard
-                    </h1>
-                    <p class="page-subtitle">Compete with fellow eco-warriors and climb the ranks</p>
-                </div>
-
-                <div class="header-action">
-                    <div class="user-ranking">
-                        <div class="rank-badge">
-                            <i class="fas fa-crown"></i>
-                            <div class="rank-info">
-                                <span class="rank-label">Your Rank</span>
-                                <span class="rank-value" id="userRank">#--</span>
-                            </div>
-                        </div>
-                        <button class="btn-help" onclick="showLeaderboardHelp()">
-                            <i class="fas fa-question-circle"></i>
-                        </button>
-                    </div>
-                </div>
+        <!-- Page Header -->
+        <div class="page-header-glass">
+            <h1 class="page-title-glass">Community Leaderboard</h1>
+            <p class="page-subtitle-glass">Track your ranking and compete with other eco-warriors</p>
+            
+            <!-- Quick Actions -->
+            <div class="d-flex gap-3 mt-4">
+                <asp:LinkButton ID="btnViewMyStats" runat="server" CssClass="action-btn primary"
+                    OnClick="btnViewMyStats_Click">
+                    <i class="fas fa-chart-line me-2"></i> My Statistics
+                </asp:LinkButton>
+                
+                <asp:LinkButton ID="btnRefresh" runat="server" CssClass="action-btn secondary"
+                    OnClick="btnRefresh_Click">
+                    <i class="fas fa-sync-alt me-2"></i> Refresh
+                </asp:LinkButton>
+                
+                <asp:LinkButton ID="btnShare" runat="server" CssClass="action-btn secondary"
+                    OnClick="btnShare_Click">
+                    <i class="fas fa-share-alt me-2"></i> Share
+                </asp:LinkButton>
             </div>
         </div>
 
-        <!-- Stats Overview Cards -->
-        <div class="stats-overview">
-            <div class="stat-card">
-                <div class="stat-icon">
-                    <i class="fas fa-users"></i>
-                </div>
-                <div class="stat-content">
-                    <div class="stat-value" id="totalParticipants">0</div>
-                    <div class="stat-label">Active Eco-Warriors</div>
-                    <div class="stat-change" id="participantsChange">
-                        <i class="fas fa-arrow-up"></i><span>0% this month</span>
+        <!-- Current User Stats -->
+        <div class="current-user-stats">
+            <div class="current-user-card-glass">
+                <div class="current-user-header">
+                    <div class="user-rank-badge">
+                        <span class="rank-number" id="userRank" runat="server">#</span>
+                        <span class="rank-label">Your Rank</span>
+                    </div>
+                    <div class="user-avatar">
+                        <img src="~/Content/Images/default-avatar.png" class="avatar-img" alt="User Avatar" />
                     </div>
                 </div>
-            </div>
-
-            <div class="stat-card">
-                <div class="stat-icon">
-                    <i class="fas fa-bolt"></i>
-                </div>
-                <div class="stat-content">
-                    <div class="stat-value" id="totalXP">0 XP</div>
-                    <div class="stat-label">Total XP Earned</div>
-                    <div class="stat-change" id="xpChange">
-                        <i class="fas fa-arrow-up"></i><span>0% increase</span>
+                
+                <div class="current-user-details">
+                    <h4 class="user-name">
+                        <span id="userName" runat="server">Your Name</span>
+                    </h4>
+                    <p class="user-role">
+                        <span id="userRole" runat="server">Citizen</span>
+                    </p>
+                    
+                    <div class="user-stats-grid">
+                        <div class="user-stat-item">
+                            <div class="stat-icon">
+                                <i class="fas fa-trophy text-warning"></i>
+                            </div>
+                            <div class="stat-content">
+                                <div class="stat-number">
+                                    <span id="userTotalPoints" runat="server">0</span>
+                                </div>
+                                <div class="stat-label">Total Points</div>
+                            </div>
+                        </div>
+                        
+                        <div class="user-stat-item">
+                            <div class="stat-icon">
+                                <i class="fas fa-recycle text-success"></i>
+                            </div>
+                            <div class="stat-content">
+                                <div class="stat-number">
+                                    <span id="userPickupsCompleted" runat="server">0</span>
+                                </div>
+                                <div class="stat-label">Pickups</div>
+                            </div>
+                        </div>
+                        
+                        <div class="user-stat-item">
+                            <div class="stat-icon">
+                                <i class="fas fa-leaf text-info"></i>
+                            </div>
+                            <div class="stat-content">
+                                <div class="stat-number">
+                                    <span id="userCO2Saved" runat="server">0</span>
+                                </div>
+                                <div class="stat-label">CO₂ Saved (kg)</div>
+                            </div>
+                        </div>
                     </div>
-                </div>
-            </div>
-
-            <div class="stat-card">
-                <div class="stat-icon">
-                    <i class="fas fa-recycle"></i>
-                </div>
-                <div class="stat-content">
-                    <div class="stat-value" id="totalCollections">0</div>
-                    <div class="stat-label">Waste Collections</div>
-                    <div class="stat-change" id="collectionsChange">
-                        <i class="fas fa-arrow-up"></i><span>0% growth</span>
-                    </div>
-                </div>
-            </div>
-
-            <div class="stat-card">
-                <div class="stat-icon">
-                    <i class="fas fa-leaf"></i>
-                </div>
-                <div class="stat-content">
-                    <div class="stat-value" id="co2Reduced">0 kg</div>
-                    <div class="stat-label">CO₂ Reduced</div>
-                    <div class="stat-change" id="co2Change">
-                        <i class="fas fa-arrow-up"></i><span>Equivalent to 0 trees</span>
+                    
+                    <div class="progress-container mt-3">
+                        <div class="progress-label">
+                            <span>Next Level Progress</span>
+                            <span class="progress-percentage" id="progressPercentage" runat="server">0%</span>
+                        </div>
+                        <div class="progress-glass">
+                            <div class="progress-bar-glass" id="progressBar" runat="server" style="width: 0%"></div>
+                        </div>
+                        <div class="progress-info">
+                            <span id="currentLevel" runat="server">Beginner</span>
+                            <span id="nextLevel" runat="server" class="text-end">Eco Warrior</span>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
 
         <!-- Leaderboard Filters -->
-        <div class="leaderboard-filters">
-            <div class="filter-tabs">
-                <button class="filter-tab active" data-tab="global" onclick="switchTab('global')">
-                    <i class="fas fa-globe"></i>
-                    <span>Global</span>
-                </button>
-                <button class="filter-tab" data-tab="monthly" onclick="switchTab('monthly')">
-                    <i class="fas fa-calendar-alt"></i>
-                    <span>Monthly</span>
-                </button>
-                <button class="filter-tab" data-tab="friends" onclick="switchTab('friends')">
-                    <i class="fas fa-user-friends"></i>
-                    <span>Friends</span>
-                </button>
-                <button class="filter-tab" data-tab="local" onclick="switchTab('local')">
-                    <i class="fas fa-map-marker-alt"></i>
-                    <span>Local</span>
-                </button>
+        <div class="leaderboard-filters-glass">
+            <div class="filters-header">
+                <h3 class="filters-title">Leaderboard Rankings</h3>
+                <div class="timeframe-badges">
+                    <asp:LinkButton ID="btnDaily" runat="server" CssClass="timeframe-badge active"
+                        OnClick="btnDaily_Click">
+                        Daily
+                    </asp:LinkButton>
+                    <asp:LinkButton ID="btnWeekly" runat="server" CssClass="timeframe-badge"
+                        OnClick="btnWeekly_Click">
+                        Weekly
+                    </asp:LinkButton>
+                    <asp:LinkButton ID="btnMonthly" runat="server" CssClass="timeframe-badge"
+                        OnClick="btnMonthly_Click">
+                        Monthly
+                    </asp:LinkButton>
+                    <asp:LinkButton ID="btnAllTime" runat="server" CssClass="timeframe-badge"
+                        OnClick="btnAllTime_Click">
+                        All Time
+                    </asp:LinkButton>
+                </div>
             </div>
-
-            <div class="filter-controls">
+            
+            <div class="filters-controls">
                 <div class="filter-group">
-                    <label><i class="fas fa-clock"></i>Time Period</label>
-                    <select class="filter-select" id="periodFilter" onchange="applyFilters()">
-                        <option value="all">All Time</option>
-                        <option value="month">This Month</option>
-                        <option value="week">This Week</option>
-                        <option value="today">Today</option>
-                    </select>
+                    <label class="filter-label">Category:</label>
+                    <asp:DropDownList ID="ddlCategory" runat="server" CssClass="filter-select-glass"
+                        AutoPostBack="true" OnSelectedIndexChanged="ddlCategory_SelectedIndexChanged">
+                        <asp:ListItem Value="points">Points Leaderboard</asp:ListItem>
+                        <asp:ListItem Value="pickups">Pickups Leaderboard</asp:ListItem>
+                        <asp:ListItem Value="waste">Waste Collected</asp:ListItem>
+                        <asp:ListItem Value="reports">Reports Submitted</asp:ListItem>
+                        <asp:ListItem Value="recycling">Recycling Rate</asp:ListItem>
+                    </asp:DropDownList>
                 </div>
-
+                
                 <div class="filter-group">
-                    <label><i class="fas fa-filter"></i>Category</label>
-                    <select class="filter-select" id="categoryFilter" onchange="applyFilters()">
-                        <option value="all">All Categories</option>
-                        <option value="xp">By XP Points</option>
-                        <option value="collections">By Collections</option>
-                        <option value="co2">By CO₂ Reduction</option>
-                    </select>
-                </div>
-
-                <div class="filter-actions">
-                    <button class="btn-refresh" onclick="refreshLeaderboard()">
-                        <i class="fas fa-sync-alt"></i>
-                        Refresh
-                    </button>
-                    <button class="btn-export" onclick="exportLeaderboard()">
-                        <i class="fas fa-download"></i>
-                        Export
-                    </button>
+                    <label class="filter-label">Search:</label>
+                    <asp:TextBox ID="txtSearch" runat="server" CssClass="form-control-glass"
+                        placeholder="Search users..." AutoPostBack="true"
+                        OnTextChanged="txtSearch_TextChanged"></asp:TextBox>
                 </div>
             </div>
         </div>
 
-        <!-- Leaderboard Content -->
-        <div class="leaderboard-content">
-            <!-- Current User Rank Highlight -->
-            <div class="current-user-highlight" id="currentUserCard">
-                <div class="user-rank-badge">
-                    <span class="rank-number">#--</span>
-                    <div class="rank-medal">
-                        <i class="fas fa-user"></i>
+        <!-- Top 3 Winners -->
+        <div class="top-winners-section">
+            <div class="winner-cards">
+                <!-- 2nd Place -->
+                <asp:Panel ID="pnlSecondPlace" runat="server" CssClass="winner-card silver">
+                    <div class="winner-medal">
+                        <i class="fas fa-medal"></i>
+                        <span class="medal-number">2</span>
                     </div>
-                </div>
-                <div class="user-info">
-                    <div class="user-avatar">
-                        <i class="fas fa-user-circle"></i>
+                    <div class="winner-avatar">
+                        <img src="~/Content/Images/default-avatar.png" class="avatar-img" alt="Second Place" />
                     </div>
-                    <div class="user-details">
-                        <h4>You</h4>
-                        <div class="user-stats">
-                            <span class="stat-item">
-                                <i class="fas fa-bolt"></i>
-                                <span id="userXP">0 XP</span>
-                            </span>
-                            <span class="stat-item">
+                    <div class="winner-details">
+                        <h5 class="winner-name">
+                            <span id="lblSecondName" runat="server">User Name</span>
+                        </h5>
+                        <p class="winner-points">
+                            <span id="lblSecondPoints" runat="server">0 points</span>
+                        </p>
+                        <div class="winner-stats">
+                            <span class="winner-stat">
                                 <i class="fas fa-recycle"></i>
-                                <span id="userCollections">0 collections</span>
+                                <span id="lblSecondPickups" runat="server">0</span>
                             </span>
-                            <span class="stat-item">
+                            <span class="winner-stat">
                                 <i class="fas fa-leaf"></i>
-                                <span id="userCO2">0 kg CO₂</span>
+                                <span id="lblSecondCO2" runat="server">0</span>kg
                             </span>
                         </div>
                     </div>
-                </div>
-                <div class="user-level">
-                    <div class="level-badge">
-                        Level <span id="userLevel">1</span>
+                </asp:Panel>
+                
+                <!-- 1st Place -->
+                <asp:Panel ID="pnlFirstPlace" runat="server" CssClass="winner-card gold">
+                    <div class="winner-crown">
+                        <i class="fas fa-crown"></i>
                     </div>
-                    <div class="progress-bar">
-                        <div class="progress-fill" id="userProgress" style="width: 0%"></div>
+                    <div class="winner-medal">
+                        <i class="fas fa-medal"></i>
+                        <span class="medal-number">1</span>
                     </div>
-                    <div class="level-text">
-                        <span id="currentXP">0</span>/<span id="nextLevelXP">1000</span> XP
+                    <div class="winner-avatar">
+                        <img src="~/Content/Images/default-avatar.png" class="avatar-img" alt="First Place" />
                     </div>
-                </div>
-            </div>
-
-            <!-- Leaderboard Table -->
-            <div class="leaderboard-table-container">
-                <table class="leaderboard-table">
-                    <thead>
-                        <tr>
-                            <th class="rank-column">Rank</th>
-                            <th class="user-column">User</th>
-                            <th class="level-column">Level</th>
-                            <th class="xp-column">XP</th>
-                            <th class="collections-column">Collections</th>
-                            <th class="co2-column">CO₂ Reduced</th>
-                            <th class="trend-column">Trend</th>
-                        </tr>
-                    </thead>
-                    <tbody id="leaderboardTableBody">
-                        <!-- Dynamic content will be inserted here -->
-                    </tbody>
-                </table>
-
-                <!-- Loading State -->
-                <div class="loading-state" id="loadingState">
-                    <div class="loading-spinner">
-                        <i class="fas fa-spinner fa-spin"></i>
+                    <div class="winner-details">
+                        <h5 class="winner-name">
+                            <span id="lblFirstName" runat="server">User Name</span>
+                        </h5>
+                        <p class="winner-points">
+                            <span id="lblFirstPoints" runat="server">0 points</span>
+                        </p>
+                        <div class="winner-stats">
+                            <span class="winner-stat">
+                                <i class="fas fa-recycle"></i>
+                                <span id="lblFirstPickups" runat="server">0</span>
+                            </span>
+                            <span class="winner-stat">
+                                <i class="fas fa-leaf"></i>
+                                <span id="lblFirstCO2" runat="server">0</span>kg
+                            </span>
+                        </div>
                     </div>
-                    <p>Loading leaderboard data...</p>
-                </div>
-
-                <!-- Empty State -->
-                <div class="empty-state" id="emptyState" style="display: none;">
-                    <div class="empty-icon">
-                        <i class="fas fa-trophy"></i>
+                </asp:Panel>
+                
+                <!-- 3rd Place -->
+                <asp:Panel ID="pnlThirdPlace" runat="server" CssClass="winner-card bronze">
+                    <div class="winner-medal">
+                        <i class="fas fa-medal"></i>
+                        <span class="medal-number">3</span>
                     </div>
-                    <h3>No Leaderboard Data</h3>
-                    <p>Start earning XP by reporting waste to appear on the leaderboard!</p>
-                    <button class="btn-start-earning" onclick="window.location.href='ReportWaste.aspx'">
-                        <i class="fas fa-plus"></i>Report Waste
-                    </button>
-                </div>
-            </div>
-
-            <!-- Pagination -->
-            <div class="leaderboard-pagination" id="paginationContainer" style="display: none;">
-                <button class="page-btn prev" onclick="changePage(-1)">
-                    <i class="fas fa-chevron-left"></i>
-                    Previous
-                </button>
-
-                <div class="page-numbers">
-                    <!-- Page numbers will be generated dynamically -->
-                </div>
-
-                <button class="page-btn next" onclick="changePage(1)">
-                    Next
-                    <i class="fas fa-chevron-right"></i>
-                </button>
+                    <div class="winner-avatar">
+                        <img src="~/Content/Images/default-avatar.png" class="avatar-img" alt="Third Place" />
+                    </div>
+                    <div class="winner-details">
+                        <h5 class="winner-name">
+                            <span id="lblThirdName" runat="server">User Name</span>
+                        </h5>
+                        <p class="winner-points">
+                            <span id="lblThirdPoints" runat="server">0 points</span>
+                        </p>
+                        <div class="winner-stats">
+                            <span class="winner-stat">
+                                <i class="fas fa-recycle"></i>
+                                <span id="lblThirdPickups" runat="server">0</span>
+                            </span>
+                            <span class="winner-stat">
+                                <i class="fas fa-leaf"></i>
+                                <span id="lblThirdCO2" runat="server">0</span>kg
+                            </span>
+                        </div>
+                    </div>
+                </asp:Panel>
             </div>
         </div>
 
-        <!-- Achievement Badges Section -->
+        <!-- Leaderboard Table -->
+        <div class="leaderboard-table-container">
+            <div class="table-header-glass">
+                <div class="table-header-row">
+                    <div class="table-col rank-col">Rank</div>
+                    <div class="table-col user-col">User</div>
+                    <div class="table-col points-col">Points</div>
+                    <div class="table-col pickups-col">Pickups</div>
+                    <div class="table-col waste-col">Waste (kg)</div>
+                    <div class="table-col co2-col">CO₂ Saved</div>
+                    <div class="table-col level-col">Level</div>
+                    <div class="table-col action-col">Actions</div>
+                </div>
+            </div>
+            
+            <div class="table-body-glass">
+                <asp:Repeater ID="rptLeaderboard" runat="server" OnItemDataBound="rptLeaderboard_ItemDataBound">
+                    <ItemTemplate>
+                        <div class='table-row-glass <%# IsCurrentUser(Eval("UserId").ToString()) ? "current-user-row" : "" %>'>
+                            <div class="table-col rank-col">
+                                <span class='rank-number <%# Convert.ToInt32(Eval("Rank")) <= 3 ? "top-rank" : "" %>'>
+                                    <%# Eval("Rank") %>
+                                </span>
+                            </div>
+                            
+                            <div class="table-col user-col">
+                                <div class="user-info">
+                                    <div class="user-avatar-small">
+                                        <img src='<%# GetAvatarUrl(Eval("Email")) %>' 
+                                            class="avatar-img-small" alt="User Avatar" />
+                                    </div>
+                                    <div class="user-details">
+                                        <h6 class="user-name"><%# Eval("FullName") %></h6>
+                                        <span class="user-region"><%# Eval("Email") %></span>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="table-col points-col">
+                                <span class="points-value"><%# Eval("TotalPoints", "{0:0}") %></span>
+                            </div>
+                            
+                            <div class="table-col pickups-col">
+                                <span class="pickups-value"><%# Eval("PickupsCompleted") %></span>
+                            </div>
+                            
+                            <div class="table-col waste-col">
+                                <span class="waste-value"><%# Eval("TotalWasteCollected", "{0:F1}") %> kg</span>
+                            </div>
+                            
+                            <div class="table-col co2-col">
+                                <span class="co2-value"><%# Eval("CO2Saved", "{0:F1}") %> kg</span>
+                            </div>
+                            
+                            <div class="table-col level-col">
+                                <span class='level-badge <%# GetLevelClass(Eval("UserLevel").ToString()) %>'>
+                                    <%# Eval("UserLevel") %>
+                                </span>
+                            </div>
+                            
+                            <div class="table-col action-col">
+                                <asp:LinkButton ID="btnViewProfile" runat="server" 
+                                    CommandName="ViewProfile" 
+                                    CommandArgument='<%# Eval("UserId") %>'
+                                    CssClass="action-btn secondary small" 
+                                    ToolTip="View Profile">
+                                    <i class="fas fa-eye"></i>
+                                </asp:LinkButton>
+                                
+                                <asp:LinkButton ID="btnChallenge" runat="server" 
+                                    CommandName="Challenge" 
+                                    CommandArgument='<%# Eval("UserId") %>'
+                                    CssClass="action-btn primary small" 
+                                    ToolTip="Send Challenge"
+                                    Visible='<%# !IsCurrentUser(Eval("UserId").ToString()) %>'>
+                                    <i class="fas fa-trophy"></i>
+                                </asp:LinkButton>
+                            </div>
+                        </div>
+                    </ItemTemplate>
+                    <AlternatingItemTemplate>
+                        <div class='table-row-glass alt <%# IsCurrentUser(Eval("UserId").ToString()) ? "current-user-row" : "" %>'>
+                            <div class="table-col rank-col">
+                                <span class='rank-number <%# Convert.ToInt32(Eval("Rank")) <= 3 ? "top-rank" : "" %>'>
+                                    <%# Eval("Rank") %>
+                                </span>
+                            </div>
+                            
+                            <div class="table-col user-col">
+                                <div class="user-info">
+                                    <div class="user-avatar-small">
+                                        <img src='<%# GetAvatarUrl(Eval("Email")) %>' 
+                                            class="avatar-img-small" alt="User Avatar" />
+                                    </div>
+                                    <div class="user-details">
+                                        <h6 class="user-name"><%# Eval("FullName") %></h6>
+                                        <span class="user-region"><%# Eval("Email") %></span>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="table-col points-col">
+                                <span class="points-value"><%# Eval("TotalPoints", "{0:0}") %></span>
+                            </div>
+                            
+                            <div class="table-col pickups-col">
+                                <span class="pickups-value"><%# Eval("PickupsCompleted") %></span>
+                            </div>
+                            
+                            <div class="table-col waste-col">
+                                <span class="waste-value"><%# Eval("TotalWasteCollected", "{0:F1}") %> kg</span>
+                            </div>
+                            
+                            <div class="table-col co2-col">
+                                <span class="co2-value"><%# Eval("CO2Saved", "{0:F1}") %> kg</span>
+                            </div>
+                            
+                            <div class="table-col level-col">
+                                <span class='level-badge <%# GetLevelClass(Eval("UserLevel").ToString()) %>'>
+                                    <%# Eval("UserLevel") %>
+                                </span>
+                            </div>
+                            
+                            <div class="table-col action-col">
+                                <asp:LinkButton ID="btnViewProfile" runat="server" 
+                                    CommandName="ViewProfile" 
+                                    CommandArgument='<%# Eval("UserId") %>'
+                                    CssClass="action-btn secondary small" 
+                                    ToolTip="View Profile">
+                                    <i class="fas fa-eye"></i>
+                                </asp:LinkButton>
+                                
+                                <asp:LinkButton ID="btnChallenge" runat="server" 
+                                    CommandName="Challenge" 
+                                    CommandArgument='<%# Eval("UserId") %>'
+                                    CssClass="action-btn primary small" 
+                                    ToolTip="Send Challenge"
+                                    Visible='<%# !IsCurrentUser(Eval("UserId").ToString()) %>'>
+                                    <i class="fas fa-trophy"></i>
+                                </asp:LinkButton>
+                            </div>
+                        </div>
+                    </AlternatingItemTemplate>
+                </asp:Repeater>
+            </div>
+            
+            <!-- Empty State -->
+            <asp:Panel ID="pnlEmptyState" runat="server" CssClass="empty-state-glass" Visible="false">
+                <div class="empty-state-icon">
+                    <i class="fas fa-trophy"></i>
+                </div>
+                <h4 class="empty-state-title">No Rankings Available</h4>
+                <p class="empty-state-message">
+                    Start recycling to appear on the leaderboard!
+                </p>
+                <asp:LinkButton ID="btnStartRecycling" runat="server" CssClass="action-btn primary"
+                    OnClick="btnStartRecycling_Click">
+                    <i class="fas fa-recycle me-2"></i> Start Recycling
+                </asp:LinkButton>
+            </asp:Panel>
+        </div>
+        
+        <!-- Pagination -->
+        <div class="d-flex justify-content-between align-items-center mt-4">
+            <div class="text-muted">
+                Showing <asp:Label ID="lblStartCount" runat="server" Text="1"></asp:Label> - 
+                <asp:Label ID="lblEndCount" runat="server" Text="20"></asp:Label> of 
+                <asp:Label ID="lblTotalCount" runat="server" Text="0"></asp:Label> users
+            </div>
+            
+            <div class="d-flex gap-2">
+                <asp:LinkButton ID="btnPrevPage" runat="server" CssClass="action-btn secondary small"
+                    OnClick="btnPrevPage_Click">
+                    <i class="fas fa-chevron-left"></i>
+                </asp:LinkButton>
+                
+                <div class="d-flex gap-1">
+                    <asp:Repeater ID="rptPageNumbers" runat="server">
+                        <ItemTemplate>
+                            <asp:LinkButton ID="btnPage" runat="server" 
+                                CssClass='<%# Convert.ToInt32(Eval("PageNumber")) == Convert.ToInt32(Eval("CurrentPage")) ? "action-btn primary small" : "action-btn secondary small" %>'
+                                CommandArgument='<%# Eval("PageNumber") %>'
+                                OnClick="btnPage_Click"
+                                Text='<%# Eval("PageNumber") %>'></asp:LinkButton>
+                        </ItemTemplate>
+                    </asp:Repeater>
+                </div>
+                
+                <asp:LinkButton ID="btnNextPage" runat="server" CssClass="action-btn secondary small"
+                    OnClick="btnNextPage_Click">
+                    <i class="fas fa-chevron-right"></i>
+                </asp:LinkButton>
+            </div>
+        </div>
+        
+        <!-- Achievements Section -->
         <div class="achievements-section">
             <div class="section-header">
-                <h2><i class="fas fa-medal"></i>Top Achievements This Month</h2>
-                <p>Recognizing outstanding contributions to environmental sustainability</p>
+                <h3 class="section-title">Available Achievements</h3>
+                <asp:LinkButton ID="btnViewAllAchievements" runat="server" CssClass="action-btn secondary small"
+                    OnClick="btnViewAllAchievements_Click">
+                    View All
+                </asp:LinkButton>
             </div>
-
-            <div class="achievements-grid" id="achievementsGrid">
-                <!-- Achievements will be loaded dynamically -->
-            </div>
-        </div>
-
-        <!-- Tips Section -->
-        <div class="tips-section">
-            <div class="tips-header">
-                <h3><i class="fas fa-lightbulb"></i>Climb the Leaderboard Faster!</h3>
-            </div>
-            <div class="tips-grid">
-                <div class="tip-card">
-                    <div class="tip-icon">
-                        <i class="fas fa-weight-hanging"></i>
-                    </div>
-                    <div class="tip-content">
-                        <h4>Report Heavier Waste</h4>
-                        <p>Report larger quantities to earn more XP per collection</p>
-                    </div>
-                </div>
-
-                <div class="tip-card">
-                    <div class="tip-icon">
-                        <i class="fas fa-layer-group"></i>
-                    </div>
-                    <div class="tip-content">
-                        <h4>Mix Waste Types</h4>
-                        <p>Different waste categories have different XP multipliers</p>
-                    </div>
-                </div>
-
-                <div class="tip-card">
-                    <div class="tip-icon">
-                        <i class="fas fa-calendar-check"></i>
-                    </div>
-                    <div class="tip-content">
-                        <h4>Consistent Reporting</h4>
-                        <p>Regular contributions earn bonus streak multipliers</p>
-                    </div>
-                </div>
-
-                <div class="tip-card">
-                    <div class="tip-icon">
-                        <i class="fas fa-user-plus"></i>
-                    </div>
-                    <div class="tip-content">
-                        <h4>Refer Friends</h4>
-                        <p>Earn referral bonuses when friends join and report waste</p>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Help Panel -->
-        <div class="help-panel" id="helpPanel">
-            <div class="help-header">
-                <h3><i class="fas fa-question-circle"></i>Leaderboard Help</h3>
-                <button class="btn-close-help" onclick="hideHelp()">
-                    <i class="fas fa-times"></i>
-                </button>
-            </div>
-            <div class="help-content">
-                <div class="help-item">
-                    <h4><i class="fas fa-bolt"></i>XP Points Explained</h4>
-                    <p>Earn XP points by reporting waste for collection. Different waste types have different XP rates per kilogram.</p>
-                </div>
-                <div class="help-item">
-                    <h4><i class="fas fa-chart-line"></i>Leaderboard Updates</h4>
-                    <p>The leaderboard updates in real-time. Your rank changes as you and others earn more XP.</p>
-                </div>
-                <div class="help-item">
-                    <h4><i class="fas fa-trophy"></i>Ranking System</h4>
-                    <p>Ranks are based on total XP earned. Special badges are awarded for monthly achievements.</p>
-                </div>
-                <div class="help-item">
-                    <h4><i class="fas fa-leaf"></i>CO₂ Reduction</h4>
-                    <p>Each waste collection contributes to CO₂ reduction based on waste type and quantity.</p>
-                </div>
+            
+            <div class="achievements-grid">
+                <asp:Repeater ID="rptAchievements" runat="server">
+                    <ItemTemplate>
+                        <div class='achievement-card <%# Convert.ToBoolean(Eval("IsUnlocked")) ? "unlocked" : "locked" %>'>
+                            <div class="achievement-icon">
+                                <i class='<%# Eval("IconClass") %>'></i>
+                            </div>
+                            <div class="achievement-details">
+                                <h5 class="achievement-title"><%# Eval("Title") %></h5>
+                                <p class="achievement-desc"><%# Eval("Description") %></p>
+                                <div class="achievement-progress">
+                                    <div class="progress-glass small">
+                                        <div class="progress-bar-glass" style='width: <%# GetAchievementProgress(Eval("Progress"), Eval("Target")) %>'></div>
+                                    </div>
+                                    <span class="progress-text">
+                                        <%# Eval("Progress") %>/<%# Eval("Target") %>
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                    </ItemTemplate>
+                </asp:Repeater>
             </div>
         </div>
     </div>
+    
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <!-- JavaScript -->
+    <script type="text/javascript">
+        // Initialize tooltips
+        document.addEventListener('DOMContentLoaded', function () {
+            var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+            var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+                return new bootstrap.Tooltip(tooltipTriggerEl);
+            });
+        });
+
+        // Scroll to current user in leaderboard
+        function scrollToCurrentUser() {
+            var currentUserRow = document.querySelector('.current-user-row');
+            if (currentUserRow) {
+                currentUserRow.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
+        }
+    </script>
 </asp:Content>

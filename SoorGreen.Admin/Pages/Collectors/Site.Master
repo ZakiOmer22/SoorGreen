@@ -1,0 +1,2162 @@
+﻿<%@ Master Language="C#" AutoEventWireup="true" CodeFile="Site.master.cs" Inherits="SoorGreen.SiteMaster" %>
+
+<!DOCTYPE html>
+<html lang="en">
+<head runat="server">
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>
+        <asp:ContentPlaceHolder ID="TitleContent" runat="server"><%: Page.Title %> - SoorGreen | Smart Waste Management</asp:ContentPlaceHolder>
+    </title>
+
+    <!-- HEAD CONTENT PLACEHOLDER -->
+    <asp:ContentPlaceHolder ID="HeadContent" runat="server"></asp:ContentPlaceHolder>
+
+    <!-- Bootstrap -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" />
+
+    <!-- Font Awesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet" />
+
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+
+    <!-- AOS Animation -->
+    <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet" />
+
+    <style>
+        /* THEME VARIABLES */
+        :root {
+            --primary: #00d4aa;
+            --primary-dark: #00b894;
+            --secondary: #0984e3;
+            --accent: #fd79a8;
+            /* Light theme defaults */
+            --bg-primary: #f8fafc;
+            --bg-secondary: #ffffff;
+            --bg-card: #ffffff;
+            --text-primary: #1e293b;
+            --text-secondary: #64748b;
+            --border-color: #e2e8f0;
+            --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            /* Navbar & Sidebar */
+            --navbar-bg: #ffffff;
+            --sidebar-bg: #ffffff;
+            /* Card styles */
+            --card-bg: #ffffff;
+            --card-border: #e2e8f0;
+            /* Status colors */
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --info: #3b82f6;
+            --sidebar-width: 280px;
+            --sidebar-collapsed: 80px;
+            --primary-rgb: 0, 212, 170;
+            /* Scrollbar Colors */
+            --scrollbar-bg: transparent;
+            --scrollbar-thumb: #cbd5e1;
+            --scrollbar-thumb-hover: #94a3b8;
+            --scrollbar-track: #f1f5f9;
+        }
+
+        /* DARK THEME VARIABLES */
+        [data-theme="dark"] {
+            --bg-primary: #0f172a;
+            --bg-secondary: #1e293b;
+            --bg-card: #1e293b;
+            --text-primary: #f1f5f9;
+            --text-secondary: #94a3b8;
+            --border-color: #334155;
+            --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3);
+            --navbar-bg: #1e293b;
+            --sidebar-bg: #1e293b;
+            --card-bg: #1e293b;
+            --card-border: #334155;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --info: #3b82f6;
+            /* Dark scrollbar */
+            --scrollbar-bg: transparent;
+            --scrollbar-thumb: #475569;
+            --scrollbar-thumb-hover: #64748b;
+            --scrollbar-track: #1e293b;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        /* CUSTOM SCROLLBARS */
+        ::-webkit-scrollbar {
+            width: 10px;
+            height: 10px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--scrollbar-track);
+            border-radius: 8px;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--scrollbar-thumb);
+            border-radius: 8px;
+            border: 2px solid var(--scrollbar-track);
+            transition: all 0.3s ease;
+        }
+
+            ::-webkit-scrollbar-thumb:hover {
+                background: var(--scrollbar-thumb-hover);
+                border-width: 1px;
+            }
+
+        /* Firefox */
+        * {
+            scrollbar-width: thin;
+            scrollbar-color: var(--scrollbar-thumb) var(--scrollbar-track);
+        }
+
+        /* IE */
+        body {
+            -ms-overflow-style: -ms-autohiding-scrollbar;
+        }
+
+        /* BODY STYLING - FIXED */
+        html, body, form {
+            height: 100%;
+            margin: 0;
+            padding: 0;
+            width: 100%;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            transition: background-color 0.3s ease, color 0.3s ease;
+            line-height: 1.6;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow-x: hidden;
+        }
+
+        /* MAIN LAYOUT CONTAINER */
+        .page-container {
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            width: 100%;
+            position: relative;
+        }
+
+        /* NAVBAR - FIXED TOP */
+        .navbar {
+            background: var(--navbar-bg) !important;
+            border-bottom: 1px solid var(--border-color);
+            padding: 0.75rem 0;
+            position: fixed;
+            width: 100%;
+            top: 0;
+            z-index: 1100;
+            height: 80px;
+            box-shadow: var(--shadow);
+        }
+
+            .navbar.scrolled {
+                padding: 0.5rem 0;
+                min-height: 70px;
+                max-height: 70px;
+            }
+
+            .navbar > .container-fluid {
+                height: 100%;
+                display: flex;
+                align-items: center;
+            }
+
+        .navbar-brand {
+            font-weight: 700;
+            font-size: 1.5rem;
+            color: var(--primary) !important;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            text-decoration: none;
+        }
+
+            .navbar-brand:hover {
+                opacity: 0.9;
+            }
+
+        .nav-link {
+            color: var(--text-primary) !important;
+            font-weight: 500;
+            margin: 0 0.5rem;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+            .nav-link:hover {
+                color: var(--primary) !important;
+                transform: translateY(-2px);
+            }
+
+            .nav-link::after {
+                content: '';
+                position: absolute;
+                bottom: -5px;
+                left: 0;
+                width: 0;
+                height: 2px;
+                background: var(--primary);
+                transition: width 0.3s ease;
+            }
+
+            .nav-link:hover::after {
+                width: 100%;
+            }
+
+            .nav-link.active {
+                color: var(--primary) !important;
+            }
+
+                .nav-link.active::after {
+                    width: 100%;
+                }
+
+        /* MAIN WRAPPER */
+        .main-wrapper {
+            display: flex;
+            flex: 1;
+            margin-top: 80px; /* Navbar height */
+            width: 100%;
+            position: relative;
+            min-height: calc(100vh - 80px);
+        }
+
+        /* ===== SIDEBAR - FIXED STRUCTURE ===== */
+        .sidebar {
+            width: var(--sidebar-width);
+            background: var(--sidebar-bg);
+            border-right: 1px solid var(--border-color);
+            position: fixed;
+            left: 0;
+            top: 80px;
+            bottom: 0;
+            overflow-y: auto;
+            transition: all 0.3s ease;
+            z-index: 1000;
+            box-shadow: var(--shadow);
+            display: flex;
+            flex-direction: column;
+        }
+
+            .sidebar.collapsed {
+                width: var(--sidebar-collapsed);
+            }
+
+        /* SIDEBAR CONTENT */
+        .sidebar-header {
+            padding: 1.5rem 1rem;
+            border-bottom: 1px solid var(--border-color);
+            text-align: center;
+        }
+
+        .sidebar-user {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .sidebar-user-avatar {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: linear-gradient(45deg, var(--primary), var(--secondary));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 600;
+            font-size: 1.2rem;
+            flex-shrink: 0;
+        }
+
+        .sidebar-user-info {
+            flex: 1;
+            overflow: hidden;
+        }
+
+        .sidebar-user-name {
+            font-weight: 600;
+            color: var(--text-primary);
+            font-size: 1rem;
+            margin-bottom: 0.25rem;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .sidebar-user-role {
+            font-size: 0.8rem;
+            color: var(--primary);
+            font-weight: 500;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .sidebar-stats {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0.5rem;
+            margin-top: 1rem;
+        }
+
+        .stat-item {
+            text-align: center;
+            padding: 0.5rem;
+            background: rgba(var(--primary-rgb), 0.05);
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+        }
+
+        .stat-value {
+            font-weight: 700;
+            color: var(--primary);
+            font-size: 1.1rem;
+        }
+
+        .stat-label {
+            font-size: 0.7rem;
+            color: var(--text-secondary);
+        }
+
+        /* ===== SIDEBAR MENU ===== */
+        .sidebar-menu {
+            padding: 1rem 0;
+            flex: 1;
+            overflow-y: auto;
+        }
+
+        .menu-section {
+            margin-bottom: 1.5rem;
+        }
+
+        .menu-title {
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            color: var(--text-secondary);
+            padding: 0 1rem 0.5rem;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+            white-space: nowrap;
+            overflow: hidden;
+        }
+
+        .menu-items {
+            list-style: none;
+            padding: 0;
+        }
+
+        .menu-item {
+            margin-bottom: 0.25rem;
+        }
+
+        .menu-link {
+            display: flex;
+            align-items: center;
+            padding: 0.75rem 1rem;
+            color: var(--text-secondary);
+            text-decoration: none;
+            transition: all 0.3s ease;
+            border-left: 3px solid transparent;
+            white-space: nowrap;
+        }
+
+            .menu-link:hover {
+                background: rgba(var(--primary-rgb), 0.05);
+                color: var(--text-primary);
+                border-left-color: var(--primary);
+            }
+
+            .menu-link.active {
+                background: rgba(var(--primary-rgb), 0.1);
+                color: var(--primary);
+                border-left-color: var(--primary);
+            }
+
+        .menu-icon {
+            width: 24px;
+            margin-right: 0.75rem;
+            text-align: center;
+            color: var(--text-secondary);
+            flex-shrink: 0;
+        }
+
+        .menu-text {
+            flex: 1;
+            font-weight: 500;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .menu-badge {
+            background: var(--accent);
+            color: white;
+            padding: 0.2rem 0.5rem;
+            border-radius: 12px;
+            font-size: 0.7rem;
+            font-weight: 600;
+            flex-shrink: 0;
+        }
+
+        /* Collector Menu Badge */
+        #activePickupsBadge {
+            background: var(--accent);
+            color: white;
+            padding: 0.2rem 0.5rem;
+            border-radius: 12px;
+            font-size: 0.7rem;
+            font-weight: 600;
+            margin-left: 0.5rem;
+        }
+
+        /* Collapsed sidebar */
+        .sidebar.collapsed .menu-text,
+        .sidebar.collapsed .menu-badge,
+        .sidebar.collapsed .sidebar-user-info,
+        .sidebar.collapsed .sidebar-stats,
+        .sidebar.collapsed .menu-title {
+            display: none;
+        }
+
+        .sidebar.collapsed .menu-link {
+            justify-content: center;
+            padding: 0.75rem;
+        }
+
+        .sidebar.collapsed .menu-icon {
+            margin-right: 0;
+        }
+
+        /* ===== SIDEBAR FOOTER ===== */
+        .sidebar-footer {
+            position: sticky;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            padding: 1rem;
+            border-top: 1px solid var(--border-color);
+            background: var(--sidebar-bg);
+            z-index: 1001;
+            margin-top: auto;
+        }
+
+        .sidebar-toggle-btn {
+            width: 100%;
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 0.5rem;
+            border-radius: 8px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            transition: all 0.3s ease;
+        }
+
+            .sidebar-toggle-btn:hover {
+                background: var(--primary-dark);
+                transform: scale(1.02);
+            }
+
+        .sidebar.collapsed .sidebar-toggle-btn span {
+            display: none;
+        }
+
+        .sidebar.collapsed .sidebar-toggle-btn i {
+            transform: rotate(180deg);
+        }
+
+        /* ===== CONTENT AREA - FIXED ===== */
+        .content-area {
+            flex: 1;
+            margin-left: var(--sidebar-width);
+            transition: margin-left 0.3s ease;
+            display: flex;
+            flex-direction: column;
+            width: calc(100% - var(--sidebar-width));
+            min-height: calc(100vh - 80px);
+            position: relative;
+            overflow-y: auto;
+        }
+
+            .content-area.collapsed {
+                margin-left: var(--sidebar-collapsed);
+                width: calc(100% - var(--sidebar-collapsed));
+            }
+
+        /* ===== PAGE CONTENT - FIXED WITH HUGE PADDING ===== */
+        .page-content {
+            flex: 1;
+            padding: 2rem;
+            min-height: 400px;
+            background: var(--bg-primary);
+            position: relative;
+            z-index: 1;
+            /* HUGE BOTTOM PADDING TO PREVENT FOOTER OVERLAP */
+            padding-bottom: 250px !important;
+            width: 100%;
+            overflow: visible;
+        }
+
+        /* ===== FOOTER - FIXED POSITION ===== */
+        .page-footer {
+            flex-shrink: 0;
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+            padding: 1.5rem 0 0.75rem;
+            border-top: 1px solid rgba(255,255,255,0.1);
+            position: relative;
+            width: 100%;
+            display: block;
+            z-index: 10;
+            margin-top: auto;
+        }
+
+        [data-theme="light"] .page-footer {
+            background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
+            border-top: 1px solid rgba(33, 37, 41, 0.1);
+        }
+
+        .page-footer::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, var(--primary), var(--secondary), transparent);
+        }
+
+        /* FOOTER CONTENT */
+        .footer-main {
+            max-height: none;
+            overflow: visible;
+        }
+
+        .footer-brand-card {
+            background: rgba(255,255,255,0.05);
+            padding: 1.25rem;
+            border-radius: 15px;
+            border: 1px solid rgba(255,255,255,0.1);
+            backdrop-filter: blur(10px);
+            position: relative;
+            overflow: visible;
+        }
+
+        [data-theme="light"] .footer-brand-card {
+            background: rgba(33, 37, 41, 0.05);
+            border: 1px solid rgba(33, 37, 41, 0.1);
+        }
+
+        .brand-header {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            margin-bottom: 1rem;
+        }
+
+        .brand-logo {
+            position: relative;
+            width: 50px;
+            height: 50px;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            color: white;
+            overflow: hidden;
+        }
+
+        .logo-glow {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            border-radius: 12px;
+            opacity: 0.5;
+            filter: blur(8px);
+            animation: logoPulse 2s ease-in-out infinite alternate;
+        }
+
+        @keyframes logoPulse {
+            0% {
+                opacity: 0.3;
+                transform: scale(1);
+            }
+
+            100% {
+                opacity: 0.6;
+                transform: scale(1.1);
+            }
+        }
+
+        .brand-title {
+            font-size: 1.5rem;
+            font-weight: 800;
+            background: linear-gradient(45deg, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin: 0;
+        }
+
+        .brand-description {
+            color: rgba(255,255,255,0.8);
+            line-height: 1.5;
+            margin-bottom: 1rem;
+            font-size: 0.9rem;
+        }
+
+        [data-theme="light"] .brand-description {
+            color: rgba(33, 37, 41, 0.8);
+        }
+
+        .social-section {
+            margin-top: 1rem;
+        }
+
+        .social-title {
+            color: #f8fafc;
+            font-size: 0.8rem;
+            font-weight: 600;
+            margin-bottom: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .social-links-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0.5rem;
+        }
+
+        .social-card {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 0.75rem;
+            background: rgba(255,255,255,0.08);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 10px;
+            color: rgba(255,255,255,0.8);
+            text-decoration: none;
+            transition: all 0.3s ease;
+            font-size: 0.85rem;
+        }
+
+        [data-theme="light"] .social-card {
+            background: rgba(33, 37, 41, 0.08);
+            border: 1px solid rgba(33, 37, 41, 0.1);
+            color: rgba(33, 37, 41, 0.8);
+        }
+
+        .social-card:hover {
+            transform: translateY(-2px);
+            border-color: var(--primary);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+
+        .social-card i {
+            font-size: 1rem;
+            width: 18px;
+            text-align: center;
+        }
+
+        .footer-section {
+            padding: 0 0.75rem;
+        }
+
+        .section-title {
+            color: #f8fafc;
+            font-size: 1rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            position: relative;
+        }
+
+            .section-title::after {
+                content: '';
+                position: absolute;
+                bottom: -6px;
+                left: 0;
+                width: 25px;
+                height: 2px;
+                background: linear-gradient(90deg, var(--primary), var(--secondary));
+                border-radius: 2px;
+            }
+
+        .footer-links-grid {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .footer-link-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 0.75rem;
+            color: rgba(255,255,255,0.7);
+            text-decoration: none;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+            background: rgba(255,255,255,0.05);
+            font-size: 0.85rem;
+        }
+
+        [data-theme="light"] .footer-link-item {
+            color: rgba(33, 37, 41, 0.7);
+            background: rgba(33, 37, 41, 0.05);
+        }
+
+        .footer-link-item:hover {
+            color: var(--primary);
+            background: rgba(0,212,170,0.1);
+            transform: translateX(5px);
+        }
+
+        .footer-link-item i {
+            width: 18px;
+            text-align: center;
+            font-size: 0.85rem;
+        }
+
+        .contact-info {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+
+        .contact-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 0.75rem;
+            padding: 0.75rem;
+            background: rgba(255,255,255,0.05);
+            border-radius: 10px;
+            border: 1px solid rgba(255,255,255,0.1);
+            transition: all 0.3s ease;
+        }
+
+        [data-theme="light"] .contact-item {
+            background: rgba(33, 37, 41, 0.05);
+            border: 1px solid rgba(33, 37, 41, 0.1);
+        }
+
+        .contact-item:hover {
+            background: rgba(255,255,255,0.08);
+            border-color: rgba(0,212,170,0.3);
+            transform: translateY(-2px);
+        }
+
+        .contact-icon {
+            width: 35px;
+            height: 35px;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 0.9rem;
+            flex-shrink: 0;
+        }
+
+        .contact-details {
+            display: flex;
+            flex-direction: column;
+            gap: 0.2rem;
+        }
+
+        .contact-label {
+            font-size: 0.75rem;
+            color: var(--primary);
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .contact-value {
+            color: rgba(255,255,255,0.9);
+            font-size: 0.85rem;
+            font-weight: 500;
+        }
+
+        [data-theme="light"] .contact-value {
+            color: rgba(33, 37, 41, 0.9);
+        }
+
+        .ealif-section {
+            margin: 1.5rem 0 1rem;
+            padding: 1.25rem;
+            background: linear-gradient(135deg, rgba(0,212,170,0.1), rgba(9,132,227,0.1));
+            border-radius: 15px;
+            border: 1px solid rgba(255,255,255,0.1);
+            position: relative;
+            overflow: visible;
+        }
+
+        .ealif-content {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 1rem;
+            text-align: center;
+        }
+
+        .ealif-logo {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.1rem;
+            animation: logoSpin 4s linear infinite;
+            overflow: hidden;
+        }
+
+        @keyframes logoSpin {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        .ealif-text {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.2rem;
+        }
+
+        .powered-by {
+            font-size: 0.8rem;
+            color: rgba(255,255,255,0.7);
+            font-weight: 500;
+        }
+
+        [data-theme="light"] .powered-by {
+            color: rgba(33, 37, 41, 0.7);
+        }
+
+        .team-name {
+            font-size: 1.2rem;
+            font-weight: 800;
+            background: linear-gradient(45deg, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .ealif-badge {
+            background: rgba(255,255,255,0.1);
+            padding: 0.4rem 0.75rem;
+            border-radius: 15px;
+            border: 1px solid rgba(255,255,255,0.2);
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: rgba(255,255,255,0.9);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        [data-theme="light"] .ealif-badge {
+            background: rgba(33, 37, 41, 0.1);
+            border: 1px solid rgba(33, 37, 41, 0.2);
+            color: rgba(33, 37, 41, 0.9);
+        }
+
+        .copyright-section {
+            border-top: 1px solid rgba(255,255,255,0.1);
+            padding-top: 1rem;
+        }
+
+        [data-theme="light"] .copyright-section {
+            border-top: 1px solid rgba(33, 37, 41, 0.1);
+        }
+
+        .copyright-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 0.75rem;
+        }
+
+        .copyright-text {
+            color: rgba(255,255,255,0.6);
+            font-size: 0.8rem;
+        }
+
+        [data-theme="light"] .copyright-text {
+            color: rgba(33, 37, 41, 0.6);
+        }
+
+        .footer-actions {
+            display: flex;
+            gap: 1rem;
+        }
+
+        .footer-action-link {
+            color: rgba(255,255,255,0.6);
+            text-decoration: none;
+            font-size: 0.8rem;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        [data-theme="light"] .footer-action-link {
+            color: rgba(33, 37, 41, 0.6);
+        }
+
+        .footer-action-link:hover {
+            color: var(--primary);
+        }
+
+        .footer-floating-elements {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            display: none;
+        }
+
+        .floating-element {
+            position: absolute;
+            font-size: 1.2rem;
+            opacity: 0.1;
+            animation: floatAround 20s infinite linear;
+        }
+
+        .el-1 {
+            top: 20%;
+            left: 5%;
+            animation-delay: 0s;
+            color: var(--primary);
+        }
+
+        .el-2 {
+            top: 60%;
+            left: 90%;
+            animation-delay: 5s;
+            color: var(--secondary);
+        }
+
+        .el-3 {
+            top: 80%;
+            left: 10%;
+            animation-delay: 10s;
+            color: var(--accent);
+        }
+
+        .el-4 {
+            top: 40%;
+            left: 85%;
+            animation-delay: 15s;
+            color: var(--primary);
+        }
+
+        @keyframes floatAround {
+            0%, 100% {
+                transform: translate(0, 0) rotate(0deg);
+            }
+
+            25% {
+                transform: translate(100px, -50px) rotate(90deg);
+            }
+
+            50% {
+                transform: translate(50px, -100px) rotate(180deg);
+            }
+
+            75% {
+                transform: translate(-100px, -50px) rotate(270deg);
+            }
+        }
+
+        /* FORM ELEMENTS */
+        input, select, textarea {
+            background: var(--bg-card) !important;
+            border: 1px solid var(--border-color) !important;
+            color: var(--text-primary) !important;
+            border-radius: 8px !important;
+        }
+
+            input:focus, select:focus, textarea:focus {
+                border-color: var(--primary) !important;
+                box-shadow: 0 0 0 3px rgba(var(--primary-rgb), 0.1) !important;
+            }
+
+            input::placeholder, textarea::placeholder {
+                color: var(--text-secondary) !important;
+            }
+
+        .form-label {
+            color: var(--text-primary);
+            font-weight: 500;
+            margin-bottom: 0.5rem;
+        }
+
+        .card {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            color: var(--text-primary);
+            border-radius: 12px;
+            transition: all 0.3s ease;
+        }
+
+            .card:hover {
+                box-shadow: var(--shadow);
+                transform: translateY(-2px);
+            }
+
+        .table {
+            color: var(--text-primary);
+        }
+
+            .table th {
+                background: var(--bg-secondary);
+                border-color: var(--border-color);
+                font-weight: 600;
+                padding: 1rem;
+            }
+
+            .table td {
+                border-color: var(--border-color);
+                padding: 0.75rem 1rem;
+            }
+
+        .table-striped tbody tr:nth-of-type(odd) {
+            background-color: rgba(var(--primary-rgb), 0.02);
+        }
+
+        /* THEME TOGGLE */
+        .theme-toggle-container {
+            display: flex;
+            align-items: center;
+            margin-right: 1rem;
+        }
+
+        #themeToggle {
+            background: none;
+            border: 1px solid var(--border-color);
+            color: var(--text-primary);
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex !important;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 1.1rem;
+        }
+
+            #themeToggle:hover {
+                background: rgba(var(--primary-rgb), 0.1);
+                border-color: var(--primary);
+                color: var(--primary);
+                transform: rotate(15deg);
+            }
+
+            #themeToggle .fa-sun {
+                display: none;
+                color: #fbbf24;
+            }
+
+            #themeToggle .fa-moon {
+                color: #64748b;
+            }
+
+        [data-theme="dark"] #themeToggle .fa-sun {
+            display: block;
+        }
+
+        [data-theme="dark"] #themeToggle .fa-moon {
+            display: none;
+        }
+
+        /* USER ACCOUNT */
+        .user-welcome {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.5rem 1rem;
+            background: rgba(var(--primary-rgb), 0.05);
+            border-radius: 10px;
+            cursor: pointer;
+            border: 1px solid var(--border-color);
+            transition: all 0.3s ease;
+        }
+
+            .user-welcome:hover {
+                background: rgba(var(--primary-rgb), 0.1);
+                border-color: var(--primary);
+            }
+
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: linear-gradient(45deg, var(--primary), var(--secondary));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 600;
+            font-size: 1rem;
+            flex-shrink: 0;
+        }
+
+        .user-info {
+            display: flex;
+            flex-direction: column;
+            flex: 1;
+            min-width: 0;
+        }
+
+        .user-name {
+            font-weight: 600;
+            color: var(--text-primary);
+            font-size: 0.9rem;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .user-role {
+            font-size: 0.75rem;
+            color: var(--primary);
+            font-weight: 500;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .account-dropdown {
+            min-width: 220px;
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            box-shadow: var(--shadow);
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+            .account-dropdown .dropdown-item {
+                color: var(--text-primary);
+                padding: 0.75rem 1rem;
+                transition: all 0.3s ease;
+                display: flex;
+                align-items: center;
+                gap: 0.75rem;
+            }
+
+                .account-dropdown .dropdown-item:hover {
+                    background: rgba(var(--primary-rgb), 0.1);
+                    color: var(--primary);
+                    padding-left: 1.25rem;
+                }
+
+                .account-dropdown .dropdown-item i {
+                    width: 20px;
+                    text-align: center;
+                }
+
+            .account-dropdown .dropdown-divider {
+                border-color: var(--border-color);
+                margin: 0.5rem 0;
+            }
+
+        /* SIDEBAR OVERLAY FOR MOBILE */
+        .sidebar-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 999;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+            .sidebar-overlay.active {
+                display: block;
+                opacity: 1;
+            }
+
+        .sidebar-toggle-mobile {
+            background: none;
+            border: none;
+            color: var(--text-primary);
+            font-size: 1.2rem;
+            cursor: pointer;
+            padding: 0.5rem;
+            border-radius: 5px;
+            transition: all 0.3s ease;
+        }
+
+            .sidebar-toggle-mobile:hover {
+                background: rgba(var(--primary-rgb), 0.1);
+                color: var(--primary);
+            }
+
+        /* MOBILE RESPONSIVE */
+        @media (max-width: 992px) {
+            .sidebar {
+                transform: translateX(-100%);
+                width: 280px;
+                z-index: 1000;
+            }
+
+                .sidebar.mobile-open {
+                    transform: translateX(0);
+                }
+
+            .content-area {
+                margin-left: 0 !important;
+                width: 100% !important;
+            }
+
+                .content-area.collapsed {
+                    margin-left: 0 !important;
+                    width: 100% !important;
+                }
+
+            .page-content {
+                padding: 1.5rem;
+                padding-bottom: 200px !important;
+            }
+
+            .sidebar-toggle-btn {
+                display: none;
+            }
+        }
+
+        /* Tablet and smaller */
+        @media (max-width: 768px) {
+            .navbar {
+                min-height: 70px;
+                max-height: 70px;
+            }
+
+            .sidebar {
+                top: 70px;
+                height: calc(100vh - 70px);
+            }
+
+            .main-wrapper {
+                margin-top: 70px;
+                min-height: calc(100vh - 70px);
+            }
+
+            .content-area {
+                min-height: calc(100vh - 70px);
+            }
+
+            .page-content {
+                padding: 1rem;
+                padding-bottom: 180px !important;
+            }
+
+            .page-footer {
+                padding: 1rem 0 0.5rem;
+            }
+        }
+
+        /* Small mobile */
+        @media (max-width: 576px) {
+            .navbar-brand span {
+                font-size: 1.2rem;
+            }
+
+            .theme-toggle-container {
+                margin-right: 0.5rem;
+            }
+
+            #themeToggle {
+                width: 36px;
+                height: 36px;
+                font-size: 1rem;
+            }
+
+            .user-welcome {
+                padding: 0.5rem;
+            }
+
+            .user-info {
+                display: none;
+            }
+
+            .sidebar-header {
+                padding: 1rem;
+            }
+
+            .sidebar-user-avatar {
+                width: 40px;
+                height: 40px;
+                font-size: 1rem;
+            }
+
+            .page-footer {
+                padding: 1rem 0 0.5rem;
+            }
+
+            .page-content {
+                padding-bottom: 160px !important;
+            }
+
+            .footer-brand-card {
+                padding: 1rem;
+            }
+
+            .social-links-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .footer-main .row {
+                gap: 1.5rem;
+            }
+
+            .ealif-section {
+                margin: 1rem 0;
+                padding: 1rem;
+            }
+        }
+
+        /* Extra small mobile */
+        @media (max-width: 400px) {
+            .navbar-brand span {
+                display: none;
+            }
+
+            .navbar-brand i {
+                font-size: 1.5rem;
+            }
+
+            .copyright-content {
+                flex-direction: column;
+                text-align: center;
+            }
+
+            .page-footer {
+                padding: 0.75rem 0 0.25rem;
+            }
+
+            .page-content {
+                padding-bottom: 150px !important;
+            }
+        }
+
+        /* ===== DASHBOARD SPECIFIC FIXES ===== */
+        .collector-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            overflow: visible;
+        }
+
+        .collector-stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        /* Ensure proper spacing for all content */
+        .page-content .container-fluid {
+            padding-bottom: 60px;
+        }
+
+        /* Fix for task lists */
+        .task-list {
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        /* ===== FINAL FOOTER FIX ===== */
+        /* Add extra margin to last element in page content */
+        .page-content > *:last-child {
+            margin-bottom: 50px !important;
+        }
+
+        /* Make sure content area can scroll */
+        .content-area {
+            overflow-y: auto !important;
+        }
+    </style>
+</head>
+<body>
+    <form runat="server">
+        <!-- ===== PAGE CONTAINER ===== -->
+        <div class="page-container">
+
+            <!-- ===== NAVBAR ===== -->
+            <nav id="mainNavbar" class="navbar navbar-expand-lg">
+                <div class="container-fluid">
+                    <!-- Mobile Sidebar Toggle -->
+                    <button type="button" class="sidebar-toggle-mobile me-3 d-lg-none" onclick="toggleSidebar()">
+                        <i class="fas fa-bars"></i>
+                    </button>
+
+                    <a class="navbar-brand me-3" href="Default.aspx">
+                        <div class="brand-logo" style="width: 40px; height: 40px; font-size: 1.2rem;">
+                            <asp:Image ID="imgLogo" runat="server" ImageUrl="~/favicon.ico"
+                                Width="28" Height="28" AlternateText="SoorGreen Logo" />
+                        </div>
+                        <span>SoorGreen</span>
+                    </a>
+
+                    <!-- Desktop navbar toggler -->
+                    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navMenu">
+                        <span class="navbar-toggler-icon"></span>
+                    </button>
+
+                    <div class="collapse navbar-collapse" id="navMenu">
+                        <ul class="navbar-nav ms-auto align-items-lg-center">
+                            <!-- Theme Toggle -->
+                            <li class="nav-item theme-toggle-container">
+                                <button class="nav-link" id="themeToggle" onclick="toggleTheme()"
+                                    title="Toggle dark/light mode">
+                                    <i class="fas fa-moon"></i>
+                                    <i class="fas fa-sun"></i>
+                                </button>
+                            </li>
+
+                            <!-- User Account Section -->
+                            <asp:Panel ID="pnlLoggedInUser" runat="server" Visible="false" CssClass="nav-item dropdown">
+                                <li class="user-welcome dropdown-toggle" data-bs-toggle="dropdown">
+                                    <div class="user-avatar" id="userAvatar" runat="server">
+                                        <asp:Label ID="lblAvatarInitials" runat="server"></asp:Label>
+                                    </div>
+                                    <div class="user-info">
+                                        <div class="user-name" id="userName" runat="server">Welcome User</div>
+                                        <div class="user-role" id="userRole" runat="server">Citizen</div>
+                                    </div>
+                                </li>
+                                <ul class="dropdown-menu dropdown-menu-end account-dropdown">
+                                    <li>
+                                        <asp:HyperLink ID="lnkDashboard" runat="server" CssClass="dropdown-item">
+                                        <i class="fas fa-tachometer-alt"></i>
+                                        <span>Dashboard</span>
+                                        </asp:HyperLink></li>
+                                    <li><a class="dropdown-item" href="UserProfile.aspx">
+                                        <i class="fas fa-user-circle"></i>
+                                        <span>My Profile</span>
+                                    </a></li>
+                                    <li><a class="dropdown-item" href="MyRewards.aspx">
+                                        <i class="fas fa-coins"></i>
+                                        <span>My Rewards</span>
+                                    </a></li>
+                                    <li><a class="dropdown-item" href="MyReports.aspx">
+                                        <i class="fas fa-history"></i>
+                                        <span>My Reports</span>
+                                    </a></li>
+                                    <li>
+                                        <hr class="dropdown-divider" />
+                                    </li>
+                                    <li><a class="dropdown-item" href="Settings.aspx">
+                                        <i class="fas fa-cog"></i>
+                                        <span>Settings</span>
+                                    </a></li>
+                                    <li>
+                                        <asp:LinkButton ID="btnLogout" runat="server" CssClass="dropdown-item text-danger" OnClick="btnLogout_Click">
+                                            <i class="fas fa-sign-out-alt"></i>
+                                            <span>Logout</span>
+                                        </asp:LinkButton>
+                                    </li>
+                                </ul>
+                            </asp:Panel>
+
+                            <!-- Guest User Section -->
+                            <asp:Panel ID="pnlGuestUser" runat="server" Visible="true" CssClass="nav-item dropdown">
+                                <li>
+                                    <a class="user-welcome dropdown-toggle" href="#" data-bs-toggle="dropdown">
+                                        <div class="user-avatar">
+                                            <i class="fas fa-user-circle"></i>
+                                        </div>
+                                        <div class="user-info">
+                                            <div class="user-name">Guest</div>
+                                            <div class="user-role">Login Required</div>
+                                        </div>
+                                    </a>
+                                    <ul class="dropdown-menu dropdown-menu-end account-dropdown">
+                                        <li><a class="dropdown-item" href="Login.aspx">
+                                            <i class="fas fa-right-to-bracket"></i>
+                                            <span>Login</span>
+                                        </a></li>
+                                        <li><a class="dropdown-item" href="Register.aspx">
+                                            <i class="fas fa-user-plus"></i>
+                                            <span>Register</span>
+                                        </a></li>
+                                        <li>
+                                            <hr class="dropdown-divider" />
+                                        </li>
+                                        <li><a class="dropdown-item" href="About.aspx">
+                                            <i class="fas fa-info-circle"></i>
+                                            <span>About SoorGreen</span>
+                                        </a></li>
+                                    </ul>
+                                </li>
+                            </asp:Panel>
+                        </ul>
+                    </div>
+                </div>
+            </nav>
+
+            <!-- ===== SIDEBAR OVERLAY (Mobile) ===== -->
+            <div class="sidebar-overlay" onclick="toggleSidebar()"></div>
+
+            <!-- ===== MAIN WRAPPER ===== -->
+            <div class="main-wrapper">
+
+                <!-- ===== SIDEBAR ===== -->
+                <aside class="sidebar" id="sidebar">
+                    <div class="sidebar-header">
+                        <div class="sidebar-user">
+                            <div class="sidebar-user-avatar" id="sidebarUserAvatar" runat="server">
+                                <asp:Label ID="lblSidebarAvatar" runat="server"></asp:Label>
+                            </div>
+                            <div class="sidebar-user-info">
+                                <div class="sidebar-user-name" id="sidebarUserName" runat="server">Guest User</div>
+                                <div class="sidebar-user-role" id="sidebarUserRole" runat="server">Guest</div>
+                            </div>
+                        </div>
+                        <div class="sidebar-stats">
+                            <div class="stat-item">
+                                <div class="stat-value" id="userCredits" runat="server">0</div>
+                                <div class="stat-label">Credits</div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="stat-value" id="userXP" runat="server">0</div>
+                                <div class="stat-label">XP</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="sidebar-menu">
+                        <!-- Main Actions -->
+                        <div class="menu-section">
+                            <%--<div class="menu-title">Main</div>--%>
+                            <ul class="menu-items">
+                                <li class="menu-item">
+                                    <asp:HyperLink ID="lnkMainDashboard" runat="server" >
+                                        <%--<span class="menu-icon"><i class="fas fa-tachometer-alt"></i></span>
+                                        <span class="menu-text">Dashboard</span>--%>
+                                    </asp:HyperLink>
+                                </li>
+                                <%--<li class="menu-item">
+                                    <a href="ReportWaste.aspx" class="menu-link">
+                                        <span class="menu-icon"><i class="fas fa-plus-circle"></i></span>
+                                        <span class="menu-text">Report Waste</span>
+                                        <span class="menu-badge">New</span>
+                                    </a>
+                                </li>
+                                <li class="menu-item">
+                                    <a href="SchedulePickup.aspx" class="menu-link">
+                                        <span class="menu-icon"><i class="fas fa-calendar-alt"></i></span>
+                                        <span class="menu-text">Schedule Pickup</span>
+                                    </a>
+                                </li>
+                                <li class="menu-item">
+                                    <a href="WasteTypes.aspx" class="menu-link">
+                                        <span class="menu-icon"><i class="fas fa-trash"></i></span>
+                                        <span class="menu-text">Waste Types</span>
+                                    </a>
+                                </li>--%>
+                            </ul>
+                        </div>
+
+                        <!-- COLLECTOR SPECIFIC MENU -->
+                        <asp:Panel ID="pnlCollectorMenu" runat="server" Visible="false">
+                            <div class="menu-section">
+                                <div class="menu-title">Collector Tools</div>
+                                <ul class="menu-items">
+                                    <li class="menu-item">
+                                        <a href="CollectorDashboard.aspx" class="menu-link">
+                                            <span class="menu-icon"><i class="fas fa-truck"></i></span>
+                                            <span class="menu-text">Collector Dashboard</span>
+                                        </a>
+                                    </li>
+                                    <li class="menu-item">
+                                        <a href="MyRoute.aspx" class="menu-link">
+                                            <span class="menu-icon"><i class="fas fa-route"></i></span>
+                                            <span class="menu-text">My Route</span>
+                                        </a>
+                                    </li>
+                                    <li class="menu-item">
+                                        <a href="ActivePickups.aspx" class="menu-link">
+                                            <span class="menu-icon"><i class="fas fa-truck-loading"></i></span>
+                                            <span class="menu-text">Active Pickups</span>
+                                            <span class="menu-badge" id="activePickupsBadge" runat="server">0</span>
+                                        </a>
+                                    </li>
+                                    <li class="menu-item">
+                                        <a href="PickupVerification.aspx" class="menu-link">
+                                            <span class="menu-icon"><i class="fas fa-qrcode"></i></span>
+                                            <span class="menu-text">Verify Pickup</span>
+                                        </a>
+                                    </li>
+                                    <li class="menu-item">
+                                        <a href="DailyReport.aspx" class="menu-link">
+                                            <span class="menu-icon"><i class="fas fa-clipboard-check"></i></span>
+                                            <span class="menu-text">Daily Report</span>
+                                        </a>
+                                    </li>
+                                    <li class="menu-item">
+                                        <a href="CollectorPerformance.aspx" class="menu-link">
+                                            <span class="menu-icon"><i class="fas fa-chart-line"></i></span>
+                                            <span class="menu-text">Performance</span>
+                                        </a>
+                                    </li>
+                                </ul>
+                            </div>
+                        </asp:Panel>
+
+                        <!-- My Activities -->
+                        <div class="menu-section">
+                            <div class="menu-title">My Activities</div>
+                            <ul class="menu-items">
+                                <li class="menu-item">
+                                    <a href="MyReports.aspx" class="menu-link">
+                                        <span class="menu-icon"><i class="fas fa-history"></i></span>
+                                        <span class="menu-text">My Reports</span>
+                                    </a>
+                                </li>
+                                <li class="menu-item">
+                                    <a href="PickupStatus.aspx" class="menu-link">
+                                        <span class="menu-icon"><i class="fas fa-truck-loading"></i></span>
+                                        <span class="menu-text">Pickup Status</span>
+                                        <span class="menu-badge" id="pendingPickups" runat="server">0</span>
+                                    </a>
+                                </li>
+                                <li class="menu-item">
+                                    <a href="MyRewards.aspx" class="menu-link">
+                                        <span class="menu-icon"><i class="fas fa-coins"></i></span>
+                                        <span class="menu-text">My Rewards</span>
+                                    </a>
+                                </li>
+                                <li class="menu-item">
+                                    <a href="RedemptionHistory.aspx" class="menu-link">
+                                        <span class="menu-icon"><i class="fas fa-exchange-alt"></i></span>
+                                        <span class="menu-text">Redemption History</span>
+                                    </a>
+                                </li>
+                                <li class="menu-item">
+                                    <a href="Achievements.aspx" class="menu-link">
+                                        <span class="menu-icon"><i class="fas fa-trophy"></i></span>
+                                        <span class="menu-text">Achievements</span>
+                                    </a>
+                                </li>
+                            </ul>
+                        </div>
+
+                        <!-- Community & Support -->
+                        <div class="menu-section">
+                            <div class="menu-title">Community</div>
+                            <ul class="menu-items">
+                                <li class="menu-item">
+                                    <a href="Leaderboard.aspx" class="menu-link">
+                                        <span class="menu-icon"><i class="fas fa-trophy"></i></span>
+                                        <span class="menu-text">Leaderboard</span>
+                                    </a>
+                                </li>
+                                <li class="menu-item">
+                                    <a href="Community.aspx" class="menu-link">
+                                        <span class="menu-icon"><i class="fas fa-users"></i></span>
+                                        <span class="menu-text">Community</span>
+                                    </a>
+                                </li>
+                                <li class="menu-item">
+                                    <a href="Events.aspx" class="menu-link">
+                                        <span class="menu-icon"><i class="fas fa-calendar-week"></i></span>
+                                        <span class="menu-text">Events</span>
+                                    </a>
+                                </li>
+                                <li class="menu-item">
+                                    <a href="Feedback.aspx" class="menu-link">
+                                        <span class="menu-icon"><i class="fas fa-comment-dots"></i></span>
+                                        <span class="menu-text">Feedback</span>
+                                    </a>
+                                </li>
+                            </ul>
+                        </div>
+
+                        <!-- Account -->
+                        <div class="menu-section">
+                            <div class="menu-title">Account</div>
+                            <ul class="menu-items">
+                                <li class="menu-item">
+                                    <a href="UserProfile.aspx" class="menu-link">
+                                        <span class="menu-icon"><i class="fas fa-user-cog"></i></span>
+                                        <span class="menu-text">Profile Settings</span>
+                                    </a>
+                                </li>
+                                <li class="menu-item">
+                                    <a href="Notifications.aspx" class="menu-link">
+                                        <span class="menu-icon"><i class="fas fa-bell"></i></span>
+                                        <span class="menu-text">Notifications</span>
+                                        <span class="menu-badge" id="unreadNotifications" runat="server">0</span>
+                                    </a>
+                                </li>
+                                <li class="menu-item">
+                                    <a href="Security.aspx" class="menu-link">
+                                        <span class="menu-icon"><i class="fas fa-shield-alt"></i></span>
+                                        <span class="menu-text">Security</span>
+                                    </a>
+                                </li>
+                                <li class="menu-item">
+                                    <a href="Help.aspx" class="menu-link">
+                                        <span class="menu-icon"><i class="fas fa-question-circle"></i></span>
+                                        <span class="menu-text">Help & Support</span>
+                                    </a>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <!-- ===== COLLAPSE BUTTON ===== -->
+                    <div class="sidebar-footer">
+                        <button class="sidebar-toggle-btn" onclick="toggleSidebar()" type="button">
+                            <i class="fas fa-chevron-left"></i>
+                            <span>Collapse Menu</span>
+                        </button>
+                    </div>
+                </aside>
+
+                <!-- ===== MAIN CONTENT AREA ===== -->
+                <div class="content-area" id="contentArea">
+                    <!-- PAGE CONTENT -->
+                    <div class="page-content">
+                        <!-- CONTENT PLACEHOLDER -->
+                        <asp:ContentPlaceHolder ID="MainContent" runat="server">
+                            <!-- Default content or leave empty -->
+                        </asp:ContentPlaceHolder>
+                    </div>
+
+                    <!-- ===== FOOTER ===== -->
+                    <footer class="page-footer">
+                        <div class="container">
+                            <div class="footer-main">
+                                <div class="row gy-5">
+                                    <!-- Brand Section -->
+                                    <div class="col-lg-4">
+                                        <div class="footer-brand-card">
+                                            <div class="brand-header">
+                                                <div class="brand-logo">
+                                                    <asp:Image ID="imgFooterLogo" runat="server" ImageUrl="~/favicon.ico"
+                                                        Width="40" Height="40" AlternateText="SoorGreen Logo" />
+                                                    <div class="logo-glow"></div>
+                                                </div>
+                                                <h3 class="brand-title">ScorGreen</h3>
+                                            </div>
+                                            <p class="brand-description">
+                                                Monitoring water management through innovative technology and sustainable solutions. 
+                            Building cleaner, greener cities for future generations.
+                                            </p>
+
+                                            <!-- FALLOW ONE JOURNEY section -->
+                                            <div class="social-section mt-4">
+                                                <h6 class="social-title">FALLOW ONE JOURNEY</h6>
+                                                <div class="footer-links-grid mt-2">
+                                                    <a href="Feedback.aspx" class="footer-link-item">
+                                                        <i class="fas fa-comment-alt"></i>
+                                                        <span>Feedback</span>
+                                                    </a>
+                                                    <a href="GetStarted.aspx" class="footer-link-item">
+                                                        <i class="fas fa-play-circle"></i>
+                                                        <span>Initiate</span>
+                                                    </a>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Navigation -->
+                                    <div class="col-lg-2 col-md-6">
+                                        <div class="footer-section">
+                                            <h4 class="section-title">Navigation</h4>
+                                            <div class="footer-links-grid">
+                                                <a href="Default.aspx" class="footer-link-item">
+                                                    <i class="fas fa-home"></i>
+                                                    <span>Home</span>
+                                                </a>
+                                                <a href="About.aspx" class="footer-link-item">
+                                                    <i class="fas fa-info-circle"></i>
+                                                    <span>About</span>
+                                                </a>
+                                                <a href="HowItWorks.aspx" class="footer-link-item">
+                                                    <i class="fas fa-cogs"></i>
+                                                    <span>How It Works</span>
+                                                </a>
+                                                <a href="Contact.aspx" class="footer-link-item">
+                                                    <i class="fas fa-envelope"></i>
+                                                    <span>Contact</span>
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Our Platform -->
+                                    <div class="col-lg-3 col-md-6">
+                                        <div class="footer-section">
+                                            <h4 class="section-title">Our Platform</h4>
+                                            <div class="footer-links-grid">
+                                                <a href="Dashboard.aspx" class="footer-link-item">
+                                                    <i class="fas fa-users"></i>
+                                                    <span>Citizen Portal</span>
+                                                </a>
+                                                <a href="AdminDashboard.aspx" class="footer-link-item">
+                                                    <i class="fas fa-chart-line"></i>
+                                                    <span>Admin Dashboard</span>
+                                                </a>
+                                                <a href="CollectorDashboard.aspx" class="footer-link-item">
+                                                    <i class="fas fa-truck"></i>
+                                                    <span>Collector Portal</span>
+                                                </a>
+                                                <a href="MunicipalityPortal.aspx" class="footer-link-item">
+                                                    <i class="fas fa-city"></i>
+                                                    <span>Municipality Portal</span>
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Get In Touch -->
+                                    <div class="col-lg-3">
+                                        <div class="footer-section">
+                                            <h4 class="section-title">Get In Touch</h4>
+                                            <div class="contact-info">
+                                                <div class="contact-item">
+                                                    <div class="contact-icon">
+                                                        <i class="fas fa-map-marker-alt"></i>
+                                                    </div>
+                                                    <div class="contact-details">
+                                                        <span class="contact-label">Our Locations</span>
+                                                        <span class="contact-value">100 Green Street, Eco City</span>
+                                                    </div>
+                                                </div>
+                                                <div class="contact-item">
+                                                    <div class="contact-icon">
+                                                        <i class="fas fa-phone"></i>
+                                                    </div>
+                                                    <div class="contact-details">
+                                                        <span class="contact-label">Call Us</span>
+                                                        <span class="contact-value">+1 (555) 731-5677</span>
+                                                    </div>
+                                                </div>
+                                                <div class="contact-item">
+                                                    <div class="contact-icon">
+                                                        <i class="fas fa-envelope"></i>
+                                                    </div>
+                                                    <div class="contact-details">
+                                                        <span class="contact-label">Email Us</span>
+                                                        <span class="contact-value">www.millioncourses.com</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- eALIF Team Section -->
+                            <div class="ealif-section">
+                                <div class="ealif-content">
+                                    <div class="ealif-logo">
+                                        <asp:Image ID="imgEalifLogo" runat="server" ImageUrl="~/favicon.ico"
+                                            Width="30" Height="30" AlternateText="eALIF Logo" />
+                                    </div>
+                                    <div class="ealif-text">
+                                        <span class="powered-by">Powered by</span>
+                                        <span class="team-name">eALIF Suite</span>
+                                    </div>
+                                    <div class="ealif-badge">
+                                        <span>Innovation Driven</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Copyright Section -->
+                            <div class="copyright-section">
+                                <div class="copyright-content">
+                                    <div class="copyright-text">
+                                        <span>&copy; <%= DateTime.Now.Year %> SoorGreen Initiative. All rights reserved.</span>
+                                    </div>
+                                    <div class="footer-actions">
+                                        <a href="PrivacyPolicy.aspx" class="footer-action-link">Privacy Policy</a>
+                                        <a href="TermsOfService.aspx" class="footer-action-link">Terms of Service</a>
+                                        <a href="CookiePolicy.aspx" class="footer-action-link">Cookie Policy</a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Floating Elements -->
+                        <div class="footer-floating-elements">
+                            <div class="floating-element el-1"><i class="fas fa-leaf"></i></div>
+                            <div class="floating-element el-2"><i class="fas fa-recycle"></i></div>
+                            <div class="floating-element el-3"><i class="fas fa-seedling"></i></div>
+                            <div class="floating-element el-4"><i class="fas fa-globe-americas"></i></div>
+                        </div>
+                    </footer>
+                </div>
+            </div>
+        </div>
+    </form>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+
+    <!-- SCRIPT CONTENT PLACEHOLDER -->
+    <asp:ContentPlaceHolder ID="ScriptsContent" runat="server"></asp:ContentPlaceHolder>
+
+    <script>
+        // Initialize AOS
+        AOS.init({ duration: 1000, once: true });
+
+        // Theme Management
+        function getTheme() {
+            return localStorage.getItem('theme') || 'light';
+        }
+
+        function setTheme(theme) {
+            document.documentElement.setAttribute('data-theme', theme);
+            localStorage.setItem('theme', theme);
+        }
+
+        function toggleTheme() {
+            const currentTheme = getTheme();
+            const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+            setTheme(newTheme);
+        }
+
+        // Initialize theme and sidebar
+        document.addEventListener('DOMContentLoaded', () => {
+            setTheme(getTheme());
+
+            // Initialize sidebar state
+            const sidebar = document.getElementById('sidebar');
+            const contentArea = document.getElementById('contentArea');
+            const isCollapsed = localStorage.getItem('sidebarCollapsed') === 'true';
+
+            if (window.innerWidth >= 992) {
+                if (isCollapsed) {
+                    sidebar.classList.add('collapsed');
+                    contentArea.classList.add('collapsed');
+                }
+            }
+
+            // Active menu item
+            const currentPath = window.location.pathname;
+            const currentPage = currentPath.substring(currentPath.lastIndexOf('/') + 1);
+            document.querySelectorAll('.menu-link').forEach(link => {
+                if (link.getAttribute('href') === currentPage ||
+                    link.getAttribute('href')?.includes(currentPage)) {
+                    link.classList.add('active');
+                }
+            });
+
+            // Scroll to top on page load
+            window.scrollTo(0, 0);
+
+            // Force content area height
+            setTimeout(forceContentHeight, 100);
+        });
+
+        // Force content area to have proper height
+        function forceContentHeight() {
+            const contentArea = document.getElementById('contentArea');
+            const pageContent = document.querySelector('.page-content');
+
+            if (contentArea && pageContent) {
+                const windowHeight = window.innerHeight;
+                const navbarHeight = 80;
+                const contentHeight = windowHeight - navbarHeight;
+
+                contentArea.style.minHeight = contentHeight + 'px';
+                pageContent.style.minHeight = (contentHeight - 250) + 'px';
+            }
+        }
+
+        // SIDEBAR TOGGLE FUNCTION
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            const contentArea = document.getElementById('contentArea');
+            const overlay = document.querySelector('.sidebar-overlay');
+
+            if (window.innerWidth < 992) {
+                // Mobile: toggle overlay
+                sidebar.classList.toggle('mobile-open');
+                overlay.classList.toggle('active');
+
+                // Only prevent scrolling when sidebar is open
+                if (sidebar.classList.contains('mobile-open')) {
+                    document.body.style.overflow = 'hidden';
+                } else {
+                    document.body.style.overflow = '';
+                }
+            } else {
+                // Desktop: toggle collapsed state
+                const isCollapsing = !sidebar.classList.contains('collapsed');
+                sidebar.classList.toggle('collapsed');
+                contentArea.classList.toggle('collapsed');
+                localStorage.setItem('sidebarCollapsed', isCollapsing);
+
+                // Adjust content height after sidebar toggle
+                setTimeout(forceContentHeight, 300);
+            }
+        }
+
+        // Close sidebar on overlay click (mobile)
+        document.querySelector('.sidebar-overlay').addEventListener('click', toggleSidebar);
+
+        // Close sidebar on Escape key
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                const sidebar = document.getElementById('sidebar');
+                if (sidebar.classList.contains('mobile-open')) {
+                    toggleSidebar();
+                }
+            }
+        });
+
+        // Handle window resize
+        window.addEventListener('resize', () => {
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.querySelector('.sidebar-overlay');
+            const contentArea = document.getElementById('contentArea');
+
+            if (window.innerWidth >= 992) {
+                sidebar.classList.remove('mobile-open');
+                overlay.classList.remove('active');
+                document.body.style.overflow = '';
+
+                // Restore collapsed state
+                const isCollapsed = localStorage.getItem('sidebarCollapsed') === 'true';
+                if (isCollapsed) {
+                    sidebar.classList.add('collapsed');
+                    contentArea.classList.add('collapsed');
+                } else {
+                    sidebar.classList.remove('collapsed');
+                    contentArea.classList.remove('collapsed');
+                }
+            }
+
+            // Adjust content height on resize
+            forceContentHeight();
+        });
+
+        // Dashboard specific functions
+        function initializeMap() {
+            const mapContainer = document.getElementById('mapContainer');
+            if (!mapContainer) return;
+
+            const map = L.map('mapContainer').setView([51.505, -0.09], 13);
+
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '© OpenStreetMap contributors'
+            }).addTo(map);
+
+            // Sample markers
+            const markers = [
+                { lat: 51.505, lng: -0.09, title: "Task #1", status: "pending" },
+                { lat: 51.51, lng: -0.1, title: "Task #2", status: "assigned" },
+                { lat: 51.49, lng: -0.08, title: "Task #3", status: "completed" }
+            ];
+
+            markers.forEach(marker => {
+                const iconColor = marker.status === 'completed' ? 'green' :
+                    marker.status === 'assigned' ? 'blue' : 'orange';
+
+                const icon = L.divIcon({
+                    html: `<div style="background: ${iconColor}; width: 20px; height: 20px; border-radius: 50%; border: 3px solid white; box-shadow: 0 0 10px rgba(0,0,0,0.3);"></div>`,
+                    className: 'custom-marker',
+                    iconSize: [20, 20]
+                });
+
+                L.marker([marker.lat, marker.lng], { icon: icon })
+                    .addTo(map)
+                    .bindPopup(`<b>${marker.title}</b><br>Status: ${marker.status}`);
+            });
+
+            if (markers.length > 0) {
+                const bounds = L.latLngBounds(markers.map(m => [m.lat, m.lng]));
+                map.fitBounds(bounds, { padding: [50, 50] });
+            }
+        }
+
+        function showNotification(message, type = 'info') {
+            const notification = document.createElement('div');
+            notification.className = `alert alert-${type} alert-dismissible fade show position-fixed`;
+            notification.style.cssText = `
+                top: 100px;
+                right: 20px;
+                z-index: 9999;
+                min-width: 300px;
+                box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+                border: none;
+            `;
+
+            notification.innerHTML = `
+                <strong>${type === 'success' ? '✓' : type === 'error' ? '✗' : 'ℹ'}</strong> ${message}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            `;
+
+            document.body.appendChild(notification);
+
+            setTimeout(() => {
+                if (notification.parentNode) {
+                    notification.remove();
+                }
+            }, 5000);
+        }
+
+        // Initialize map when panel is shown
+        document.addEventListener('DOMContentLoaded', function () {
+            const mapPanel = document.querySelector('[id*="pnlMapView"]');
+            if (mapPanel && mapPanel.style.display !== 'none') {
+                setTimeout(initializeMap, 100);
+            }
+
+            // Force content height multiple times to ensure it works
+            setTimeout(forceContentHeight, 500);
+            setTimeout(forceContentHeight, 1000);
+            setTimeout(forceContentHeight, 2000);
+        });
+    </script>
+</body>
+</html>

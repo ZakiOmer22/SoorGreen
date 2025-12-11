@@ -1,231 +1,133 @@
-﻿using SoorGreen.Admin;
-using System;
-using System.Collections.Generic;
+﻿using System;
 using System.Data;
 using System.Data.SqlClient;
-using System.Web.Configuration;
 using System.Web.UI;
-using System.Web.UI.HtmlControls;
+using System.Web.UI.WebControls;
 
 namespace SoorGreen.Admin
 {
     public partial class ReportWaste : System.Web.UI.Page
     {
-        private string connectionString = WebConfigurationManager.ConnectionStrings["SoorGreenDBConnectionString"].ConnectionString;
+        private string currentUserId;
+        private string selectedWasteTypeId;
+        private decimal selectedWasteRate;
+        private string selectedWasteName;
+        private decimal estimatedWeight = 0;
+        private decimal estimatedReward = 0;
+
+        string connectionString = System.Configuration.ConfigurationManager.ConnectionStrings["SoorGreenDBConnectionString"].ConnectionString;
 
         protected void Page_Load(object sender, EventArgs e)
         {
             if (!IsPostBack)
             {
-                if (Session["UserID"] == null)
+                // Check if user is logged in
+                if (Session["UserId"] == null)
                 {
                     Response.Redirect("~/Login.aspx");
                     return;
                 }
 
-                LoadUserDashboardStats();
+                currentUserId = Session["UserId"].ToString();
+
+                // Load user stats
+                LoadUserStats();
+
+                // Load waste types for step 1
                 LoadWasteTypes();
-                InitializeForm();
+
+                // Initialize step 1 as visible
+                ShowStep(1);
+
+                // Register startup scripts
+                RegisterStartupScripts();
             }
-        }
-
-        private void InitializeForm()
-        {
-            // Add JavaScript event handlers
-            txtWeight.Attributes.Add("oninput", "calculateReward()");
-
-            // Initialize photo upload
-            if (filePhoto != null)
+            else
             {
-                filePhoto.Attributes["onchange"] = "handlePhotoUpload(event)";
+                // Restore values from session
+                if (Session["UserId"] != null)
+                {
+                    currentUserId = Session["UserId"].ToString();
+                }
+
+                if (Session["SelectedWasteTypeId"] != null)
+                {
+                    selectedWasteTypeId = Session["SelectedWasteTypeId"].ToString();
+                }
+
+                if (Session["SelectedWasteRate"] != null)
+                {
+                    selectedWasteRate = (decimal)Session["SelectedWasteRate"];
+                }
+
+                if (Session["SelectedWasteName"] != null)
+                {
+                    selectedWasteName = Session["SelectedWasteName"].ToString();
+                }
+
+                if (Session["EstimatedWeight"] != null)
+                {
+                    estimatedWeight = (decimal)Session["EstimatedWeight"];
+                }
+
+                if (Session["EstimatedReward"] != null)
+                {
+                    estimatedReward = (decimal)Session["EstimatedReward"];
+                }
             }
         }
 
-        protected void btnSubmitReport_Click(object sender, EventArgs e)
+        private void LoadUserStats()
         {
             try
             {
-                if (Session["UserID"] == null)
-                {
-                    ShowNotification("Please log in to submit a report", "error");
-                    return;
-                }
-
-                if (string.IsNullOrEmpty(hdnWasteType.Value))
-                {
-                    ShowNotification("Please select a waste type", "error");
-                    return;
-                }
-
-                decimal weight;
-                if (string.IsNullOrEmpty(txtWeight.Text) || !decimal.TryParse(txtWeight.Text, out weight) || weight <= 0)
-                {
-                    ShowNotification("Please enter a valid weight greater than 0", "error");
-                    return;
-                }
-
-                if (string.IsNullOrEmpty(txtAddress.Text.Trim()))
-                {
-                    ShowNotification("Please enter collection address", "error");
-                    return;
-                }
-
-                decimal lat = 0, lng = 0;
-                if (!string.IsNullOrEmpty(txtLatitude.Text) && !string.IsNullOrEmpty(txtLongitude.Text))
-                {
-                    decimal.TryParse(txtLatitude.Text, out lat);
-                    decimal.TryParse(txtLongitude.Text, out lng);
-                }
-                else if (!string.IsNullOrEmpty(hdnLatitude.Value) && !string.IsNullOrEmpty(hdnLongitude.Value))
-                {
-                    decimal.TryParse(hdnLatitude.Value, out lat);
-                    decimal.TryParse(hdnLongitude.Value, out lng);
-                }
-
-                string photoUrl = UploadPhoto();
-
                 using (SqlConnection conn = new SqlConnection(connectionString))
                 {
                     conn.Open();
-                    using (SqlCommand cmd = new SqlCommand("sp_SubmitWasteReport", conn))
+
+                    // Get user credits
+                    string creditsQuery = @"SELECT ISNULL(SUM(Amount), 0) FROM RewardPoints WHERE UserId = @UserId";
+                    using (SqlCommand cmd = new SqlCommand(creditsQuery, conn))
                     {
-                        cmd.CommandType = CommandType.StoredProcedure;
+                        cmd.Parameters.AddWithValue("@UserId", currentUserId);
+                        var credits = cmd.ExecuteScalar();
+                        statCredits.InnerText = credits != DBNull.Value ? Convert.ToDecimal(credits).ToString("N2") : "0.00";
+                    }
 
-                        cmd.Parameters.AddWithValue("@UserId", Session["UserID"].ToString());
-                        cmd.Parameters.AddWithValue("@WasteTypeId", hdnWasteTypeId.Value);
-                        cmd.Parameters.AddWithValue("@WasteType", hdnWasteType.Value);
-                        cmd.Parameters.AddWithValue("@EstimatedKg", weight);
-                        cmd.Parameters.AddWithValue("@Description", txtDescription.Text.Trim());
-                        cmd.Parameters.AddWithValue("@Address", txtAddress.Text.Trim());
-                        cmd.Parameters.AddWithValue("@Landmark", txtLandmark.Text.Trim());
-                        cmd.Parameters.AddWithValue("@ContactPerson", txtContactPerson.Text.Trim());
-                        cmd.Parameters.AddWithValue("@Instructions", txtInstructions.Text.Trim());
-                        cmd.Parameters.AddWithValue("@Lat", lat > 0 ? (object)lat : DBNull.Value);
-                        cmd.Parameters.AddWithValue("@Lng", lng > 0 ? (object)lng : DBNull.Value);
-                        cmd.Parameters.AddWithValue("@PhotoUrl", string.IsNullOrEmpty(photoUrl) ? DBNull.Value : (object)photoUrl);
+                    // Get user report count
+                    string reportsQuery = @"SELECT COUNT(*) FROM WasteReports WHERE UserId = @UserId";
+                    using (SqlCommand cmd = new SqlCommand(reportsQuery, conn))
+                    {
+                        cmd.Parameters.AddWithValue("@UserId", currentUserId);
+                        var reportCount = cmd.ExecuteScalar();
+                        statReports.InnerText = reportCount != DBNull.Value ? reportCount.ToString() : "0";
+                    }
 
-                        // Calculate and add estimated reward
-                        decimal estimatedReward = CalculateEstimatedReward(weight, hdnWasteTypeId.Value);
-                        cmd.Parameters.AddWithValue("@EstimatedReward", estimatedReward);
+                    // Get total weight recycled
+                    string weightQuery = @"SELECT ISNULL(SUM(wr.EstimatedKg), 0) 
+                                          FROM WasteReports wr
+                                          INNER JOIN PickupRequests pr ON wr.ReportId = pr.ReportId
+                                          WHERE wr.UserId = @UserId AND pr.Status = 'Collected'";
+                    using (SqlCommand cmd = new SqlCommand(weightQuery, conn))
+                    {
+                        cmd.Parameters.AddWithValue("@UserId", currentUserId);
+                        var weight = cmd.ExecuteScalar();
+                        statWeight.InnerText = weight != DBNull.Value ? Convert.ToDecimal(weight).ToString("N1") + " kg" : "0.0 kg";
+                    }
 
-                        cmd.ExecuteNonQuery();
-
-                        ShowSuccessMessage();
-
-                        ClearForm();
-                        LoadUserDashboardStats();
+                    // Get potential reward
+                    string potentialQuery = @"SELECT TOP 1 CreditPerKg FROM WasteTypes ORDER BY CreditPerKg DESC";
+                    using (SqlCommand cmd = new SqlCommand(potentialQuery, conn))
+                    {
+                        var maxRate = cmd.ExecuteScalar();
+                        statPotential.InnerText = maxRate != DBNull.Value ? Convert.ToDecimal(maxRate).ToString("N0") + " XP/kg" : "0 XP";
                     }
                 }
             }
             catch (Exception ex)
             {
-                ShowNotification("Error submitting report: " + ex.Message, "error");
-                LogError("ReportWaste.Submit", ex.Message);
-            }
-        }
-
-        private decimal CalculateEstimatedReward(decimal weight, string wasteTypeId)
-        {
-            try
-            {
-                // Get reward rate from WasteTypes table
-                using (SqlConnection conn = new SqlConnection(connectionString))
-                {
-                    conn.Open();
-                    string query = "SELECT CreditPerKg FROM WasteTypes WHERE WasteTypeId = @WasteTypeId";
-                    using (SqlCommand cmd = new SqlCommand(query, conn))
-                    {
-                        cmd.Parameters.AddWithValue("@WasteTypeId", wasteTypeId);
-                        object result = cmd.ExecuteScalar();
-                        if (result != null && result != DBNull.Value)
-                        {
-                            decimal creditPerKg = Convert.ToDecimal(result);
-                            return weight * creditPerKg;
-                        }
-                    }
-                }
-            }
-            catch { }
-            return 0;
-        }
-
-        private void LoadUserDashboardStats()
-        {
-            try
-            {
-                using (SqlConnection conn = new SqlConnection(connectionString))
-                {
-                    conn.Open();
-                    string userId = Session["UserID"].ToString();
-
-                    string query = @"
-                        SELECT 
-                            TotalReports,
-                            TotalCredits,
-                            TotalKgRecycled,
-                            CASE WHEN TotalReports > 0 THEN CONVERT(DECIMAL(10,2), (TotalKgRecycled / TotalReports)) ELSE 0 END as AvgWeight,
-                            CASE WHEN TotalReports > 0 THEN CONVERT(DECIMAL(10,2), (TotalPickups * 100.0 / TotalReports)) ELSE 100 END as SuccessRate
-                        FROM vw_CitizenActivitySummary 
-                        WHERE UserId = @UserId";
-
-                    using (SqlCommand cmd = new SqlCommand(query, conn))
-                    {
-                        cmd.Parameters.AddWithValue("@UserId", userId);
-                        using (SqlDataReader reader = cmd.ExecuteReader())
-                        {
-                            if (reader.Read())
-                            {
-                                int totalReports = reader.IsDBNull(0) ? 0 : reader.GetInt32(0);
-                                decimal totalCredits = reader.IsDBNull(1) ? 0 : reader.GetDecimal(1);
-                                decimal totalKgRecycled = reader.IsDBNull(2) ? 0 : reader.GetDecimal(2);
-                                decimal avgWeight = reader.IsDBNull(3) ? 0 : reader.GetDecimal(3);
-                                decimal successRate = reader.IsDBNull(4) ? 0 : reader.GetDecimal(4);
-
-                                // Update the stats display using JavaScript
-                                string script = string.Format(
-                                    @"if (document.getElementById('totalReports')) {{
-                                        document.getElementById('totalReports').textContent = '{0}';
-                                        document.getElementById('totalRewards').textContent = '{1}';
-                                        document.getElementById('avgWeight').textContent = '{2}';
-                                        document.getElementById('successRate').textContent = '{3}%';
-                                    }}
-                                    
-                                    // Update potential reward with max value
-                                    if (document.getElementById('potentialReward')) {{
-                                        var maxReward = {1} > 0 ? {1} : 50;
-                                        document.getElementById('potentialReward').textContent = maxReward.toFixed(0) + ' XP';
-                                    }}",
-                                    totalReports,
-                                    totalCredits.ToString("F0"),
-                                    avgWeight.ToString("F1"),
-                                    successRate.ToString("F0")
-                                );
-
-                                ScriptManager.RegisterStartupScript(this, this.GetType(), "updateStats", script, true);
-                            }
-                        }
-                    }
-
-                    // Update the potential reward badge via JavaScript
-                    string maxRewardQuery = "SELECT MAX(CreditPerKg) * 10 FROM WasteTypes";
-                    using (SqlCommand cmd = new SqlCommand(maxRewardQuery, conn))
-                    {
-                        object result = cmd.ExecuteScalar();
-                        decimal maxReward = result != DBNull.Value ? (decimal)result : 50;
-
-                        string updateScript = string.Format(
-                            @"if (document.getElementById('potentialReward')) {{
-                                document.getElementById('potentialReward').textContent = '{0} XP';
-                            }}",
-                            maxReward.ToString("F0")
-                        );
-                        ScriptManager.RegisterStartupScript(this, this.GetType(), "updateMaxReward", updateScript, true);
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                LogError("LoadUserDashboardStats", ex.Message);
+                // Show error in console only
+                System.Diagnostics.Debug.WriteLine("LoadUserStats Error: " + ex.Message);
             }
         }
 
@@ -236,242 +138,676 @@ namespace SoorGreen.Admin
                 using (SqlConnection conn = new SqlConnection(connectionString))
                 {
                     conn.Open();
-                    string query = "SELECT WasteTypeId, Name, CreditPerKg, CategoryCode FROM WasteTypes WHERE IsActive = 1 ORDER BY DisplayOrder, Name";
+
+                    // SIMPLE QUERY - NO WHERE CLAUSE
+                    string query = @"SELECT WasteTypeId, Name, Description, Category, CreditPerKg 
+                                     FROM WasteTypes 
+                                     ORDER BY Name";
+
                     using (SqlCommand cmd = new SqlCommand(query, conn))
-                    using (SqlDataReader reader = cmd.ExecuteReader())
                     {
-                        var wasteTypes = new List<WasteType>();
-                        while (reader.Read())
+                        using (SqlDataAdapter da = new SqlDataAdapter(cmd))
                         {
-                            wasteTypes.Add(new WasteType
+                            DataTable dt = new DataTable();
+                            da.Fill(dt);
+
+                            if (dt.Rows.Count == 0)
                             {
-                                WasteTypeId = reader["WasteTypeId"].ToString(),
-                                Name = reader["Name"].ToString(),
-                                CreditPerKg = Convert.ToDecimal(reader["CreditPerKg"]),
-                                CategoryCode = reader["CategoryCode"].ToString()
-                            });
+                                // Insert default waste types if table is empty
+                                InsertDefaultWasteTypes(conn);
+                                // Reload
+                                da.Fill(dt);
+                            }
+
+                            rptWasteTypes.DataSource = dt;
+                            rptWasteTypes.DataBind();
                         }
-
-                        // Store in session for potential use
-                        Session["WasteTypes"] = wasteTypes;
-
-                        // Pass waste types to JavaScript
-                        string jsArray = "var wasteTypes = " + Newtonsoft.Json.JsonConvert.SerializeObject(wasteTypes) + ";";
-                        ScriptManager.RegisterStartupScript(this, this.GetType(), "wasteTypesJS", jsArray, true);
                     }
                 }
             }
             catch (Exception ex)
             {
-                LogError("LoadWasteTypes", ex.Message);
+                // Use fallback data
+                LoadFallbackWasteTypes();
+                System.Diagnostics.Debug.WriteLine("LoadWasteTypes Error: " + ex.Message);
             }
         }
 
-        private string UploadPhoto()
+        private void InsertDefaultWasteTypes(SqlConnection conn)
         {
-            // Handle HTML file input instead of ASP.NET FileUpload control
-            var fileInput = filePhoto as HtmlInputFile;
-
-            if (fileInput == null || fileInput.PostedFile == null || string.IsNullOrEmpty(fileInput.PostedFile.FileName))
-            {
-                return string.Empty;
-            }
-
             try
             {
-                string fileName = fileInput.PostedFile.FileName;
-                string fileExtension = System.IO.Path.GetExtension(fileName).ToLower();
-                string[] allowedExtensions = { ".jpg", ".jpeg", ".png", ".gif" };
+                string insertQuery = @"
+                    INSERT INTO WasteTypes (WasteTypeId, Name, Description, Category, CreditPerKg, ColorCode) VALUES
+                    ('WT01', 'Plastic', 'Plastic bottles, containers, packaging materials', 'Recyclable', 10.50, '#3B82F6'),
+                    ('WT02', 'Paper', 'Newspapers, cardboard, office paper, magazines', 'Recyclable', 8.75, '#10B981'),
+                    ('WT03', 'Metal', 'Aluminum cans, steel containers, scrap metal', 'Recyclable', 15.25, '#6B7280'),
+                    ('WT04', 'Glass', 'Glass bottles, jars, broken glass pieces', 'Recyclable', 7.50, '#8B5CF6'),
+                    ('WT05', 'Electronics', 'E-waste, batteries, cables, small appliances', 'Hazardous', 25.00, '#F59E0B'),
+                    ('WT06', 'Organic', 'Food waste, garden waste, compostable materials', 'Compostable', 5.00, '#22C55E'),
+                    ('WT07', 'Textiles', 'Clothes, fabrics, shoes, blankets', 'Reusable', 12.00, '#EC4899'),
+                    ('WT08', 'Hazardous', 'Chemicals, medical waste, paint, oil', 'Special', 30.00, '#EF4444')";
 
-                if (Array.IndexOf(allowedExtensions, fileExtension) == -1)
+                using (SqlCommand cmd = new SqlCommand(insertQuery, conn))
                 {
-                    ShowNotification("Only image files (JPG, PNG, GIF) are allowed.", "error");
-                    return string.Empty;
+                    cmd.ExecuteNonQuery();
                 }
-
-                if (fileInput.PostedFile.ContentLength > 5 * 1024 * 1024)
-                {
-                    ShowNotification("File size must be less than 5MB.", "error");
-                    return string.Empty;
-                }
-
-                string newFileName = Guid.NewGuid().ToString() + fileExtension;
-                string uploadPath = Server.MapPath("~/Uploads/WastePhotos/");
-
-                if (!System.IO.Directory.Exists(uploadPath))
-                    System.IO.Directory.CreateDirectory(uploadPath);
-
-                string filePath = System.IO.Path.Combine(uploadPath, newFileName);
-                fileInput.PostedFile.SaveAs(filePath);
-
-                return "/Uploads/WastePhotos/" + newFileName;
             }
             catch (Exception ex)
             {
-                ShowNotification("Error uploading photo: " + ex.Message, "error");
-                return string.Empty;
+                System.Diagnostics.Debug.WriteLine("InsertDefaultWasteTypes Error: " + ex.Message);
             }
         }
 
-        private void ShowSuccessMessage()
+        private void LoadFallbackWasteTypes()
+        {
+            DataTable dt = new DataTable();
+            dt.Columns.Add("WasteTypeId", typeof(string));
+            dt.Columns.Add("Name", typeof(string));
+            dt.Columns.Add("Description", typeof(string));
+            dt.Columns.Add("Category", typeof(string));
+            dt.Columns.Add("CreditPerKg", typeof(decimal));
+
+            dt.Rows.Add("WT01", "Plastic", "Plastic bottles, containers, packaging", "Recyclable", 10.50);
+            dt.Rows.Add("WT02", "Paper", "Newspapers, cardboard, office paper", "Recyclable", 8.75);
+            dt.Rows.Add("WT03", "Metal", "Aluminum cans, scrap metal", "Recyclable", 15.25);
+            dt.Rows.Add("WT04", "Glass", "Bottles, jars, broken glass", "Recyclable", 7.50);
+            dt.Rows.Add("WT05", "Electronics", "E-waste, batteries, cables", "Hazardous", 25.00);
+            dt.Rows.Add("WT06", "Organic", "Food waste, garden waste", "Compostable", 5.00);
+            dt.Rows.Add("WT07", "Textiles", "Clothes, fabrics, shoes", "Reusable", 12.00);
+            dt.Rows.Add("WT08", "Hazardous", "Chemicals, medical waste", "Special", 30.00);
+
+            rptWasteTypes.DataSource = dt;
+            rptWasteTypes.DataBind();
+        }
+
+        protected void rptWasteTypes_ItemCommand(object source, RepeaterCommandEventArgs e)
+        {
+            if (e.CommandName == "SelectType")
+            {
+                string[] args = e.CommandArgument.ToString().Split('|');
+                if (args.Length >= 3)
+                {
+                    selectedWasteTypeId = args[0];
+                    selectedWasteRate = decimal.Parse(args[1]);
+                    selectedWasteName = args[2];
+
+                    // Store in session
+                    Session["SelectedWasteTypeId"] = selectedWasteTypeId;
+                    Session["SelectedWasteRate"] = selectedWasteRate;
+                    Session["SelectedWasteName"] = selectedWasteName;
+
+                    // Update preview labels
+                    lblSelectedWaste.Text = selectedWasteName;
+                    lblRatePreview.Text = selectedWasteRate.ToString("N2") + " XP/kg";
+
+                    // Enable next button
+                    btnNextStep1.Enabled = true;
+
+                    // Show success message
+                    ShowMessage("Waste type selected: " + selectedWasteName, "success");
+
+                    // SAFE UI UPDATE - No JavaScript function dependency
+                    string script = @"
+                        setTimeout(function() {
+                            // Clear previous selections
+                            var wasteCards = document.querySelectorAll('.category-card-glass');
+                            wasteCards.forEach(function(card) {
+                                card.classList.remove('selected');
+                            });
+                            
+                            // Find and select the clicked card
+                            var selectedCards = document.querySelectorAll('.waste-type-select');
+                            selectedCards.forEach(function(card) {
+                                if (card.textContent.indexOf('" + selectedWasteName.Replace("'", "\\'") + @"') > -1) {
+                                    var parent = card.closest('.category-card-glass');
+                                    if (parent) {
+                                        parent.classList.add('selected');
+                                    }
+                                }
+                            });
+                        }, 100);
+                    ";
+
+                    ScriptManager.RegisterStartupScript(this, GetType(), "SelectWasteType_" + Guid.NewGuid(), script, true);
+                }
+            }
+        }
+
+        protected void btnNextStep1_Click(object sender, EventArgs e)
+        {
+            if (!string.IsNullOrEmpty(selectedWasteTypeId))
+            {
+                ShowStep(2);
+                UpdateWeightPreview();
+            }
+            else
+            {
+                ShowMessage("Please select a waste type first.", "error");
+            }
+        }
+
+        protected void btnBackStep2_Click(object sender, EventArgs e)
+        {
+            ShowStep(1);
+        }
+
+        protected void btnNextStep2_Click(object sender, EventArgs e)
+        {
+            if (IsValidStep2())
+            {
+                ShowStep(3);
+                UpdateWeightPreview();
+            }
+        }
+
+        protected void btnBackStep3_Click(object sender, EventArgs e)
+        {
+            ShowStep(2);
+            UpdateWeightPreview();
+        }
+
+        protected void btnNextStep3_Click(object sender, EventArgs e)
+        {
+            if (IsValidStep3())
+            {
+                UpdateReviewSection();
+                ShowStep(4);
+            }
+        }
+
+        protected void btnBackStep4_Click(object sender, EventArgs e)
+        {
+            ShowStep(3);
+            UpdateWeightPreview();
+        }
+
+        protected void btnSubmitReport_Click(object sender, EventArgs e)
+        {
+            if (IsValidStep4())
+            {
+                try
+                {
+                    SubmitWasteReport();
+                }
+                catch (Exception ex)
+                {
+                    ShowMessage("Error submitting report: " + ex.Message, "error");
+                }
+            }
+        }
+
+        protected void btnSubmitAnother_Click(object sender, EventArgs e)
+        {
+            ResetForm();
+            ShowStep(1);
+        }
+
+        protected void txtWeight_TextChanged(object sender, EventArgs e)
+        {
+            UpdateWeightPreview();
+        }
+
+        protected void btnWeight0_5_Click(object sender, EventArgs e)
+        {
+            txtWeight.Text = "0.5";
+            UpdateWeightPreview();
+        }
+
+        protected void btnWeight1_Click(object sender, EventArgs e)
+        {
+            txtWeight.Text = "1";
+            UpdateWeightPreview();
+        }
+
+        protected void btnWeight2_Click(object sender, EventArgs e)
+        {
+            txtWeight.Text = "2";
+            UpdateWeightPreview();
+        }
+
+        protected void btnWeight5_Click(object sender, EventArgs e)
+        {
+            txtWeight.Text = "5";
+            UpdateWeightPreview();
+        }
+
+        protected void btnWeight10_Click(object sender, EventArgs e)
+        {
+            txtWeight.Text = "10";
+            UpdateWeightPreview();
+        }
+
+        protected void btnGetLocation_Click(object sender, EventArgs e)
         {
             string script = @"
-                Swal.fire({
-                    icon: 'success',
-                    title: 'Report Submitted Successfully!',
-                    text: 'Your waste report has been submitted. A collector will contact you within 24-48 hours.',
-                    confirmButtonText: 'Go to Dashboard',
-                    confirmButtonColor: '#10b981',
-                    showCancelButton: true,
-                    cancelButtonText: 'Submit Another',
-                    cancelButtonColor: '#64748b'
-                }).then((result) => {
-                    if (result.isConfirmed) {
-                        window.location.href = 'Dashboard.aspx';
-                    } else if (result.dismiss === Swal.DismissReason.cancel) {
-                        // Reset form for another submission
-                        document.querySelector('.form-wrapper').scrollIntoView({ behavior: 'smooth' });
-                    }
-                });";
-
-            ScriptManager.RegisterStartupScript(this, this.GetType(), "SuccessMessage", script, true);
-        }
-
-        private void ShowNotification(string message, string type)
-        {
-            string script = "showNotification('" + message.Replace("'", "\\'") + "', '" + type + "');";
-            ScriptManager.RegisterStartupScript(this, this.GetType(), "ShowNotification", script, true);
-        }
-
-        private void ClearForm()
-        {
-            // Clear all form fields
-            hdnWasteType.Value = string.Empty;
-            hdnWasteTypeId.Value = string.Empty;
-            txtWeight.Text = string.Empty;
-            txtDescription.Text = string.Empty;
-            txtAddress.Text = string.Empty;
-            txtLandmark.Text = string.Empty;
-            txtContactPerson.Text = string.Empty;
-            txtInstructions.Text = string.Empty;
-            txtLatitude.Text = string.Empty;
-            txtLongitude.Text = string.Empty;
-            hdnLatitude.Value = string.Empty;
-            hdnLongitude.Value = string.Empty;
-
-            // Clear photo preview and reset form steps
-            string clearScript = @"
-                // Clear photo preview
-                var photoPreview = document.getElementById('photoPreview');
-                if (photoPreview) {
-                    var placeholder = photoPreview.querySelector('.preview-placeholder');
-                    if (placeholder) {
-                        photoPreview.innerHTML = '';
-                        photoPreview.appendChild(placeholder.cloneNode(true));
-                    }
+                if (navigator.geolocation) {
+                    navigator.geolocation.getCurrentPosition(
+                        function(position) {
+                            document.getElementById('" + txtLatitude.ClientID + @"').value = position.coords.latitude.toFixed(6);
+                            document.getElementById('" + txtLongitude.ClientID + @"').value = position.coords.longitude.toFixed(6);
+                            
+                            var messagePanel = document.querySelector('.message-panel');
+                            if (messagePanel) {
+                                messagePanel.innerHTML = 
+                                    '<div class=""message-alert success show"">' +
+                                    '    <i class=""fas fa-check-circle""></i>' +
+                                    '    <div>' +
+                                    '        <strong>Location Captured!</strong>' +
+                                    '        <p class=""mb-0"">Current location coordinates have been filled.</p>' +
+                                    '    </div>' +
+                                    '</div>';
+                                messagePanel.style.display = 'block';
+                                setTimeout(function() { messagePanel.style.display = 'none'; }, 3000);
+                            }
+                        },
+                        function(error) {
+                            alert('Unable to get location. Please enter manually.');
+                        }
+                    );
+                } else {
+                    alert('Geolocation is not supported by your browser.');
                 }
-                
-                // Reset form to step 1
-                if (typeof goToStep === 'function') {
-                    goToStep(1);
-                }
-                
-                // Clear all category selections
-                document.querySelectorAll('.category-card').forEach(card => {
-                    card.classList.remove('selected');
-                });
-                
-                // Reset checkboxes
-                var chkConfirm = document.getElementById('chkConfirmDetails');
-                var chkAgree = document.getElementById('chkAgreeTerms');
-                var chkSchedule = document.getElementById('chkSchedulePickup');
-                
-                if (chkConfirm) chkConfirm.checked = false;
-                if (chkAgree) chkAgree.checked = false;
-                if (chkSchedule) chkSchedule.checked = false;
-                
-                // Reset reward display
-                var estimatedReward = document.getElementById('estimatedReward');
-                var rewardWeight = document.getElementById('rewardWeight');
-                var rewardRate = document.getElementById('rewardRate');
-                var rewardTotal = document.getElementById('rewardTotal');
-                
-                if (estimatedReward) estimatedReward.textContent = '0 XP';
-                if (rewardWeight) rewardWeight.textContent = '0 kg';
-                if (rewardRate) rewardRate.textContent = '0 XP/kg';
-                if (rewardTotal) rewardTotal.textContent = '0 XP';
-                
-                // Clear file input
-                var fileInput = document.getElementById('filePhoto');
-                if (fileInput) fileInput.value = '';";
+            ";
 
-            ScriptManager.RegisterStartupScript(this, this.GetType(), "ClearForm", clearScript, true);
+            ScriptManager.RegisterStartupScript(this, GetType(), "GetLocation", script, true);
         }
 
-        private void LogError(string method, string message)
+        private void ShowStep(int stepNumber)
         {
-            try
+            // Hide all steps
+            pnlStep1.Visible = false;
+            pnlStep2.Visible = false;
+            pnlStep3.Visible = false;
+            pnlStep4.Visible = false;
+            pnlSuccess.Visible = false;
+
+            // Show selected step
+            if (stepNumber == 1)
             {
-                using (SqlConnection conn = new SqlConnection(connectionString))
+                pnlStep1.Visible = true;
+            }
+            else if (stepNumber == 2)
+            {
+                pnlStep2.Visible = true;
+            }
+            else if (stepNumber == 3)
+            {
+                pnlStep3.Visible = true;
+            }
+            else if (stepNumber == 4)
+            {
+                pnlStep4.Visible = true;
+            }
+            else if (stepNumber == 0) // Special case for success
+            {
+                pnlSuccess.Visible = true;
+                stepNumber = 4; // For progress steps
+            }
+
+            // Update progress steps
+            UpdateProgressSteps(stepNumber);
+        }
+
+        private void UpdateProgressSteps(int currentStep)
+        {
+            string script = @"
+                for (var i = 1; i <= 4; i++) {
+                    var stepElement = document.getElementById('step' + i);
+                    var lineElement = document.getElementById('line' + i);
+                    if (stepElement) stepElement.classList.remove('active');
+                    if (lineElement) lineElement.classList.remove('active');
+                }
+
+                for (var i = 1; i <= " + currentStep + @"; i++) {
+                    var stepElement = document.getElementById('step' + i);
+                    var lineElement = document.getElementById('line' + i);
+                    if (stepElement) stepElement.classList.add('active');
+                    if (lineElement && i < " + currentStep + @") lineElement.classList.add('active');
+                }
+            ";
+
+            ScriptManager.RegisterStartupScript(this, GetType(), "UpdateProgress_" + Guid.NewGuid().ToString("N"), script, true);
+        }
+
+        private void UpdateWeightPreview()
+        {
+            decimal weight = 0;
+            if (!string.IsNullOrEmpty(txtWeight.Text))
+            {
+                decimal.TryParse(txtWeight.Text, out weight);
+            }
+
+            estimatedWeight = weight;
+            estimatedReward = weight * selectedWasteRate;
+
+            // Update labels
+            lblWeightPreview.Text = weight.ToString("N1");
+            lblWeightDisplay.Text = weight.ToString("N1") + " kg";
+            lblEstimatedReward.Text = estimatedReward.ToString("N0");
+
+            // Store in session
+            Session["EstimatedWeight"] = estimatedWeight;
+            Session["EstimatedReward"] = estimatedReward;
+        }
+
+        private void UpdateReviewSection()
+        {
+            // Update review labels
+            lblReviewWasteType.Text = selectedWasteName;
+            lblReviewWeight.Text = estimatedWeight.ToString("N1") + " kg";
+            lblReviewRate.Text = selectedWasteRate.ToString("N2") + " XP/kg";
+            lblReviewContact.Text = !string.IsNullOrEmpty(txtContactPerson.Text) ? txtContactPerson.Text : "-";
+            lblReviewAddress.Text = !string.IsNullOrEmpty(txtAddress.Text) ? txtAddress.Text : "Not provided";
+            lblReviewDescription.Text = !string.IsNullOrEmpty(txtDescription.Text) ? txtDescription.Text : "No description provided";
+
+            // Update final reward section
+            lblFinalWeight.Text = estimatedWeight.ToString("N1") + " kg";
+            lblFinalRate.Text = selectedWasteRate.ToString("N2") + " XP/kg";
+            lblFinalReward.Text = estimatedReward.ToString("N0");
+            lblFinalTotal.Text = estimatedReward.ToString("N0") + " XP";
+        }
+
+        private bool IsValidStep2()
+        {
+            decimal weight;
+            if (string.IsNullOrEmpty(txtWeight.Text) || !decimal.TryParse(txtWeight.Text, out weight) || weight <= 0)
+            {
+                ShowMessage("Please enter a valid weight greater than 0.", "error");
+                return false;
+            }
+
+            if (weight > 1000)
+            {
+                ShowMessage("Weight cannot exceed 1000 kg. Please contact support for large quantities.", "error");
+                return false;
+            }
+
+            return true;
+        }
+
+        private bool IsValidStep3()
+        {
+            if (string.IsNullOrEmpty(txtAddress.Text))
+            {
+                ShowMessage("Please enter collection address.", "error");
+                return false;
+            }
+
+            return true;
+        }
+
+        private bool IsValidStep4()
+        {
+            if (!chkConfirmDetails.Checked)
+            {
+                ShowMessage("Please confirm that all details are correct.", "error");
+                return false;
+            }
+
+            if (!chkAgreeTerms.Checked)
+            {
+                ShowMessage("Please agree to the terms and conditions.", "error");
+                return false;
+            }
+
+            return true;
+        }
+
+        private void SubmitWasteReport()
+        {
+            using (SqlConnection conn = new SqlConnection(connectionString))
+            {
+                conn.Open();
+
+                using (SqlTransaction transaction = conn.BeginTransaction())
                 {
-                    conn.Open();
-                    string query = @"
-                        INSERT INTO ErrorLogs (ErrorType, Url, Message, UserIP, UserAgent, Referrer, CreatedAt)
-                        VALUES (@ErrorType, @Url, @Message, @UserIP, @UserAgent, @Referrer, GETDATE())";
-
-                    using (SqlCommand cmd = new SqlCommand(query, conn))
+                    try
                     {
-                        cmd.Parameters.AddWithValue("@ErrorType", method);
-                        cmd.Parameters.AddWithValue("@Url", Request.Url.ToString());
-                        cmd.Parameters.AddWithValue("@Message", message);
-                        cmd.Parameters.AddWithValue("@UserIP", GetClientIP());
-                        cmd.Parameters.AddWithValue("@UserAgent", Request.UserAgent ?? "Unknown");
-                        cmd.Parameters.AddWithValue("@Referrer", Request.UrlReferrer != null ? Request.UrlReferrer.ToString() : "Direct");
+                        // Generate Report ID
+                        string reportId = GenerateNextId(conn, transaction, "WasteReports", "ReportId", "WR");
 
-                        cmd.ExecuteNonQuery();
+                        // Insert waste report
+                        string insertReportQuery = @"
+                            INSERT INTO WasteReports (ReportId, UserId, WasteTypeId, EstimatedKg, Address, Lat, Lng, CreatedAt)
+                            VALUES (@ReportId, @UserId, @WasteTypeId, @EstimatedKg, @Address, @Lat, @Lng, @CreatedAt)";
+
+                        using (SqlCommand cmd = new SqlCommand(insertReportQuery, conn, transaction))
+                        {
+                            cmd.Parameters.AddWithValue("@ReportId", reportId);
+                            cmd.Parameters.AddWithValue("@UserId", currentUserId);
+                            cmd.Parameters.AddWithValue("@WasteTypeId", selectedWasteTypeId);
+                            cmd.Parameters.AddWithValue("@EstimatedKg", estimatedWeight);
+                            cmd.Parameters.AddWithValue("@Address", txtAddress.Text);
+                            cmd.Parameters.AddWithValue("@Lat", !string.IsNullOrEmpty(txtLatitude.Text) ? txtLatitude.Text : (object)DBNull.Value);
+                            cmd.Parameters.AddWithValue("@Lng", !string.IsNullOrEmpty(txtLongitude.Text) ? txtLongitude.Text : (object)DBNull.Value);
+                            cmd.Parameters.AddWithValue("@CreatedAt", DateTime.Now);
+
+                            cmd.ExecuteNonQuery();
+                        }
+
+                        // Generate Pickup ID
+                        string pickupId = GenerateNextId(conn, transaction, "PickupRequests", "PickupId", "PK");
+
+                        // Insert pickup request
+                        string insertPickupQuery = @"
+                            INSERT INTO PickupRequests (PickupId, ReportId, Status, ScheduledAt)
+                            VALUES (@PickupId, @ReportId, 'Requested', DATEADD(HOUR, 48, GETDATE()))";
+
+                        using (SqlCommand cmd = new SqlCommand(insertPickupQuery, conn, transaction))
+                        {
+                            cmd.Parameters.AddWithValue("@PickupId", pickupId);
+                            cmd.Parameters.AddWithValue("@ReportId", reportId);
+                            cmd.ExecuteNonQuery();
+                        }
+
+                        // Insert user activity
+                        string insertActivityQuery = @"
+                            INSERT INTO UserActivities (UserId, ActivityType, Description, Points, Timestamp)
+                            VALUES (@UserId, 'WasteReport', @Description, 5, @Timestamp)";
+
+                        using (SqlCommand cmd = new SqlCommand(insertActivityQuery, conn, transaction))
+                        {
+                            cmd.Parameters.AddWithValue("@UserId", currentUserId);
+                            cmd.Parameters.AddWithValue("@Description", "Reported " + selectedWasteName + " for collection (" + estimatedWeight.ToString("N1") + " kg)");
+                            cmd.Parameters.AddWithValue("@Timestamp", DateTime.Now);
+                            cmd.ExecuteNonQuery();
+                        }
+
+                        // Commit transaction
+                        transaction.Commit();
+
+                        // Update success display
+                        lblSuccessReportId.Text = reportId;
+                        lblSuccessPickupId.Text = pickupId;
+                        lblSuccessReward.Text = estimatedReward.ToString("N0") + " XP";
+                        lblSuccessTime.Text = DateTime.Now.ToString("yyyy-MM-dd HH:mm");
+
+                        // Update user stats
+                        LoadUserStats();
+
+                        // Show success step
+                        ShowStep(0); // 0 means success
+
+                        // Show success message
+                        ShowMessage("Waste report submitted successfully! A collector will contact you within 48 hours.", "success");
+
+                        // Trigger success animation
+                        string successScript = "showDatabaseConfirmation();";
+                        ScriptManager.RegisterStartupScript(this, GetType(), "ShowSuccess", successScript, true);
+                    }
+                    catch (Exception ex)
+                    {
+                        transaction.Rollback();
+                        ShowMessage("Failed to submit report: " + ex.Message, "error");
                     }
                 }
             }
-            catch { }
         }
 
-        private string GetClientIP()
+        private string GenerateNextId(SqlConnection conn, SqlTransaction transaction, string tableName, string idColumn, string prefix)
         {
-            string ip = Request.ServerVariables["HTTP_X_FORWARDED_FOR"];
-            if (string.IsNullOrEmpty(ip))
-                ip = Request.ServerVariables["REMOTE_ADDR"];
-            if (string.IsNullOrEmpty(ip))
-                ip = Request.UserHostAddress;
-            return ip ?? "Unknown";
-        }
+            string query = string.Format(@"
+                SELECT ISNULL(MAX(CAST(SUBSTRING({0}, 3, LEN({0})) AS INT)), 0) + 1 
+                FROM {1} 
+                WHERE {0} LIKE '{2}%'", idColumn, tableName, prefix);
 
-        [System.Web.Services.WebMethod]
-        public static string GetWasteTypeIdByName(string wasteTypeName)
-        {
-            try
+            using (SqlCommand cmd = new SqlCommand(query, conn, transaction))
             {
-                string connectionString = WebConfigurationManager.ConnectionStrings["SoorGreenDBConnectionString"].ConnectionString;
-                using (SqlConnection conn = new SqlConnection(connectionString))
-                {
-                    conn.Open();
-                    string query = "SELECT WasteTypeId FROM WasteTypes WHERE LOWER(Name) = @Name";
-                    using (SqlCommand cmd = new SqlCommand(query, conn))
-                    {
-                        cmd.Parameters.AddWithValue("@Name", wasteTypeName.ToLower());
-                        object result = cmd.ExecuteScalar();
-                        return result != null ? result.ToString() : "WT01";
+                int nextNumber = Convert.ToInt32(cmd.ExecuteScalar());
+                return prefix + nextNumber.ToString("D2");
+            }
+        }
+
+        private void ResetForm()
+        {
+            // Clear all fields
+            txtWeight.Text = "";
+            txtDescription.Text = "";
+            txtAddress.Text = "";
+            txtLandmark.Text = "";
+            txtContactPerson.Text = "";
+            txtInstructions.Text = "";
+            txtLatitude.Text = "";
+            txtLongitude.Text = "";
+
+            // Reset checkboxes
+            chkConfirmDetails.Checked = false;
+            chkAgreeTerms.Checked = false;
+            chkSchedulePickup.Checked = true;
+
+            // Clear session data
+            Session.Remove("SelectedWasteTypeId");
+            Session.Remove("SelectedWasteRate");
+            Session.Remove("SelectedWasteName");
+            Session.Remove("EstimatedWeight");
+            Session.Remove("EstimatedReward");
+
+            // Reload waste types
+            LoadWasteTypes();
+
+            // Disable next button
+            btnNextStep1.Enabled = false;
+        }
+
+        private void ShowMessage(string message, string type)
+        {
+            string icon = "exclamation-circle";
+            switch (type.ToLower())
+            {
+                case "success":
+                    icon = "check-circle";
+                    break;
+                case "warning":
+                    icon = "exclamation-triangle";
+                    break;
+                case "error":
+                    icon = "exclamation-circle";
+                    break;
+            }
+
+            string upperType = type.ToUpper();
+            string escapedMessage = message.Replace("'", "\\'").Replace("\"", "\\\"");
+
+            string script = string.Format(@"
+                var messagePanel = document.querySelector('.message-panel');
+                if (messagePanel) {{
+                    messagePanel.innerHTML = 
+                        '<div class=""message-alert {0} show"">' +
+                        '    <i class=""fas fa-{1}""></i>' +
+                        '    <div>' +
+                        '        <strong>{2}</strong>' +
+                        '        <p class=""mb-0"">{3}</p>' +
+                        '    </div>' +
+                        '</div>';
+                    messagePanel.style.display = 'block';
+                    setTimeout(function() {{
+                        messagePanel.style.display = 'none';
+                    }}, 5000);
+                }}
+            ", type, icon, upperType, escapedMessage);
+
+            ScriptManager.RegisterStartupScript(this, GetType(), "ShowMessage_" + Guid.NewGuid().ToString("N"), script, true);
+        }
+
+        private void RegisterStartupScripts()
+        {
+            string initScript = @"
+                // Update progress steps
+                function updateProgressSteps(currentStep) {
+                    for (var i = 1; i <= 4; i++) {
+                        var stepElement = document.getElementById('step' + i);
+                        var lineElement = document.getElementById('line' + i);
+                        if (stepElement) stepElement.classList.remove('active');
+                        if (lineElement) lineElement.classList.remove('active');
+                    }
+
+                    for (var i = 1; i <= currentStep; i++) {
+                        var stepElement = document.getElementById('step' + i);
+                        var lineElement = document.getElementById('line' + i);
+                        if (stepElement) stepElement.classList.add('active');
+                        if (lineElement && i < currentStep) lineElement.classList.add('active');
                     }
                 }
-            }
-            catch { return "WT01"; }
-        }
-    }
+                
+                // Show database confirmation
+                function showDatabaseConfirmation() {
+                    var successCard = document.querySelector('.success-card-glass');
+                    if (successCard) {
+                        successCard.style.animation = 'none';
+                        setTimeout(function() {
+                            successCard.style.animation = 'pulse 2s infinite';
+                        }, 10);
+                    }
+                }
+                
+                // Make functions globally available
+                window.updateProgressSteps = updateProgressSteps;
+                window.showDatabaseConfirmation = showDatabaseConfirmation;
+            ";
 
-    public class WasteType
-    {
-        public string WasteTypeId { get; set; }
-        public string Name { get; set; }
-        public decimal CreditPerKg { get; set; }
-        public string CategoryCode { get; set; }
+            ScriptManager.RegisterClientScriptBlock(this, GetType(), "InitializeScripts", initScript, true);
+        }
+
+        public string GetWasteTypeIcon(string wasteTypeName)
+        {
+            switch (wasteTypeName.ToLower())
+            {
+                case "plastic":
+                    return "fa-bottle-water";
+                case "paper":
+                    return "fa-file-alt";
+                case "metal":
+                    return "fa-cogs";
+                case "glass":
+                    return "fa-wine-glass";
+                case "organic":
+                    return "fa-leaf";
+                case "electronics":
+                    return "fa-laptop";
+                case "textiles":
+                    return "fa-tshirt";
+                case "hazardous":
+                    return "fa-radiation";
+                default:
+                    return "fa-trash";
+            }
+        }
+
+        protected void btnThemeToggle_Click(object sender, EventArgs e)
+        {
+            string currentTheme = "light";
+            if (Request.Cookies["theme"] != null)
+            {
+                currentTheme = Request.Cookies["theme"].Value;
+            }
+
+            string newTheme = currentTheme == "light" ? "dark" : "light";
+
+            Response.Cookies["theme"].Value = newTheme;
+            Response.Cookies["theme"].Expires = DateTime.Now.AddDays(30);
+
+            Response.Redirect(Request.RawUrl);
+        }
     }
 }
