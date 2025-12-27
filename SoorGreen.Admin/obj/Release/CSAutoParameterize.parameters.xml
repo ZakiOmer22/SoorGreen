@@ -1,0 +1,6 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<parameters>
+  <parameter name="SoorGreenDBConnectionString-Web.config Connection String" description="SoorGreenDBConnectionString Connection String used in web.config by the application to access the database." defaultValue="Server=ZAKI\SQLEXPRESS;Database=SoorGreenDB;Integrated Security=true;Connect Timeout=30;" tags="SqlConnectionString">
+    <parameterEntry kind="XmlFile" scope="Z:\\ZAKI\\Sem\ 1\\Asp\.net\\MAIN\\SoorGreen\.Admin\\obj\\Release\\Package\\PackageTmp\\Web\.config$" match="/configuration/connectionStrings/add[@name='SoorGreenDBConnectionString']/@connectionString" />
+  </parameter>
+</parameters>

@@ -289,9 +289,97 @@ namespace SoorGreen.Admin
             // Admin Waste Types
             bundles.Add(new StyleBundle("~/Content/adminwastetypes").Include(
                 "~/Content/Pages/Admin/adminwastetypes.css"));
-}
             bundles.Add(new ScriptBundle("~/bundles/adminwastetypes").Include(
                 "~/Scripts/Pages/Admin/adminwastetypes.js"));
+
+
+            // ==========================================
+            //   COLLECTORS PAGES BUNDLES
+            // ==========================================
+
+            // Collector Dashboard
+            bundles.Add(new StyleBundle("~/Content/dashboard").Include(
+                "~/Content/Pages/Collectors/dashboard.css"));
+
+            // Schedule Pickup
+            bundles.Add(new StyleBundle("~/Content/schedulepickup").Include(
+                "~/Content/Pages/Collectors/schedulepickup.css"));
+
+            // My Reports (Collector version)
+            bundles.Add(new StyleBundle("~/Content/collectorreports").Include(
+                "~/Content/Pages/Collectors/collectorreports.css"));
+
+            // Pickup Status (for collectors to track their pickups)
+            bundles.Add(new StyleBundle("~/Content/pickupstatus").Include(
+                "~/Content/Pages/Collectors/pickupstatus.css"));
+
+            // My Rewards (Collector version)
+            bundles.Add(new StyleBundle("~/Content/myrewards").Include(
+                "~/Content/Pages/Collectors/myrewards.css"));
+
+            // Redemption History
+            bundles.Add(new StyleBundle("~/Content/redemptionhistory").Include(
+                "~/Content/Pages/Collectors/redemptionhistory.css"));
+
+            // Leaderboard (Collectors see their ranking)
+            bundles.Add(new StyleBundle("~/Content/leaderboard").Include(
+                "~/Content/Pages/Collectors/leaderboard.css"));
+
+            // Community (Collector-specific community)
+            bundles.Add(new StyleBundle("~/Content/community").Include(
+                "~/Content/Pages/Collectors/community.css"));
+
+            // Feedback (Collector feedback system)
+            bundles.Add(new StyleBundle("~/Content/feedback").Include(
+                "~/Content/Pages/Collectors/feedback.css"));
+
+            // User Profile (Collector profile settings)
+            bundles.Add(new StyleBundle("~/Content/userprofile").Include(
+                "~/Content/Pages/Collectors/userprofile.css"));
+
+            // Notifications
+            bundles.Add(new StyleBundle("~/Content/notifications").Include(
+                "~/Content/Pages/Collectors/notifications.css"));
+
+            // Help & Support
+            bundles.Add(new StyleBundle("~/Content/help").Include(
+                "~/Content/Pages/Collectors/help.css"));
+
+            // ==========================================
+            //   COLLECTOR-SPECIFIC FEATURES
+            // ==========================================
+
+            // Collector Performance Analytics
+            bundles.Add(new StyleBundle("~/Content/performance").Include(
+                "~/Content/Pages/Collectors/performance.css"));
+
+            // Collector Routes & Navigation
+            bundles.Add(new StyleBundle("~/Content/routes").Include(
+                "~/Content/Pages/Collectors/routes.css"));
+
+            // Collector Map View
+            bundles.Add(new StyleBundle("~/Content/map").Include(
+                "~/Content/Pages/Collectors/map.css"));
+
+            // Waste Collection Verification
+            bundles.Add(new StyleBundle("~/Content/verification").Include(
+                "~/Content/Pages/Collectors/verification.css"));
+
+            // Daily Collection Log
+            bundles.Add(new StyleBundle("~/Content/collectionlog").Include(
+                "~/Content/Pages/Collectors/collectionlog.css"));
+
+            // Vehicle Management (if collectors have vehicles assigned)
+            bundles.Add(new StyleBundle("~/Content/vehicles").Include(
+                "~/Content/Pages/Collectors/vehicles.css"));
+
+            // Inventory Management
+            bundles.Add(new StyleBundle("~/Content/inventory").Include(
+                "~/Content/Pages/Collectors/inventory.css"));
+
+            // Earnings Report
+            bundles.Add(new StyleBundle("~/Content/earnings").Include(
+                "~/Content/Pages/Collectors/earnings.css"));
         }
 
         public static void RegisterJQueryScriptManager()
@@ -306,3 +394,4 @@ namespace SoorGreen.Admin
                 });
         }
     }
+}

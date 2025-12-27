@@ -118,14 +118,27 @@
     <Content Include="About.aspx" />
     <Content Include="Admin Dashboard.aspx" />
     <Content Include="Content\Pages\about.css" />
+    <Content Include="Content\Pages\Collectors\CollectorPerformance.css" />
+    <Content Include="Content\Pages\Collectors\CollectorReports.css" />
     <Content Include="Content\Pages\Collectors\collectorsroute.css" />
+    <Content Include="Content\Pages\Collectors\MyRewards.css" />
+    <Content Include="Content\Pages\Collectors\PickupStatus.css" />
     <Content Include="css\site-master.css" />
     <Content Include="css\universal.css" />
+    <Content Include="Pages\Collectors\Achievements.aspx" />
+    <Content Include="Pages\Collectors\ActivePickups.aspx" />
+    <Content Include="Pages\Collectors\CollectorPerformance.aspx" />
+    <Content Include="Pages\Collectors\Community.aspx" />
     <Content Include="Pages\Collectors\Dashboard.aspx" />
     <Content Include="Pages\Collectors\DailyReport.aspx" />
+    <Content Include="Pages\Collectors\Leaderboard.aspx" />
+    <Content Include="Pages\Collectors\MyReports.aspx" />
+    <Content Include="Pages\Collectors\MyRewards.aspx" />
     <Content Include="Pages\Collectors\MyRoute.aspx" />
     <Content Include="Pages\Collectors\PickupDetails.aspx" />
-    <Content Include="Pages\Collectors\WebForm1.aspx" />
+    <Content Include="Pages\Collectors\PickupStatus.aspx" />
+    <Content Include="Pages\Collectors\PickupVerification.aspx" />
+    <Content Include="Pages\Collectors\RedemptionHistory.aspx" />
     <Content Include="Scripts\Pages\about.js" />
     <Content Include="Content\Pages\Admin\adminauditlogs.css" />
     <Content Include="Content\Pages\Admin\admincitizens.css" />
@@ -203,7 +216,9 @@
     <Content Include="Content\Site.css" />
     <Content Include="Dashboard.aspx" />
     <Content Include="Default.aspx" />
-    <Content Include="favicon.ico" />
+    <Content Include="favicon.ico">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
     <Content Include="ForgotPassword.aspx" />
     <Content Include="Global.asax" />
     <Content Include="Login.aspx" />
@@ -255,6 +270,9 @@
       <DependentUpon>Dockerfile</DependentUpon>
     </None>
     <Content Include="Pages\Collectors\Site.Master" />
+    <None Include="Properties\PublishProfiles\FolderProfile.pubxml" />
+    <None Include="Properties\PublishProfiles\zakiomer-001-site1 - FTP.pubxml" />
+    <None Include="Properties\PublishProfiles\zakiomer-001-site1 - Web Deploy.pubxml" />
     <None Include="Scripts\jquery-3.7.0.intellisense.js" />
     <Content Include="Scripts\jquery-3.7.0.js" />
     <Content Include="Scripts\jquery-3.7.0.min.js" />
@@ -324,15 +342,11 @@
     <Content Include="WasteCollection.aspx" />
     <Content Include="Web.config" />
     <Content Include="Bundle.config" />
-    <Content Include="Site.Mobile.Master" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="404.aspx.cs">
       <DependentUpon>404.aspx</DependentUpon>
       <SubType>ASPXCodeBehind</SubType>
-    </Compile>
-    <Compile Include="404.aspx.designer.cs">
-      <DependentUpon>404.aspx</DependentUpon>
     </Compile>
     <Compile Include="Admin Dashboard.aspx.cs">
       <DependentUpon>Admin Dashboard.aspx</DependentUpon>
@@ -341,12 +355,81 @@
     <Compile Include="Admin Dashboard.aspx.designer.cs">
       <DependentUpon>Admin Dashboard.aspx</DependentUpon>
     </Compile>
+    <Compile Include="Dashboard.aspx.designer.cs">
+      <DependentUpon>Dashboard.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="ForgotPassword.aspx.designer.cs">
+      <DependentUpon>ForgotPassword.aspx</DependentUpon>
+    </Compile>
     <Compile Include="HowITWorks.aspx.cs">
       <DependentUpon>HowITWorks.aspx</DependentUpon>
       <SubType>ASPXCodeBehind</SubType>
     </Compile>
-    <Compile Include="HowITWorks.aspx.designer.cs">
-      <DependentUpon>HowITWorks.aspx</DependentUpon>
+    <Compile Include="Login.aspx.designer.cs">
+      <DependentUpon>Login.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="Pages\Admin\Analytics.aspx.designer.cs">
+      <DependentUpon>Analytics.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="Pages\Admin\AuditLogs.aspx.designer.cs">
+      <DependentUpon>AuditLogs.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="Pages\Admin\Citizens.aspx.designer.cs">
+      <DependentUpon>Citizens.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="Pages\Admin\Collections.aspx.designer.cs">
+      <DependentUpon>Collections.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="Pages\Admin\Collectors.aspx.designer.cs">
+      <DependentUpon>Collectors.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="Pages\Admin\Credits.aspx.designer.cs">
+      <DependentUpon>Credits.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="Pages\Admin\Dashboard.aspx.designer.cs">
+      <DependentUpon>Dashboard.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="Pages\Admin\Feedbacks.aspx.designer.cs">
+      <DependentUpon>Feedbacks.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="Pages\Admin\Municipalities.aspx.designer.cs">
+      <DependentUpon>Municipalities.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="Pages\Admin\NotificationsMgmt.aspx.designer.cs">
+      <DependentUpon>NotificationsMgmt.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="Pages\Admin\Pickups.aspx.designer.cs">
+      <DependentUpon>Pickups.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="Pages\Admin\Profile.aspx.designer.cs">
+      <DependentUpon>Profile.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="Pages\Admin\Redemptions.aspx.designer.cs">
+      <DependentUpon>Redemptions.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="Pages\Admin\Reports.aspx.designer.cs">
+      <DependentUpon>Reports.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="Pages\Admin\Rewards.aspx.designer.cs">
+      <DependentUpon>Rewards.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="Pages\Admin\Settings.aspx.designer.cs">
+      <DependentUpon>Settings.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="Pages\Admin\Site.Master.designer.cs">
+      <DependentUpon>Site.Master</DependentUpon>
+    </Compile>
+    <Compile Include="Pages\Admin\Transactions.aspx.designer.cs">
+      <DependentUpon>Transactions.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="Pages\Admin\Users.aspx.designer.cs">
+      <DependentUpon>Users.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="Pages\Admin\WasteReports.aspx.designer.cs">
+      <DependentUpon>WasteReports.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="Pages\Admin\WasteTypes.aspx.designer.cs">
+      <DependentUpon>WasteTypes.aspx</DependentUpon>
     </Compile>
     <Compile Include="Pages\Citizen\Community.aspx.cs">
       <DependentUpon>Community.aspx</DependentUpon>
@@ -359,165 +442,99 @@
       <DependentUpon>Dashboard.aspx</DependentUpon>
       <SubType>ASPXCodeBehind</SubType>
     </Compile>
-    <Compile Include="Pages\Citizen\Dashboard.aspx.designer.cs">
-      <DependentUpon>Dashboard.aspx</DependentUpon>
-    </Compile>
     <Compile Include="Pages\Admin\Analytics.aspx.cs">
       <DependentUpon>Analytics.aspx</DependentUpon>
       <SubType>ASPXCodeBehind</SubType>
-    </Compile>
-    <Compile Include="Pages\Admin\Analytics.aspx.designer.cs">
-      <DependentUpon>Analytics.aspx</DependentUpon>
     </Compile>
     <Compile Include="Pages\Admin\AuditLogs.aspx.cs">
       <DependentUpon>AuditLogs.aspx</DependentUpon>
       <SubType>ASPXCodeBehind</SubType>
     </Compile>
-    <Compile Include="Pages\Admin\AuditLogs.aspx.designer.cs">
-      <DependentUpon>AuditLogs.aspx</DependentUpon>
-    </Compile>
     <Compile Include="Pages\Admin\Citizens.aspx.cs">
       <DependentUpon>Citizens.aspx</DependentUpon>
       <SubType>ASPXCodeBehind</SubType>
-    </Compile>
-    <Compile Include="Pages\Admin\Citizens.aspx.designer.cs">
-      <DependentUpon>Citizens.aspx</DependentUpon>
     </Compile>
     <Compile Include="Pages\Admin\Collections.aspx.cs">
       <DependentUpon>Collections.aspx</DependentUpon>
       <SubType>ASPXCodeBehind</SubType>
     </Compile>
-    <Compile Include="Pages\Admin\Collections.aspx.designer.cs">
-      <DependentUpon>Collections.aspx</DependentUpon>
-    </Compile>
     <Compile Include="Pages\Admin\Collectors.aspx.cs">
       <DependentUpon>Collectors.aspx</DependentUpon>
       <SubType>ASPXCodeBehind</SubType>
-    </Compile>
-    <Compile Include="Pages\Admin\Collectors.aspx.designer.cs">
-      <DependentUpon>Collectors.aspx</DependentUpon>
     </Compile>
     <Compile Include="Pages\Admin\Credits.aspx.cs">
       <DependentUpon>Credits.aspx</DependentUpon>
       <SubType>ASPXCodeBehind</SubType>
     </Compile>
-    <Compile Include="Pages\Admin\Credits.aspx.designer.cs">
-      <DependentUpon>Credits.aspx</DependentUpon>
-    </Compile>
     <Compile Include="Pages\Admin\Dashboard.aspx.cs">
       <DependentUpon>Dashboard.aspx</DependentUpon>
       <SubType>ASPXCodeBehind</SubType>
-    </Compile>
-    <Compile Include="Pages\Admin\Dashboard.aspx.designer.cs">
-      <DependentUpon>Dashboard.aspx</DependentUpon>
     </Compile>
     <Compile Include="Pages\Admin\Feedbacks.aspx.cs">
       <DependentUpon>Feedbacks.aspx</DependentUpon>
       <SubType>ASPXCodeBehind</SubType>
     </Compile>
-    <Compile Include="Pages\Admin\Feedbacks.aspx.designer.cs">
-      <DependentUpon>Feedbacks.aspx</DependentUpon>
-    </Compile>
     <Compile Include="Pages\Admin\Municipalities.aspx.cs">
       <DependentUpon>Municipalities.aspx</DependentUpon>
       <SubType>ASPXCodeBehind</SubType>
-    </Compile>
-    <Compile Include="Pages\Admin\Municipalities.aspx.designer.cs">
-      <DependentUpon>Municipalities.aspx</DependentUpon>
     </Compile>
     <Compile Include="Pages\Admin\NotificationsMgmt.aspx.cs">
       <DependentUpon>NotificationsMgmt.aspx</DependentUpon>
       <SubType>ASPXCodeBehind</SubType>
     </Compile>
-    <Compile Include="Pages\Admin\NotificationsMgmt.aspx.designer.cs">
-      <DependentUpon>NotificationsMgmt.aspx</DependentUpon>
-    </Compile>
     <Compile Include="Pages\Admin\Pickups.aspx.cs">
       <DependentUpon>Pickups.aspx</DependentUpon>
       <SubType>ASPXCodeBehind</SubType>
-    </Compile>
-    <Compile Include="Pages\Admin\Pickups.aspx.designer.cs">
-      <DependentUpon>Pickups.aspx</DependentUpon>
     </Compile>
     <Compile Include="Pages\Admin\Profile.aspx.cs">
       <DependentUpon>Profile.aspx</DependentUpon>
       <SubType>ASPXCodeBehind</SubType>
     </Compile>
-    <Compile Include="Pages\Admin\Profile.aspx.designer.cs">
-      <DependentUpon>Profile.aspx</DependentUpon>
-    </Compile>
     <Compile Include="Pages\Admin\Redemptions.aspx.cs">
       <DependentUpon>Redemptions.aspx</DependentUpon>
       <SubType>ASPXCodeBehind</SubType>
-    </Compile>
-    <Compile Include="Pages\Admin\Redemptions.aspx.designer.cs">
-      <DependentUpon>Redemptions.aspx</DependentUpon>
     </Compile>
     <Compile Include="Pages\Admin\Reports.aspx.cs">
       <DependentUpon>Reports.aspx</DependentUpon>
       <SubType>ASPXCodeBehind</SubType>
     </Compile>
-    <Compile Include="Pages\Admin\Reports.aspx.designer.cs">
-      <DependentUpon>Reports.aspx</DependentUpon>
-    </Compile>
     <Compile Include="Pages\Admin\Rewards.aspx.cs">
       <DependentUpon>Rewards.aspx</DependentUpon>
       <SubType>ASPXCodeBehind</SubType>
-    </Compile>
-    <Compile Include="Pages\Admin\Rewards.aspx.designer.cs">
-      <DependentUpon>Rewards.aspx</DependentUpon>
     </Compile>
     <Compile Include="Pages\Admin\Settings.aspx.cs">
       <DependentUpon>Settings.aspx</DependentUpon>
       <SubType>ASPXCodeBehind</SubType>
     </Compile>
-    <Compile Include="Pages\Admin\Settings.aspx.designer.cs">
-      <DependentUpon>Settings.aspx</DependentUpon>
-    </Compile>
     <Compile Include="Pages\Admin\Site.Master.cs">
       <DependentUpon>Site.Master</DependentUpon>
       <SubType>ASPXCodeBehind</SubType>
-    </Compile>
-    <Compile Include="Pages\Admin\Site.Master.designer.cs">
-      <DependentUpon>Site.Master</DependentUpon>
     </Compile>
     <Compile Include="Pages\Admin\Transactions.aspx.cs">
       <DependentUpon>Transactions.aspx</DependentUpon>
       <SubType>ASPXCodeBehind</SubType>
     </Compile>
-    <Compile Include="Pages\Admin\Transactions.aspx.designer.cs">
-      <DependentUpon>Transactions.aspx</DependentUpon>
-    </Compile>
     <Compile Include="Pages\Admin\Users.aspx.cs">
       <DependentUpon>Users.aspx</DependentUpon>
       <SubType>ASPXCodeBehind</SubType>
-    </Compile>
-    <Compile Include="Pages\Admin\Users.aspx.designer.cs">
-      <DependentUpon>Users.aspx</DependentUpon>
     </Compile>
     <Compile Include="Pages\Admin\WasteReports.aspx.cs">
       <DependentUpon>WasteReports.aspx</DependentUpon>
       <SubType>ASPXCodeBehind</SubType>
     </Compile>
-    <Compile Include="Pages\Admin\WasteReports.aspx.designer.cs">
-      <DependentUpon>WasteReports.aspx</DependentUpon>
-    </Compile>
     <Compile Include="Pages\Admin\WasteTypes.aspx.cs">
       <DependentUpon>WasteTypes.aspx</DependentUpon>
       <SubType>ASPXCodeBehind</SubType>
-    </Compile>
-    <Compile Include="Pages\Admin\WasteTypes.aspx.designer.cs">
-      <DependentUpon>WasteTypes.aspx</DependentUpon>
     </Compile>
     <Compile Include="App_Start\BundleConfig.cs" />
     <Compile Include="About.aspx.cs">
       <DependentUpon>About.aspx</DependentUpon>
       <SubType>ASPXCodeBehind</SubType>
     </Compile>
-    <Compile Include="About.aspx.designer.cs">
-      <DependentUpon>About.aspx</DependentUpon>
-    </Compile>
     <Compile Include="App_Start\RouteConfig.cs" />
+    <Compile Include="Pages\Citizen\Dashboard.aspx.designer.cs">
+      <DependentUpon>Dashboard.aspx</DependentUpon>
+    </Compile>
     <Compile Include="Pages\Citizen\Feedback.aspx.cs">
       <DependentUpon>Feedback.aspx</DependentUpon>
       <SubType>ASPXCodeBehind</SubType>
@@ -591,36 +608,21 @@
       <DependentUpon>Site.Master</DependentUpon>
       <SubType>ASPXCodeBehind</SubType>
     </Compile>
-    <Compile Include="Pages\Citizen\Site.Master.designer.cs">
-      <DependentUpon>Site.Master</DependentUpon>
-    </Compile>
     <Compile Include="Contact.aspx.cs">
       <DependentUpon>Contact.aspx</DependentUpon>
       <SubType>ASPXCodeBehind</SubType>
-    </Compile>
-    <Compile Include="Contact.aspx.designer.cs">
-      <DependentUpon>Contact.aspx</DependentUpon>
     </Compile>
     <Compile Include="Dashboard.aspx.cs">
       <DependentUpon>Dashboard.aspx</DependentUpon>
       <SubType>ASPXCodeBehind</SubType>
     </Compile>
-    <Compile Include="Dashboard.aspx.designer.cs">
-      <DependentUpon>Dashboard.aspx</DependentUpon>
-    </Compile>
     <Compile Include="Default.aspx.cs">
       <DependentUpon>Default.aspx</DependentUpon>
       <SubType>ASPXCodeBehind</SubType>
     </Compile>
-    <Compile Include="Default.aspx.designer.cs">
-      <DependentUpon>Default.aspx</DependentUpon>
-    </Compile>
     <Compile Include="ForgotPassword.aspx.cs">
       <DependentUpon>ForgotPassword.aspx</DependentUpon>
       <SubType>ASPXCodeBehind</SubType>
-    </Compile>
-    <Compile Include="ForgotPassword.aspx.designer.cs">
-      <DependentUpon>ForgotPassword.aspx</DependentUpon>
     </Compile>
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
@@ -629,8 +631,8 @@
       <DependentUpon>Login.aspx</DependentUpon>
       <SubType>ASPXCodeBehind</SubType>
     </Compile>
-    <Compile Include="Login.aspx.designer.cs">
-      <DependentUpon>Login.aspx</DependentUpon>
+    <Compile Include="Pages\Citizen\Site.Master.designer.cs">
+      <DependentUpon>Site.Master</DependentUpon>
     </Compile>
     <Compile Include="Pages\Citizen\UserProfile.aspx.cs">
       <DependentUpon>UserProfile.aspx</DependentUpon>
@@ -639,19 +641,68 @@
     <Compile Include="Pages\Citizen\UserProfile.aspx.designer.cs">
       <DependentUpon>UserProfile.aspx</DependentUpon>
     </Compile>
+    <Compile Include="Pages\Collectors\Achievements.aspx.cs">
+      <DependentUpon>Achievements.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="Pages\Collectors\Achievements.aspx.designer.cs">
+      <DependentUpon>Achievements.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="Pages\Collectors\ActivePickups.aspx.cs">
+      <DependentUpon>ActivePickups.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="Pages\Collectors\ActivePickups.aspx.designer.cs">
+      <DependentUpon>ActivePickups.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="Pages\Collectors\CollectorPerformance.aspx.cs">
+      <DependentUpon>CollectorPerformance.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="Pages\Collectors\CollectorPerformance.aspx.designer.cs">
+      <DependentUpon>CollectorPerformance.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="Pages\Collectors\Community.aspx.cs">
+      <DependentUpon>Community.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="Pages\Collectors\Community.aspx.designer.cs">
+      <DependentUpon>Community.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="Pages\Collectors\DailyReport.aspx.designer.cs">
+      <DependentUpon>DailyReport.aspx</DependentUpon>
+    </Compile>
     <Compile Include="Pages\Collectors\Dashboard.aspx.cs">
       <DependentUpon>Dashboard.aspx</DependentUpon>
       <SubType>ASPXCodeBehind</SubType>
-    </Compile>
-    <Compile Include="Pages\Collectors\Dashboard.aspx.designer.cs">
-      <DependentUpon>Dashboard.aspx</DependentUpon>
     </Compile>
     <Compile Include="Pages\Collectors\DailyReport.aspx.cs">
       <DependentUpon>DailyReport.aspx</DependentUpon>
       <SubType>ASPXCodeBehind</SubType>
     </Compile>
-    <Compile Include="Pages\Collectors\DailyReport.aspx.designer.cs">
-      <DependentUpon>DailyReport.aspx</DependentUpon>
+    <Compile Include="Pages\Collectors\Dashboard.aspx.designer.cs">
+      <DependentUpon>Dashboard.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="Pages\Collectors\Leaderboard.aspx.cs">
+      <DependentUpon>Leaderboard.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="Pages\Collectors\Leaderboard.aspx.designer.cs">
+      <DependentUpon>Leaderboard.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="Pages\Collectors\MyReports.aspx.cs">
+      <DependentUpon>MyReports.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="Pages\Collectors\MyReports.aspx.designer.cs">
+      <DependentUpon>MyReports.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="Pages\Collectors\MyRewards.aspx.cs">
+      <DependentUpon>MyRewards.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="Pages\Collectors\MyRewards.aspx.designer.cs">
+      <DependentUpon>MyRewards.aspx</DependentUpon>
     </Compile>
     <Compile Include="Pages\Collectors\MyRoute.aspx.cs">
       <DependentUpon>MyRoute.aspx</DependentUpon>
@@ -667,19 +718,33 @@
     <Compile Include="Pages\Collectors\PickupDetails.aspx.designer.cs">
       <DependentUpon>PickupDetails.aspx</DependentUpon>
     </Compile>
+    <Compile Include="Pages\Collectors\PickupStatus.aspx.cs">
+      <DependentUpon>PickupStatus.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="Pages\Collectors\PickupStatus.aspx.designer.cs">
+      <DependentUpon>PickupStatus.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="Pages\Collectors\PickupVerification.aspx.cs">
+      <DependentUpon>PickupVerification.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="Pages\Collectors\PickupVerification.aspx.designer.cs">
+      <DependentUpon>PickupVerification.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="Pages\Collectors\RedemptionHistory.aspx.cs">
+      <DependentUpon>RedemptionHistory.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="Pages\Collectors\RedemptionHistory.aspx.designer.cs">
+      <DependentUpon>RedemptionHistory.aspx</DependentUpon>
+    </Compile>
     <Compile Include="Pages\Collectors\Site.Master.cs">
       <DependentUpon>Site.Master</DependentUpon>
       <SubType>ASPXCodeBehind</SubType>
     </Compile>
     <Compile Include="Pages\Collectors\Site.Master.designer.cs">
       <DependentUpon>Site.Master</DependentUpon>
-    </Compile>
-    <Compile Include="Pages\Collectors\WebForm1.aspx.cs">
-      <DependentUpon>WebForm1.aspx</DependentUpon>
-      <SubType>ASPXCodeBehind</SubType>
-    </Compile>
-    <Compile Include="Pages\Collectors\WebForm1.aspx.designer.cs">
-      <DependentUpon>WebForm1.aspx</DependentUpon>
     </Compile>
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Register.aspx.cs">
@@ -700,22 +765,12 @@
       <DependentUpon>Services.aspx</DependentUpon>
       <SubType>ASPXCodeBehind</SubType>
     </Compile>
-    <Compile Include="Services.aspx.designer.cs">
-      <DependentUpon>Services.aspx</DependentUpon>
-    </Compile>
     <Compile Include="Site.Master.cs">
       <DependentUpon>Site.Master</DependentUpon>
       <SubType>ASPXCodeBehind</SubType>
     </Compile>
     <Compile Include="Site.Master.designer.cs">
       <DependentUpon>Site.Master</DependentUpon>
-    </Compile>
-    <Compile Include="Site.Mobile.Master.cs">
-      <DependentUpon>Site.Mobile.Master</DependentUpon>
-      <SubType>ASPXCodeBehind</SubType>
-    </Compile>
-    <Compile Include="Site.Mobile.Master.designer.cs">
-      <DependentUpon>Site.Mobile.Master</DependentUpon>
     </Compile>
     <Compile Include="ViewSwitcher.ascx.cs">
       <DependentUpon>ViewSwitcher.ascx</DependentUpon>

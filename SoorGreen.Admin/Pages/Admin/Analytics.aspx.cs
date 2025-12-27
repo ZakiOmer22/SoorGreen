@@ -56,7 +56,7 @@ namespace SoorGreen.Admin.Admin
         {
             try
             {
-                string connectionString = System.Configuration.ConfigurationManager.ConnectionStrings["SoorGreenDB"].ConnectionString;
+                string connectionString = System.Configuration.ConfigurationManager.ConnectionStrings["SoorGreenDBConnectionString"].ConnectionString;
 
                 if (string.IsNullOrEmpty(connectionString))
                 {

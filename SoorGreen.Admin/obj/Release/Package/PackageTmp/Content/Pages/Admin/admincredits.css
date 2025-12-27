@@ -1,0 +1,236 @@
+﻿.credit-card {
+    border: 1px solid #e0e0e0;
+    border-radius: 10px;
+    padding: 1.25rem;
+    background: #fff;
+    transition: all 0.3s ease;
+    height: 100%;
+}
+
+    .credit-card:hover {
+        box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+        transform: translateY(-2px);
+    }
+
+    .credit-card h5 {
+        color: var(--text-primary);
+        font-size: 1rem;
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+    }
+
+.role-badge {
+    font-size: 0.75rem !important;
+    padding: 0.35em 0.75em;
+    border-radius: 20px;
+}
+
+    .role-badge.citizen {
+        background-color: rgba(40, 167, 69, 0.1);
+        color: #28a745;
+        border: 1px solid rgba(40, 167, 69, 0.2);
+    }
+
+    .role-badge.collector {
+        background-color: rgba(0, 123, 255, 0.1);
+        color: #007bff;
+        border: 1px solid rgba(0, 123, 255, 0.2);
+    }
+
+    .role-badge.admin {
+        background-color: rgba(220, 53, 69, 0.1);
+        color: #dc3545;
+        border: 1px solid rgba(220, 53, 69, 0.2);
+    }
+
+    .role-badge.company {
+        background-color: rgba(255, 193, 7, 0.1);
+        color: #ffc107;
+        border: 1px solid rgba(255, 193, 7, 0.2);
+    }
+
+.balance-info {
+    background: #f8f9fa;
+    border-radius: 8px;
+    padding: 1rem;
+    margin: 1rem 0;
+}
+
+.balance-amount {
+    font-size: 1.5rem;
+    font-weight: 700;
+    text-align: center;
+    margin-bottom: 0.5rem;
+}
+
+    .balance-amount.high {
+        color: #28a745;
+    }
+
+    .balance-amount.medium {
+        color: #ffc107;
+    }
+
+    .balance-amount.low {
+        color: #dc3545;
+    }
+
+    .balance-amount.zero {
+        color: #6c757d;
+    }
+
+.balance-stats {
+    display: flex;
+    justify-content: space-around;
+    border-top: 1px solid #dee2e6;
+    padding-top: 0.75rem;
+}
+
+    .balance-stats .stat {
+        text-align: center;
+    }
+
+    .balance-stats .stat-label {
+        display: block;
+        font-size: 0.75rem;
+        color: #6c757d;
+    }
+
+    .balance-stats .stat-value {
+        display: block;
+        font-weight: 600;
+        font-size: 0.9rem;
+        color: var(--text-primary);
+    }
+
+.user-meta {
+    margin: 1rem 0;
+}
+
+.meta-item {
+    display: flex;
+    align-items: center;
+    margin-bottom: 0.5rem;
+    font-size: 0.85rem;
+    color: #6c757d;
+}
+
+    .meta-item i {
+        width: 20px;
+        margin-right: 0.5rem;
+    }
+
+.action-buttons {
+    display: flex;
+    gap: 0.5rem;
+    margin-top: 1rem;
+}
+
+    .action-buttons .btn {
+        flex: 1;
+        font-size: 0.85rem;
+        padding: 0.375rem 0.75rem;
+    }
+
+/* Table View Styles */
+.balance-display {
+    font-size: 1.1rem;
+    font-weight: 600;
+    padding: 0.5rem;
+    border-radius: 6px;
+    text-align: center;
+}
+
+    .balance-display.high {
+        background-color: rgba(40, 167, 69, 0.1);
+    }
+
+    .balance-display.medium {
+        background-color: rgba(255, 193, 7, 0.1);
+    }
+
+    .balance-display.low {
+        background-color: rgba(220, 53, 69, 0.1);
+    }
+
+    .balance-display.zero {
+        background-color: rgba(108, 117, 125, 0.1);
+    }
+
+.role-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 12px;
+    flex-shrink: 0;
+}
+
+    .role-icon.citizen {
+        background-color: rgba(40, 167, 69, 0.1);
+        color: #28a745;
+    }
+
+    .role-icon.collector {
+        background-color: rgba(0, 123, 255, 0.1);
+        color: #007bff;
+    }
+
+    .role-icon.admin {
+        background-color: rgba(220, 53, 69, 0.1);
+        color: #dc3545;
+    }
+
+    .role-icon.company {
+        background-color: rgba(255, 193, 7, 0.1);
+        color: #ffc107;
+    }
+
+/* Badge styles */
+.badge-light {
+    background-color: #f8f9fa;
+    color: #212529;
+    border: 1px solid #dee2e6;
+}
+
+/* Empty State */
+.empty-state {
+    grid-column: 1 / -1;
+    text-align: center;
+    padding: 3rem;
+    color: #6c757d;
+}
+
+    .empty-state i {
+        font-size: 3rem;
+        margin-bottom: 1rem;
+        opacity: 0.5;
+    }
+
+    .empty-state p {
+        font-size: 1rem;
+        margin: 0;
+    }
+
+/* Modal Preview */
+#balancePreview {
+    transition: all 0.3s ease;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .balance-stats {
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+
+    .action-buttons {
+        flex-direction: column;
+    }
+
+    .filter-group {
+        grid-template-columns: 1fr;
+    }
+}

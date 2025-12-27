@@ -28,7 +28,7 @@ public partial class SoorGreen_Admin_Dashboard : Page
             totalCredits.InnerText = "45.2K";
             wasteReports.InnerText = "5,678";
 
-            string connectionString = System.Configuration.ConfigurationManager.ConnectionStrings["SoorGreenDB"].ConnectionString;
+            string connectionString = System.Configuration.ConfigurationManager.ConnectionStrings["SoorGreenDBConnectionString"].ConnectionString;
 
             using (SqlConnection conn = new SqlConnection(connectionString))
             {

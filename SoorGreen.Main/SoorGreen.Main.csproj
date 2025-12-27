@@ -133,6 +133,7 @@
     <Content Include="favicon.ico" />
     <Content Include="Global.asax" />
     <Content Include="icon.png" />
+    <Content Include="Images\Team\ZACKI.jpg" />
     <Content Include="main.css" />
     <Content Include="main.js" />
     <Content Include="Scripts\bootstrap.bundle.js" />

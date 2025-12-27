@@ -11,7 +11,7 @@ namespace SoorGreen.Admin
 {
 
 
-    public partial class SiteMaster
+    public partial class Master
     {
 
         /// <summary>

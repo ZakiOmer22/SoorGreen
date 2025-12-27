@@ -18,7 +18,7 @@ namespace SoorGreen.Collectors
     public partial class MyRoute : System.Web.UI.Page
     {
         // Database connection string
-        private string connectionString = ConfigurationManager.ConnectionStrings["SoorGreenDBConnectionString"].ConnectionString;
+        public string connectionString = ConfigurationManager.ConnectionStrings["SoorGreenDBConnectionString"].ConnectionString;
 
         // Current collector ID (from session)
         private string currentCollectorId;
@@ -1538,50 +1538,51 @@ END
         {
             try
             {
-                string connectionString = ConfigurationManager.ConnectionStrings["SoorGreenDBConnection"].ConnectionString;
+                // Use ConfigurationManager to get the connection string in a static context
+                string connectionString = ConfigurationManager.ConnectionStrings["SoorGreenDBConnectionString"].ConnectionString;
 
                 using (SqlConnection conn = new SqlConnection(connectionString))
                 {
                     string query = @"
-BEGIN TRANSACTION;
+                BEGIN TRANSACTION;
 
--- Insert verification
-DECLARE @VerificationId CHAR(4);
-SELECT @VerificationId = 'PV' + RIGHT('00' + CAST(ISNULL(MAX(CAST(SUBSTRING(VerificationId, 3, 2) AS INT)), 0) + 1 AS VARCHAR(2)), 2)
-FROM PickupVerifications;
+                -- Insert verification
+                DECLARE @VerificationId CHAR(4);
+                SELECT @VerificationId = 'PV' + RIGHT('00' + CAST(ISNULL(MAX(CAST(SUBSTRING(VerificationId, 3, 2) AS INT)), 0) + 1 AS VARCHAR(2)), 2)
+                FROM PickupVerifications;
 
-INSERT INTO PickupVerifications (VerificationId, PickupId, VerifiedKg, MaterialType, VerificationMethod)
-VALUES (@VerificationId, @PickupId, @VerifiedKg, @MaterialType, 'Manual');
+                INSERT INTO PickupVerifications (VerificationId, PickupId, VerifiedKg, MaterialType, VerificationMethod)
+                VALUES (@VerificationId, @PickupId, @VerifiedKg, @MaterialType, 'Manual');
 
--- Update pickup status
-UPDATE PickupRequests
-SET Status = 'Collected',
-    CompletedAt = GETDATE()
-WHERE PickupId = @PickupId;
+                -- Update pickup status
+                UPDATE PickupRequests
+                SET Status = 'Collected',
+                    CompletedAt = GETDATE()
+                WHERE PickupId = @PickupId;
 
--- Get user ID and credit rate
-DECLARE @UserId CHAR(4);
-DECLARE @CreditRate DECIMAL(5,2);
+                -- Get user ID and credit rate
+                DECLARE @UserId CHAR(4);
+                DECLARE @CreditRate DECIMAL(5,2);
 
-SELECT @UserId = wr.UserId, @CreditRate = wt.CreditPerKg
-FROM PickupRequests pr
-JOIN WasteReports wr ON pr.ReportId = wr.ReportId
-JOIN WasteTypes wt ON wr.WasteTypeId = wt.WasteTypeId
-WHERE pr.PickupId = @PickupId;
+                SELECT @UserId = wr.UserId, @CreditRate = wt.CreditPerKg
+                FROM PickupRequests pr
+                JOIN WasteReports wr ON pr.ReportId = wr.ReportId
+                JOIN WasteTypes wt ON wr.WasteTypeId = wt.WasteTypeId
+                WHERE pr.PickupId = @PickupId;
 
--- Add reward points
-IF @CreditRate IS NOT NULL AND @UserId IS NOT NULL
-BEGIN
-    DECLARE @RewardId CHAR(4);
-    SELECT @RewardId = 'RP' + RIGHT('00' + CAST(ISNULL(MAX(CAST(SUBSTRING(RewardId, 3, 2) AS INT)), 0) + 1 AS VARCHAR(2)), 2)
-    FROM RewardPoints;
-    
-    INSERT INTO RewardPoints (RewardId, UserId, Amount, Type, Reference)
-    VALUES (@RewardId, @UserId, @VerifiedKg * @CreditRate, 'Credit', 'Pickup ' + @PickupId);
-END
+                -- Add reward points
+                IF @CreditRate IS NOT NULL AND @UserId IS NOT NULL
+                BEGIN
+                    DECLARE @RewardId CHAR(4);
+                    SELECT @RewardId = 'RP' + RIGHT('00' + CAST(ISNULL(MAX(CAST(SUBSTRING(RewardId, 3, 2) AS INT)), 0) + 1 AS VARCHAR(2)), 2)
+                    FROM RewardPoints;
 
-COMMIT TRANSACTION;
-";
+                    INSERT INTO RewardPoints (RewardId, UserId, Amount, Type, Reference)
+                    VALUES (@RewardId, @UserId, @VerifiedKg * @CreditRate, 'Credit', 'Pickup ' + @PickupId);
+                END
+
+                COMMIT TRANSACTION;
+            ";
 
                     using (SqlCommand cmd = new SqlCommand(query, conn))
                     {
@@ -1607,14 +1608,15 @@ COMMIT TRANSACTION;
         {
             try
             {
-                string connectionString = ConfigurationManager.ConnectionStrings["SoorGreenDBConnection"].ConnectionString;
+                // Use ConfigurationManager to get the connection string in a static context
+                string connectionString = ConfigurationManager.ConnectionStrings["SoorGreenDBConnectionString"].ConnectionString;
 
                 using (SqlConnection conn = new SqlConnection(connectionString))
                 {
                     string query = @"
-                        INSERT INTO CollectorLocations (CollectorId, Lat, Lng, Timestamp)
-                        VALUES (@CollectorId, @Lat, @Lng, GETDATE());
-                    ";
+                INSERT INTO CollectorLocations (CollectorId, Lat, Lng, Timestamp)
+                VALUES (@CollectorId, @Lat, @Lng, GETDATE());
+            ";
 
                     using (SqlCommand cmd = new SqlCommand(query, conn))
                     {

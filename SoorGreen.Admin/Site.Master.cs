@@ -3,7 +3,7 @@ using System.Web.UI;
 
 namespace SoorGreen.Admin
 {
-    public partial class SiteMaster : MasterPage
+    public partial class Master : MasterPage
     {
         protected void Page_Load(object sender, EventArgs e)
         {

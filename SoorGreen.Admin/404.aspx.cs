@@ -21,15 +21,15 @@ public partial class Error404 : System.Web.UI.Page
         // Show what was missing
         if (!string.IsNullOrEmpty(originalPath) && originalPath != "Unknown page")
         {
-            litRequestedPath.Text = $@"
-            <div class='alert alert-dark mt-3' style='background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1);'>
-                <small class='text-muted'>Missing page:</small><br/>
-                <code class='text-warning'>{Server.HtmlEncode(originalPath)}</code>
-            </div>";
+            //litRequestedPath.Text = $@"
+            //<div class='alert alert-dark mt-3' style='background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1);'>
+            //    <small class='text-muted'>Missing page:</small><br/>
+            //    <code class='text-warning'>{Server.HtmlEncode(originalPath)}</code>
+            //</div>";
         }
         else
         {
-            litRequestedPath.Text = string.Empty;
+            //litRequestedPath.Text = string.Empty;
         }
     }
 
