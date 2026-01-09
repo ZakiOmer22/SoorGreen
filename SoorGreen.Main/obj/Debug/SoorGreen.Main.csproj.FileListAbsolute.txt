@@ -52,3 +52,9 @@ Z:\ZAKI\Sem 1\Asp.net\MAIN\SoorGreen.Main\obj\Debug\SoorGreen.Main.csproj.CoreCo
 Z:\ZAKI\Sem 1\Asp.net\MAIN\SoorGreen.Main\obj\Debug\SoorGree.545F9A4D.Up2Date
 Z:\ZAKI\Sem 1\Asp.net\MAIN\SoorGreen.Main\obj\Debug\SoorGreen.Main.dll
 Z:\ZAKI\Sem 1\Asp.net\MAIN\SoorGreen.Main\obj\Debug\SoorGreen.Main.pdb
+Z:\ZAKI\Sem 1\Asp.net\MAIN\SoorGreen.Main\bin\Microsoft.Threading.Tasks.dll
+Z:\ZAKI\Sem 1\Asp.net\MAIN\SoorGreen.Main\bin\Microsoft.Threading.Tasks.Extensions.Desktop.dll
+Z:\ZAKI\Sem 1\Asp.net\MAIN\SoorGreen.Main\bin\Microsoft.Threading.Tasks.Extensions.dll
+Z:\ZAKI\Sem 1\Asp.net\MAIN\SoorGreen.Main\bin\Microsoft.Threading.Tasks.xml
+Z:\ZAKI\Sem 1\Asp.net\MAIN\SoorGreen.Main\bin\Microsoft.Threading.Tasks.Extensions.xml
+Z:\ZAKI\Sem 1\Asp.net\MAIN\SoorGreen.Main\bin\Microsoft.Threading.Tasks.Extensions.Desktop.xml

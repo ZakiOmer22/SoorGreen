@@ -2,420 +2,503 @@
 
 <asp:Content ID="BodyContent" ContentPlaceHolderID="MainContent" runat="server">
     <style>
-        /* FIXED: Navbar spacing solution */
-        body {
-            padding-top: 60px !important; /* Reduced from 120px */
+        /* Light mode specific colors for Dashboard */
+        [data-theme="light"] {
+            --light-bg: #f8f9fa;
+            --light-card: #ffffff;
+            --light-border: #e9ecef;
+            --light-text: #212529;
+            --light-muted: #6c757d;
+            --light-shadow: rgba(0, 0, 0, 0.1);
+            --light-overlay: rgba(255, 255, 255, 0.8);
         }
 
-        /* Remove the content-wrapper override if it exists */
-        .content-wrapper {
-            padding-top: 0 !important;
+        /* Dashboard Loading Section Light Mode */
+        [data-theme="light"] .dashboard-loading-section {
+            background: radial-gradient(ellipse at center, rgba(0, 212, 170, 0.08) 0%, transparent 70%);
         }
 
-        .dashboard-section {
-            min-height: calc(100vh - 150px); /* Reduced height */
+        [data-theme="light"] .floating-element {
+            opacity: 0.2;
+        }
+
+        [data-theme="light"] .dashboard-visual::before {
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><circle cx="50" cy="50" r="2" fill="%23000" opacity="0.05"/></svg>') repeat;
+        }
+
+        /* Loading Cards Light Mode */
+        [data-theme="light"] .loading-container,
+        [data-theme="light"] .progress-step-card,
+        [data-theme="light"] .user-loading-card {
+            background: var(--light-card) !important;
+            border: 1px solid var(--light-border) !important;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+        }
+
+        /* Text Colors Light Mode */
+        [data-theme="light"] .hero-title {
+            background: linear-gradient(45deg, var(--light-text), var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: 0 0 30px rgba(0, 212, 170, 0.2);
+        }
+
+        [data-theme="light"] .hero-subtitle,
+        [data-theme="light"] .text-muted,
+        [data-theme="light"] .text-white-50 {
+            color: var(--light-muted) !important;
+        }
+
+        /* Dashboard Loading Specific Styles */
+        .dashboard-loading-section {
+            min-height: 100vh;
             display: flex;
             align-items: center;
-            justify-content: center;
             position: relative;
             overflow: hidden;
             background: radial-gradient(ellipse at center, rgba(0, 212, 170, 0.1) 0%, transparent 70%);
-            padding: 30px 0; /* Reduced padding */
+            padding-top: 100px;
         }
 
-        [data-theme="light"] .dashboard-section {
-            background: radial-gradient(ellipse at center, rgba(0, 212, 170, 0.05) 0%, transparent 70%);
+        .floating-element {
+            position: absolute;
+            font-size: 2rem;
+            opacity: 0.3;
+            animation: floatElement 15s ease-in-out infinite;
         }
 
-        .loading-card {
+        .element-1 {
+            top: 20%;
+            left: 10%;
+            animation-delay: 0s;
+        }
+
+        .element-2 {
+            top: 60%;
+            right: 15%;
+            animation-delay: 5s;
+        }
+
+        .element-3 {
+            bottom: 20%;
+            left: 20%;
+            animation-delay: 10s;
+        }
+
+        @keyframes floatElement {
+            0%, 100% {
+                transform: translate(0, 0) rotate(0deg) scale(1);
+            }
+            25% {
+                transform: translate(50px, -40px) rotate(90deg) scale(1.1);
+            }
+            50% {
+                transform: translate(25px, -60px) rotate(180deg) scale(0.9);
+            }
+            75% {
+                transform: translate(-40px, -30px) rotate(270deg) scale(1.05);
+            }
+        }
+
+        .dashboard-visual {
+            background: linear-gradient(45deg, var(--primary), var(--secondary));
+            height: 400px;
+            width: 100%;
+            border-radius: 20px;
+            position: relative;
+            overflow: hidden;
+            opacity: 0.8;
+        }
+
+            .dashboard-visual::before {
+                content: '';
+                position: absolute;
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><circle cx="50" cy="50" r="2" fill="white" opacity="0.1"/></svg>') repeat;
+                animation: sparkle 4s linear infinite;
+            }
+
+        @keyframes sparkle {
+            0% { background-position: 0 0; }
+            100% { background-position: 100px 100px; }
+        }
+
+        /* Loading Container */
+        .loading-container {
             background: var(--card-bg);
             border: 1px solid var(--card-border);
-            border-radius: 15px; /* Reduced radius */
-            padding: 2rem; /* Reduced padding */
+            border-radius: 20px;
+            backdrop-filter: blur(10px);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .loading-badge {
+            background: rgba(0, 212, 170, 0.1) !important;
+            border: 1px solid rgba(0, 212, 170, 0.3);
+            color: var(--primary) !important;
+            backdrop-filter: blur(10px);
+        }
+
+        /* Progress Steps */
+        .progress-step-card {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 15px;
             transition: all 0.3s ease;
             backdrop-filter: blur(10px);
-            color: var(--light);
-            text-align: center;
-            max-width: 500px;
-            margin: 0 auto;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2); /* Reduced shadow */
+            opacity: 0.7;
+            position: relative;
         }
 
-        [data-theme="light"] .loading-card {
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
-        }
+            .progress-step-card.active {
+                opacity: 1;
+                border-color: var(--primary);
+                background: rgba(0, 212, 170, 0.05);
+            }
 
-        .progress-container {
+            .progress-step-card.completed {
+                opacity: 1;
+                border-color: #10b981;
+                background: rgba(16, 185, 129, 0.05);
+            }
+
+        .step-icon {
+            width: 50px;
+            height: 50px;
+            background: rgba(0, 212, 170, 0.1);
+            border-radius: 50%;
             display: flex;
-            flex-direction: column;
             align-items: center;
-            gap: 1.5rem; /* Reduced gap */
+            justify-content: center;
+            color: var(--primary);
+            font-size: 1.25rem;
+            flex-shrink: 0;
         }
 
-        .progress-spinner {
-            width: 60px; /* Reduced size */
-            height: 60px;
-            border: 3px solid var(--card-border);
-            border-left: 3px solid var(--primary);
+        .progress-step-card.active .step-icon {
+            background: var(--primary);
+            color: white;
+            animation: pulse 2s infinite;
+        }
+
+        .progress-step-card.completed .step-icon {
+            background: #10b981;
+            color: white;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+
+        /* Loading Animation */
+        .loading-spinner {
+            width: 80px;
+            height: 80px;
+            border: 4px solid transparent;
+            border-top: 4px solid var(--primary);
+            border-right: 4px solid var(--primary);
             border-radius: 50%;
             animation: spin 1s linear infinite;
         }
 
-        .progress-text {
-            display: flex;
-            flex-direction: column;
-            gap: 0.5rem;
-            width: 100%;
-        }
-
-        .progress-step {
-            display: flex;
-            align-items: center;
-            gap: 0.75rem; /* Reduced gap */
-            padding: 0.5rem 0.75rem; /* Reduced padding */
-            background: var(--card-bg);
-            border-radius: 8px; /* Reduced radius */
-            border: 1px solid var(--card-border);
-            transition: all 0.3s ease;
-            font-size: 0.9rem; /* Smaller font */
-        }
-
-            .progress-step.active {
-                border-color: var(--primary);
-                background: rgba(0, 212, 170, 0.1);
-            }
-
-            .progress-step.completed {
-                border-color: #10b981;
-                background: rgba(16, 185, 129, 0.1);
-            }
-
-        .step-icon {
-            width: 20px; /* Reduced size */
-            height: 20px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 0.7rem; /* Smaller font */
-            background: var(--card-bg);
-            border: 1px solid var(--card-border);
-            color: var(--light);
-            transition: all 0.3s ease;
-            flex-shrink: 0; /* Prevent shrinking */
-        }
-
-        .progress-step.active .step-icon {
-            background: var(--primary);
-            border-color: var(--primary);
-            color: white;
-        }
-
-        .progress-step.completed .step-icon {
-            background: #10b981;
-            border-color: #10b981;
-            color: white;
-        }
-
-        .step-text {
-            flex: 1;
-            text-align: left;
-            min-width: 0; /* Allow text to wrap */
-        }
-
-            .step-text strong {
-                color: var(--light) !important;
-                display: block;
-                margin-bottom: 0.125rem; /* Reduced margin */
-                font-size: 0.85rem; /* Smaller font */
-            }
-
-            .step-text small {
-                color: var(--light) !important;
-                opacity: 0.8;
-                font-size: 0.75rem; /* Smaller font */
-            }
-
-        .user-info {
-            background: var(--card-bg);
-            border: 1px solid var(--card-border);
-            border-radius: 10px; /* Reduced radius */
-            padding: 1rem; /* Reduced padding */
-            margin-bottom: 1.5rem; /* Reduced margin */
-            text-align: center;
-        }
-
-        .user-avatar {
-            width: 60px; /* Reduced size */
-            height: 60px;
-            border-radius: 50%;
-            background: linear-gradient(45deg, var(--primary), var(--secondary));
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            font-size: 1.5rem; /* Smaller font */
-            font-weight: 600;
-            margin: 0 auto 0.75rem; /* Reduced margin */
-            box-shadow: 0 4px 15px rgba(0, 212, 170, 0.3); /* Reduced shadow */
-        }
-
-        .user-details h4 {
-            margin-bottom: 0.25rem; /* Reduced margin */
-            color: var(--light) !important;
-            font-size: 1.1rem; /* Smaller font */
-        }
-
-        .user-role {
-            color: var(--primary) !important;
-            font-weight: 600;
-            margin-bottom: 0.5rem; /* Reduced margin */
-            font-size: 0.9rem; /* Smaller font */
-        }
-
-        .user-details .small {
-            color: var(--light) !important;
-            opacity: 0.8;
-            font-size: 0.8rem; /* Smaller font */
-        }
-
         @keyframes spin {
-            0% {
-                transform: rotate(0deg);
-            }
-
-            100% {
-                transform: rotate(360deg);
-            }
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
         }
 
-        .pulse {
-            animation: pulse 2s infinite;
+        /* Skeleton Loading */
+        .skeleton {
+            background: linear-gradient(90deg, 
+                rgba(255, 255, 255, 0.05) 25%, 
+                rgba(255, 255, 255, 0.1) 50%, 
+                rgba(255, 255, 255, 0.05) 75%);
+            background-size: 200% 100%;
+            animation: skeletonLoading 1.5s ease-in-out infinite;
+            border-radius: 4px;
         }
 
-        @keyframes pulse {
-            0% {
-                opacity: 1;
-            }
-
-            50% {
-                opacity: 0.7;
-            }
-
-            100% {
-                opacity: 1;
-            }
+        .skeleton-text {
+            height: 12px;
+            margin-bottom: 8px;
         }
 
-        .redirect-info {
-            margin-top: 1.5rem; /* Reduced margin */
-            padding: 0.75rem; /* Reduced padding */
+        .skeleton-title {
+            height: 24px;
+            width: 60%;
+            margin-bottom: 16px;
+        }
+
+        .skeleton-avatar {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+        }
+
+        @keyframes skeletonLoading {
+            0% { background-position: -200% 0; }
+            100% { background-position: 200% 0; }
+        }
+
+        /* User Loading Card */
+        .user-loading-card {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 20px;
+            backdrop-filter: blur(10px);
+        }
+
+        .user-avatar-loading {
+            width: 100px;
+            height: 100px;
+            background: linear-gradient(45deg, var(--primary), var(--secondary));
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 2rem;
+            font-weight: 600;
+            margin: 0 auto;
+            opacity: 0.7;
+        }
+
+        /* Countdown Display */
+        .countdown-display {
             background: rgba(0, 212, 170, 0.1);
             border: 1px solid rgba(0, 212, 170, 0.3);
-            border-radius: 8px; /* Reduced radius */
+            border-radius: 15px;
+            padding: 1.5rem;
+        }
+
+        .countdown-number {
+            font-size: 3rem;
+            font-weight: 700;
             color: var(--primary);
-            font-size: 0.9rem; /* Smaller font */
+            text-shadow: 0 0 20px rgba(0, 212, 170, 0.3);
         }
 
-        [data-theme="light"] .redirect-info {
-            background: rgba(0, 212, 170, 0.15);
+        /* Progress Bar */
+        .progress-bar-container {
+            width: 100%;
+            height: 6px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 3px;
+            overflow: hidden;
+            margin: 1rem 0;
         }
 
-        .countdown {
-            font-size: 1.25rem; /* Smaller font */
-            font-weight: 600;
-            color: var(--primary);
-            margin: 0.25rem 0; /* Reduced margin */
+        .progress-bar-fill {
+            height: 100%;
+            background: linear-gradient(45deg, var(--primary), var(--secondary));
+            border-radius: 3px;
+            width: 0%;
+            transition: width 0.5s ease;
         }
 
-        /* Simple Toast Notifications */
-        .toast-container {
-            position: fixed;
-            top: 70px; /* Lower to account for navbar */
-            right: 20px;
-            z-index: 9999;
-        }
-
-        .toast {
-            background: var(--card-bg);
-            border: 1px solid var(--card-border);
-            border-radius: 8px; /* Reduced radius */
-            padding: 0.75rem; /* Reduced padding */
-            margin-bottom: 0.5rem;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2); /* Reduced shadow */
-            border-left: 4px solid var(--primary);
-            color: var(--light);
-            font-weight: 500;
-            max-width: 280px; /* Smaller width */
-            transform: translateX(400px);
-            transition: all 0.3s ease;
-            backdrop-filter: blur(10px);
-            font-size: 0.85rem; /* Smaller font */
-        }
-
-        [data-theme="light"] .toast {
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-        }
-
-        .toast.show {
-            transform: translateX(0);
-        }
-
-        .toast.success {
-            border-left-color: #10b981;
-        }
-
-        .toast.error {
-            border-left-color: #ef4444;
-        }
-
-        .toast.warning {
-            border-left-color: #f59e0b;
-        }
-
-        .toast.info {
-            border-left-color: var(--primary);
-        }
-
-        @media (max-width: 768px) {
-            body {
-                padding-top: 50px !important; /* Even smaller on mobile */
-            }
-
-            .dashboard-section {
-                padding: 20px 0;
-                min-height: calc(100vh - 120px);
-            }
-
-            .loading-card {
-                padding: 1.5rem 1rem;
-                margin: 0.5rem;
-            }
-
-            .progress-step {
-                padding: 0.4rem;
-                font-size: 0.8rem;
-            }
-
-            .progress-spinner {
-                width: 50px;
-                height: 50px;
-            }
-
-            .user-avatar {
-                width: 50px;
-                height: 50px;
-                font-size: 1.25rem;
-            }
-
-            .toast-container {
-                top: 60px; /* Adjust for mobile navbar */
-                right: 10px;
-                left: 10px;
-            }
-
-            .toast {
-                max-width: none;
-                margin: 0 10px 0.5rem 10px;
-                font-size: 0.8rem;
-            }
-        }
-
-        /* Animation for card entrance */
-        @keyframes fadeInUp {
-            from {
-                opacity: 0;
-                transform: translateY(20px);
-            }
-
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        .loading-card {
-            animation: fadeInUp 0.4s ease-out;
-        }
-
-        /* Ensure proper text colors */
-        h1, h2, h3, h4, h5, h6 {
-            color: var(--light) !important;
-        }
-
-        p, span, small {
-            color: var(--light) !important;
+        /* Text Colors */
+        .text-primary {
+            color: var(--primary) !important;
         }
 
         .text-muted {
-            color: var(--light) !important;
-            opacity: 0.8 !important;
+            color: rgba(255, 255, 255, 0.6) !important;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .dashboard-loading-section {
+                min-height: auto;
+                padding: 100px 0 50px;
+            }
+
+            .floating-element {
+                display: none;
+            }
+
+            .dashboard-visual {
+                height: 300px;
+                margin-top: 2rem;
+            }
+
+            .loading-spinner {
+                width: 60px;
+                height: 60px;
+            }
+
+            .step-icon {
+                width: 40px;
+                height: 40px;
+                font-size: 1rem;
+            }
+
+            .countdown-number {
+                font-size: 2.5rem;
+            }
         }
     </style>
 
-    <!-- Toast Container -->
-    <div class="toast-container" id="toastContainer"></div>
-
-    <section class="dashboard-section">
+    <!-- Loading Section -->
+    <section class="dashboard-loading-section">
         <div class="container">
-            <div class="row justify-content-center">
-                <div class="col-lg-6 col-md-8 col-sm-10">
-                    <div class="loading-card">
-                        <!-- User Info -->
-                        <asp:Panel ID="pnlUserInfo" runat="server" CssClass="user-info">
-                            <div class="user-avatar" id="userAvatar" runat="server">
-                                <!-- Initials will be set by code-behind -->
+            <div class="row align-items-center">
+                <div class="col-lg-6">
+                    <span class="loading-badge px-3 py-2 rounded-pill mb-3">Loading Dashboard</span>
+                    <h1 class="hero-title mb-3">Almost There...</h1>
+                    <p class="hero-subtitle mb-4">We're preparing your personalized dashboard experience. This will only take a moment.</p>
+                    
+                    <!-- Progress Bar -->
+                    <div class="progress-bar-container">
+                        <div class="progress-bar-fill" id="globalProgress"></div>
+                    </div>
+                    <small class="text-muted" id="progressText">Initializing dashboard components...</small>
+                </div>
+                <div class="col-lg-6 text-center">
+                    <div class="dashboard-loading-visual position-relative">
+                        <div class="floating-element element-1">
+                            <i class="fas fa-cog fa-spin text-primary"></i>
+                        </div>
+                        <div class="floating-element element-2">
+                            <i class="fas fa-sync fa-spin text-success"></i>
+                        </div>
+                        <div class="floating-element element-3">
+                            <i class="fas fa-spinner fa-spin text-warning"></i>
+                        </div>
+                        <div class="dashboard-visual rounded-3 shadow-lg mt-4">
+                            <div class="position-absolute top-50 start-50 translate-middle">
+                                <div class="loading-spinner"></div>
                             </div>
-                            <div class="user-details">
-                                <h4 id="userName" runat="server">Loading...</h4>
-                                <div class="user-role" id="userRole" runat="server">Checking account...</div>
-                                <div class="small text-muted" id="userEmail" runat="server">Loading user information...</div>
-                            </div>
-                        </asp:Panel>
+                        </div>
+                    </div>
+                </div>
+            </div>
 
-                        <!-- Progress Container -->
-                        <div class="progress-container">
-                            <div class="progress-spinner"></div>
+            <!-- Loading Progress Container -->
+            <div class="loading-container mt-5 p-4">
+                <div class="row g-4">
+                    <!-- Progress Steps -->
+                    <div class="col-lg-8">
+                        <div class="mb-4">
+                            <h4 class="fw-bold mb-3 text-white">Setting Up Your Dashboard</h4>
+                            <p class="text-muted">We're loading all your personalized content and settings.</p>
+                        </div>
 
-                            <div class="progress-text">
-                                <div class="progress-step active" id="step1">
-                                    <div class="step-icon">
-                                        <i class="fas fa-sync fa-spin"></i>
-                                    </div>
-                                    <div class="step-text">
-                                        <strong>Checking Account</strong>
-                                        <small>Verifying your credentials and role...</small>
-                                    </div>
+                        <!-- Step 1 -->
+                        <div class="progress-step-card active p-4 mb-3" id="step1">
+                            <div class="d-flex align-items-center gap-4">
+                                <div class="step-icon">
+                                    <i class="fas fa-user-check"></i>
                                 </div>
-
-                                <div class="progress-step" id="step2">
-                                    <div class="step-icon">
-                                        <i class="fas fa-clock"></i>
-                                    </div>
-                                    <div class="step-text">
-                                        <strong>Loading Dashboard</strong>
-                                        <small>Preparing your personalized interface...</small>
-                                    </div>
+                                <div class="flex-grow-1">
+                                    <h5 class="fw-bold mb-1 text-white">Verifying Your Account</h5>
+                                    <p class="text-muted mb-0">Checking permissions and loading profile data...</p>
                                 </div>
-
-                                <div class="progress-step" id="step3">
-                                    <div class="step-icon">
-                                        <i class="fas fa-rocket"></i>
-                                    </div>
-                                    <div class="step-text">
-                                        <strong>Redirecting</strong>
-                                        <small>Taking you to your dashboard...</small>
-                                    </div>
+                                <div class="text-end">
+                                    <span class="badge bg-primary">Active</span>
                                 </div>
                             </div>
+                        </div>
 
-                            <!-- Redirect Info -->
-                            <div class="redirect-info">
-                                <i class="fas fa-info-circle me-2"></i>
-                                <strong>Automatic Redirect</strong>
-                                <div class="countdown" id="countdown">3</div>
-                                <small>You will be automatically redirected to your dashboard</small>
+                        <!-- Step 2 -->
+                        <div class="progress-step-card p-4 mb-3" id="step2">
+                            <div class="d-flex align-items-center gap-4">
+                                <div class="step-icon">
+                                    <i class="fas fa-chart-line"></i>
+                                </div>
+                                <div class="flex-grow-1">
+                                    <h5 class="fw-bold mb-1 text-white">Loading Statistics</h5>
+                                    <p class="text-muted mb-0">Fetching your environmental impact data...</p>
+                                </div>
+                                <div class="text-end">
+                                    <span class="badge bg-secondary">Pending</span>
+                                </div>
                             </div>
+                        </div>
+
+                        <!-- Step 3 -->
+                        <div class="progress-step-card p-4 mb-3" id="step3">
+                            <div class="d-flex align-items-center gap-4">
+                                <div class="step-icon">
+                                    <i class="fas fa-bolt"></i>
+                                </div>
+                                <div class="flex-grow-1">
+                                    <h5 class="fw-bold mb-1 text-white">Preparing Interface</h5>
+                                    <p class="text-muted mb-0">Loading widgets and dashboard components...</p>
+                                </div>
+                                <div class="text-end">
+                                    <span class="badge bg-secondary">Pending</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Step 4 -->
+                        <div class="progress-step-card p-4" id="step4">
+                            <div class="d-flex align-items-center gap-4">
+                                <div class="step-icon">
+                                    <i class="fas fa-rocket"></i>
+                                </div>
+                                <div class="flex-grow-1">
+                                    <h5 class="fw-bold mb-1 text-white">Finalizing Setup</h5>
+                                    <p class="text-muted mb-0">Almost ready! Preparing for redirection...</p>
+                                </div>
+                                <div class="text-end">
+                                    <span class="badge bg-secondary">Pending</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- User Info & Countdown -->
+                    <div class="col-lg-4">
+                        <!-- User Loading Card -->
+                        <div class="user-loading-card p-4 mb-4">
+                            <div class="text-center">
+                                <div class="user-avatar-loading mb-3" id="userAvatar">
+                                    <!-- Initials will be set by code-behind -->
+                                </div>
+                                <div class="skeleton skeleton-title mx-auto mb-2"></div>
+                                <div class="skeleton skeleton-text mx-auto w-50 mb-3"></div>
+                                <div class="d-flex flex-column gap-2">
+                                    <div class="skeleton skeleton-text"></div>
+                                    <div class="skeleton skeleton-text w-75"></div>
+                                    <div class="skeleton skeleton-text w-50"></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Countdown Display -->
+                        <div class="countdown-display text-center">
+                            <h5 class="fw-bold mb-3 text-white">Auto Redirect In</h5>
+                            <div class="countdown-number mb-2" id="countdown">5</div>
+                            <p class="text-muted small">You'll be automatically redirected to your dashboard</p>
+                            <div class="mt-3">
+                                <button class="btn btn-outline-primary btn-sm" onclick="cancelRedirect()">
+                                    <i class="fas fa-times me-2"></i>Cancel Redirect
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Loading Status -->
+            <div class="row mt-4">
+                <div class="col-12">
+                    <div class="text-center">
+                        <p class="text-muted mb-2">
+                            <i class="fas fa-info-circle me-2"></i>
+                            Loading your personalized dashboard content...
+                        </p>
+                        <div class="d-flex justify-content-center align-items-center gap-3">
+                            <div class="spinner-border spinner-border-sm text-primary" role="status">
+                                <span class="visually-hidden">Loading...</span>
+                            </div>
+                            <small class="text-muted" id="statusMessage">Fetching user data...</small>
                         </div>
                     </div>
                 </div>
@@ -424,59 +507,168 @@
     </section>
 
     <script>
-        // Simple toast notification function
-        function showToast(message, type = 'info', duration = 5000) {
-            const toastContainer = document.getElementById('toastContainer');
-            if (!toastContainer) return;
+        // Dashboard loading simulation
+        document.addEventListener('DOMContentLoaded', function () {
+            const steps = [
+                { id: 'step1', duration: 1000, message: 'Verifying account credentials...' },
+                { id: 'step2', duration: 1500, message: 'Loading environmental statistics...' },
+                { id: 'step3', duration: 2000, message: 'Preparing dashboard interface...' },
+                { id: 'step4', duration: 1000, message: 'Finalizing setup...' }
+            ];
 
-            const toast = document.createElement('div');
-            toast.className = 'toast ' + type;
+            let currentStep = 0;
+            const progressBar = document.getElementById('globalProgress');
+            const progressText = document.getElementById('progressText');
+            const statusMessage = document.getElementById('statusMessage');
+            const countdownElement = document.getElementById('countdown');
 
-            // Set icon based on type
-            let icon = 'fa-info-circle';
-            if (type === 'success') icon = 'fa-check-circle';
-            if (type === 'error') icon = 'fa-exclamation-circle';
-            if (type === 'warning') icon = 'fa-exclamation-triangle';
+            // Initialize progress
+            progressBar.style.width = '0%';
 
-            toast.innerHTML =
-                '<div class="d-flex align-items-center">' +
-                '<i class="fas ' + icon + ' me-2"></i>' +
-                '<span>' + message + '</span>' +
-                '</div>';
+            // Start the loading sequence
+            function startLoadingSequence() {
+                if (currentStep < steps.length) {
+                    const step = steps[currentStep];
+                    const stepElement = document.getElementById(step.id);
 
-            toastContainer.appendChild(toast);
+                    // Update UI for current step
+                    stepElement.classList.add('active');
+                    statusMessage.textContent = step.message;
 
-            // Show toast
-            setTimeout(function () {
-                toast.classList.add('show');
-            }, 100);
+                    // Calculate progress
+                    const progress = ((currentStep + 1) / steps.length) * 200;
+                    progressBar.style.width = progress + '%';
 
-            // Auto remove after duration
-            setTimeout(function () {
-                toast.classList.remove('show');
-                setTimeout(function () {
-                    if (toast.parentNode === toastContainer) {
-                        toastContainer.removeChild(toast);
+                    // Update progress text
+                    progressText.textContent = `Step ${currentStep + 1} of ${steps.length}: ${step.message}`;
+
+                    // Simulate step completion
+                    setTimeout(() => {
+                        stepElement.classList.remove('active');
+                        stepElement.classList.add('completed');
+                        stepElement.querySelector('.badge').className = 'badge bg-success';
+                        stepElement.querySelector('.badge').textContent = 'Completed';
+
+                        currentStep++;
+                        startLoadingSequence();
+                    }, step.duration);
+                } else {
+                    // All steps completed
+                    progressBar.style.width = '100%';
+                    progressText.textContent = 'Dashboard ready! Redirecting...';
+                    statusMessage.textContent = 'Dashboard loaded successfully!';
+
+                    // Start countdown
+                    startCountdown();
+                }
+            }
+
+            // Start countdown for redirect
+            function startCountdown() {
+                let countdown = 5;
+                countdownElement.textContent = countdown;
+
+                const countdownInterval = setInterval(() => {
+                    countdown--;
+                    countdownElement.textContent = countdown;
+
+                    if (countdown <= 0) {
+                        clearInterval(countdownInterval);
+                        performRedirect();
                     }
-                }, 300);
-            }, duration);
+                }, 5000);
+            }
 
-            // Click to dismiss
-            toast.addEventListener('click', function () {
-                toast.classList.remove('show');
-                setTimeout(function () {
-                    if (toast.parentNode === toastContainer) {
-                        toastContainer.removeChild(toast);
-                    }
-                }, 300);
-            });
+            // Perform the redirect
+            function performRedirect() {
+                // Show final message
+                statusMessage.textContent = 'Redirecting to your dashboard...';
+
+                // In real implementation, this would redirect to the actual dashboard
+                // window.location.href = '/Dashboard/Home';
+
+                // For demo, show completion message
+                setTimeout(() => {
+                    showToast('Dashboard loaded successfully!', 'success');
+                    progressText.textContent = 'Click "Go to Dashboard" below to continue';
+
+                    // Show manual redirect option
+                    document.querySelector('.countdown-display').innerHTML = `
+                        <h5 class="fw-bold mb-3 text-white">Ready to Go!</h5>
+                        <div class="mb-3">
+                            <i class="fas fa-check-circle text-success fa-3x"></i>
+                        </div>
+                        <p class="text-muted">Your dashboard is ready to use</p>
+                        <button class="btn btn-primary" onclick="goToDashboard()">
+                            <i class="fas fa-rocket me-2"></i>Go to Dashboard
+                        </button>
+                    `;
+                }, 8000);
+            }
+
+            // Simulate user data loading
+            setTimeout(() => {
+                // This would normally come from code-behind
+                const userName = '<%= Session["UserName"] ?? "User" %>';
+                const userInitials = getUserInitials(userName);
+
+                const avatar = document.getElementById('userAvatar');
+                if (avatar && userInitials !== '??') {
+                    avatar.innerHTML = userInitials;
+                    avatar.style.opacity = '1';
+                }
+            }, 500);
+
+            // Start the loading process
+            setTimeout(startLoadingSequence, 1000);
+        });
+
+        function getUserInitials(name) {
+            if (!name || name === 'User') return '??';
+            return name.split(' ').map(n => n[0]).join('').toUpperCase().substring(0, 2);
         }
 
-        // Initial welcome message
-        document.addEventListener('DOMContentLoaded', function () {
-            setTimeout(function () {
-                showToast('Welcome! Setting up your dashboard experience...', 'info', 10000);
-            }, 1000);
-        });
+        function cancelRedirect() {
+            if (confirm('Cancel auto-redirect and stay on this page?')) {
+                showToast('Redirect cancelled. You can continue manually.', 'warning');
+                document.querySelector('.countdown-display').innerHTML = `
+                    <h5 class="fw-bold mb-3 text-white">Redirect Cancelled</h5>
+                    <p class="text-muted">You can proceed to your dashboard manually</p>
+                    <button class="btn btn-primary" onclick="goToDashboard()">
+                        <i class="fas fa-arrow-right me-2"></i>Continue to Dashboard
+                    </button>
+                `;
+            }
+        }
+
+        function goToDashboard() {
+            showToast('Navigating to dashboard...', 'info');
+            setTimeout(() => {
+                document.querySelector('.progress-text').textContent = 'Redirecting...';
+                document.querySelector('.loading-container').style.opacity = '0.7';
+            }, 8000);
+        }
+
+        function showToast(message, type = 'info') {
+            // Create toast element
+            const toast = document.createElement('div');
+            toast.className = `position-fixed top-0 end-0 m-3 p-3 rounded shadow-lg ${type === 'success' ? 'bg-success' : type === 'warning' ? 'bg-warning' : 'bg-primary'}`;
+            toast.style.zIndex = '9999';
+            toast.innerHTML = `
+                <div class="d-flex align-items-center text-white">
+                    <i class="fas fa-${type === 'success' ? 'check-circle' : type === 'warning' ? 'exclamation-triangle' : 'info-circle'} me-3"></i>
+                    <span>${message}</span>
+                    <button class="btn-close btn-close-white ms-3" onclick="this.parentElement.parentElement.remove()"></button>
+                </div>
+            `;
+
+            document.body.appendChild(toast);
+
+            setTimeout(() => {
+                if (toast.parentNode) {
+                    toast.remove();
+                }
+            }, 3000);
+        }
     </script>
 </asp:Content>

@@ -961,3 +961,214 @@ body {
 .category-card-glass.selected span {
     color: var(--report-text-on-glass) !important;
 }
+
+
+/* FIX: Scrollbar for main container */
+.report-container {
+    position: relative;
+    min-height: calc(100vh - 150px);
+    overflow-y: auto;
+    padding-right: 10px;
+}
+
+    /* Custom scrollbar that works with both themes */
+    .report-container::-webkit-scrollbar {
+        width: 10px;
+    }
+
+    .report-container::-webkit-scrollbar-track {
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 10px;
+        margin: 5px 0;
+    }
+
+    .report-container::-webkit-scrollbar-thumb {
+        background: rgba(16, 185, 129, 0.6);
+        border-radius: 10px;
+        border: 2px solid transparent;
+        background-clip: content-box;
+    }
+
+        .report-container::-webkit-scrollbar-thumb:hover {
+            background: rgba(16, 185, 129, 0.8);
+        }
+
+[data-theme="dark"] .report-container::-webkit-scrollbar-track {
+    background: rgba(0, 0, 0, 0.2);
+}
+
+[data-theme="dark"] .report-container::-webkit-scrollbar-thumb {
+    background: rgba(16, 185, 129, 0.4);
+}
+
+    [data-theme="dark"] .report-container::-webkit-scrollbar-thumb:hover {
+        background: rgba(16, 185, 129, 0.6);
+    }
+
+/* Fix for message panel visibility */
+.message-panel {
+    position: fixed;
+    top: 80px;
+    right: 20px;
+    width: 350px;
+    z-index: 9999;
+    display: block;
+    visibility: visible;
+}
+
+.message-alert {
+    padding: 15px;
+    margin-bottom: 10px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    animation: slideIn 0.3s ease;
+    box-shadow: 0 8px 25px rgba(0,0,0,0.2);
+    visibility: visible !important;
+    opacity: 1 !important;
+    transform: none !important;
+}
+
+    .message-alert.show {
+        display: flex !important;
+        visibility: visible !important;
+        opacity: 1 !important;
+    }
+
+    .message-alert.success {
+        background: linear-gradient(135deg, #10B981, #059669);
+        color: white;
+        border-left: 4px solid #047857;
+    }
+
+    .message-alert.error {
+        background: linear-gradient(135deg, #EF4444, #DC2626);
+        color: white;
+        border-left: 4px solid #B91C1C;
+    }
+
+    .message-alert.warning {
+        background: linear-gradient(135deg, #F59E0B, #D97706);
+        color: white;
+        border-left: 4px solid #B45309;
+    }
+
+    .message-alert i {
+        font-size: 24px;
+        margin-right: 15px;
+    }
+
+@keyframes slideIn {
+    from {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+/* Fix: Ensure selected waste type is visible in both themes */
+.category-card-glass.selected {
+    border: 2px solid #22c55e !important;
+    background: rgba(34, 197, 94, 0.1) !important;
+    box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.2) !important;
+    transform: translateY(-2px);
+    transition: all 0.3s ease;
+}
+
+    .category-card-glass.selected .category-icon-glass {
+        background: linear-gradient(135deg, #22c55e, #16a34a) !important;
+        color: white !important;
+    }
+
+/* Fix: Ensure text is visible in both themes */
+.card-header-glass h4,
+.card-header-glass i {
+    color: white !important;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3) !important;
+}
+
+/* Fix: Ensure form labels are visible */
+.form-label {
+    color: white !important;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3) !important;
+}
+
+/* Fix: Ensure text-muted is visible in dark mode */
+[data-theme="dark"] .text-muted {
+    color: rgba(255, 255, 255, 0.7) !important;
+}
+
+/* Fix: Ensure preview text is visible */
+.preview-details .text-muted,
+.detail-row .text-muted {
+    color: rgba(255, 255, 255, 0.8) !important;
+}
+
+/* Fix: Ensure placeholders are visible */
+.form-control-glass::placeholder {
+    color: rgba(255, 255, 255, 0.6) !important;
+}
+
+/* Fix: Ensure form check labels are visible */
+.form-check-label {
+    color: white !important;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2) !important;
+}
+
+/* Fix: Ensure stats cards text is visible */
+.stats-card .stats-number,
+.stats-card .stats-label {
+    color: white !important;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3) !important;
+}
+
+/* Fix: Ensure step labels are visible */
+.step-label-glass {
+    color: rgba(255, 255, 255, 0.9) !important;
+}
+
+/* Fix: Remove inline conflicting styles */
+.card-glass {
+    background: transparent !important;
+    backdrop-filter: blur(20px) !important;
+    border: 1px solid rgba(255, 255, 255, 0.2) !important;
+}
+
+.stats-card {
+    background: rgba(255, 255, 255, 0.1) !important;
+    backdrop-filter: blur(20px) !important;
+}
+
+/* Fix: Ensure button text is visible */
+.btn {
+    color: white !important;
+    text-shadow: 0 1px 1px rgba(0, 0, 0, 0.3) !important;
+}
+
+/* AI Section Styles */
+.ai-results-card {
+    background: rgba(59, 130, 246, 0.1) !important;
+    border: 1px solid rgba(59, 130, 246, 0.3) !important;
+    backdrop-filter: blur(10px) !important;
+}
+
+.ai-loading {
+    color: #3B82F6 !important;
+}
+
+.ai-success {
+    color: #10B981 !important;
+}
+
+.ai-error {
+    color: #EF4444 !important;
+}
+
+.ai-highlight {
+    background: linear-gradient(120deg, rgba(59, 130, 246, 0.2), rgba(16, 185, 129, 0.2)) !important;
+    border-left: 3px solid #3B82F6 !important;
+}

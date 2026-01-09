@@ -852,7 +852,7 @@
         </div>
 
         <!-- Updated Custom Modal - Showing Full Team Collaboration -->
-        <div class="modal fade" id="customModal" tabindex="-1" aria-hidden="true">
+         <div class="modal fade" id="customModal" tabindex="-1" aria-hidden="true">
             <div class="modal-dialog modal-lg">
                 <div class="modal-content">
                     <div class="modal-header">

@@ -1863,9 +1863,130 @@
                 height: 100vh;
             }
         }
+        /* === VIDEO SPLASH SCREEN === */
+        .video-splash {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: var(--darker);
+            z-index: 9999;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: opacity 0.5s ease, visibility 0.5s ease;
+        }
+
+            .video-splash video {
+                width: 100%;
+                height: 100%;
+                object-fit: cover;
+            }
+
+        .video-controls {
+            position: absolute;
+            bottom: 40px;
+            left: 0;
+            right: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 20px;
+            padding: 0 20px;
+            z-index: 10000;
+        }
+
+        .skip-btn {
+            background: linear-gradient(135deg, var(--green), var(--teal));
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 50px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 1rem;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+            .skip-btn:hover {
+                transform: translateY(-3px);
+                box-shadow: 0 15px 30px rgba(16, 185, 129, 0.4);
+            }
+
+        .video-time {
+            background: rgba(0, 0, 0, 0.7);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 50px;
+            font-weight: 600;
+            font-size: 1.1rem;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .video-splash.hidden {
+            opacity: 0;
+            visibility: hidden;
+            pointer-events: none;
+        }
+
+        /* Ensure content is hidden during video playback */
+        .main-content.video-playing {
+            filter: blur(5px);
+            pointer-events: none;
+        }
+
+        /* Keyboard shortcut hint */
+        .keyboard-hint {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: rgba(0, 0, 0, 0.7);
+            color: var(--green);
+            padding: 8px 15px;
+            border-radius: 10px;
+            font-size: 0.9rem;
+            font-weight: 500;
+            border: 1px solid var(--green);
+            backdrop-filter: blur(10px);
+            animation: pulseHint 2s infinite;
+        }
+
+        @keyframes pulseHint {
+            0%, 100% {
+                opacity: 0.8;
+                transform: scale(1);
+            }
+
+            50% {
+                opacity: 1;
+                transform: scale(1.05);
+            }
+        }
     </style>
 </head>
 <body>
+    <!-- Video Splash Screen -->
+    <div class="video-splash" id="videoSplash">
+        <video id="introVideo" muted autoplay playsinline>
+            <source src="Videos/Soongreen.mp4" type="video/mp4">
+            Your browser does not support the video tag.
+        </video>
+        <div class="video-controls">
+            <%--<button class="skip-btn" onclick="skipVideo()">
+                <i class="fas fa-forward"></i>Skip Intro (Press 'S')
+            </button>--%>
+            <div class="video-time">
+                <span id="videoTime">01:00</span>
+            </div>
+        </div>
+    </div>
     <!-- Main Content -->
     <div class="main-content" id="mainContent">
         <form id="form1" runat="server">
@@ -2057,7 +2178,7 @@
                                     <i class="fas fa-flask"></i>Research & Backend Unit
                                 </span>
                                 <div class="team-img-container">
-                                    <img src="Images/Team/abdirxeem.jpg" alt="Abdirxeem Khadar Cabdirahman" class="team-img">
+                                    <img src="Images/Team/abdirxeem.jpeg" alt="Abdirxeem Khadar Cabdirahman" class="team-img">
                                     <div class="team-gradient-overlay"></div>
                                 </div>
                                 <div class="team-content">
@@ -2101,7 +2222,7 @@
                                     <i class="fas fa-bullhorn"></i>Marketing Lead
                                 </span>
                                 <div class="team-img-container">
-                                    <img src="Images/Team/arafat.jpg" alt="Arafat Osman Aden" class="team-img">
+                                    <img src="Images/Team/arafat.jpeg" alt="Arafat Osman Aden" class="team-img">
                                     <div class="team-gradient-overlay"></div>
                                 </div>
                                 <div class="team-content">
@@ -2643,12 +2764,12 @@
                         <div class="footer-links-section">
                             <h3>Solutions</h3>
                             <ul class="footer-links">
-                                <li><a href="#" class="footer-link"><i class="fas fa-robot"></i>AI Sorting</a></li>
-                                <li><a href="#" class="footer-link"><i class="fas fa-route"></i>Smart Routing</a></li>
-                                <li><a href="#" class="footer-link"><i class="fas fa-satellite-dish"></i>IoT Monitoring</a></li>
-                                <li><a href="#" class="footer-link"><i class="fas fa-chart-line"></i>Analytics Dashboard</a></li>
-                                <li><a href="#" class="footer-link"><i class="fas fa-mobile-alt"></i>Mobile Apps</a></li>
-                                <li><a href="#" class="footer-link"><i class="fas fa-cloud"></i>Cloud Platform</a></li>
+                                <li><a href="AI-Sorting.aspx" class="footer-link"><i class="fas fa-robot"></i>AI Sorting</a></li>
+                                <li><a href="Smart-Routing.aspx" class="footer-link"><i class="fas fa-route"></i>Smart Routing</a></li>
+                                <li><a href="IoT-Monitoring.aspx" class="footer-link"><i class="fas fa-satellite-dish"></i>IoT Monitoring</a></li>
+                                <li><a href="Analytics-Dashboard.aspx" class="footer-link"><i class="fas fa-chart-line"></i>Analytics Dashboard</a></li>
+                                <li><a href="Mobile-Apps.aspx" class="footer-link"><i class="fas fa-mobile-alt"></i>Mobile Apps</a></li>
+                                <li><a href="Cloud-Platform.aspx" class="footer-link"><i class="fas fa-cloud"></i>Cloud Platform</a></li>
                             </ul>
                         </div>
 
@@ -2730,7 +2851,7 @@
                             </div>
                         </div>
                         <div style="text-align: center; margin-top: 30px; color: rgba(255,255,255,0.3); font-size: 0.9rem;">
-                            <p>Built with ❤️ by the SoorGreen Team: Zacki (AI), Abdirxeem (Research), Arafat (Marketing), Soe (Systems)</p>
+                            <p>Powered By eALIF Suite</p>
                         </div>
                     </div>
                 </div>
@@ -2739,6 +2860,80 @@
     </div>
 
     <script>
+        // Video Splash Screen Controls
+        function initVideoSplash() {
+            const videoSplash = document.getElementById('videoSplash');
+            const introVideo = document.getElementById('introVideo');
+            const videoTime = document.getElementById('videoTime');
+            const mainContent = document.getElementById('mainContent');
+
+            if (!introVideo) return; // Exit if video element doesn't exist
+
+            // Ensure video is muted
+            introVideo.muted = true;
+
+            // Start the 1-minute timer
+            let remainingTime = 60; // 1 minute in seconds
+            let timerInterval = setInterval(() => {
+                remainingTime--;
+                if (remainingTime <= 0) {
+                    clearInterval(timerInterval);
+                    hideVideoSplash();
+                } else {
+                    const minutes = Math.floor(remainingTime / 60);
+                    const seconds = remainingTime % 60;
+                    if (videoTime) {
+                        videoTime.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+                    }
+                }
+            }, 1000);
+
+            // Check if video ends early
+            introVideo.addEventListener('ended', function () {
+                clearInterval(timerInterval);
+                hideVideoSplash();
+            });
+
+            // Keyboard shortcut (S key)
+            document.addEventListener('keydown', function (e) {
+                if ((e.key === 's' || e.key === 'S') && videoSplash && !videoSplash.classList.contains('hidden')) {
+                    skipVideo();
+                }
+            });
+        }
+
+        function skipVideo() {
+            hideVideoSplash();
+        }
+
+        function hideVideoSplash() {
+            const videoSplash = document.getElementById('videoSplash');
+            const mainContent = document.getElementById('mainContent');
+            const introVideo = document.getElementById('introVideo');
+
+            if (!videoSplash) return;
+
+            // Pause video
+            if (introVideo) {
+                introVideo.pause();
+            }
+
+            // Hide splash screen
+            videoSplash.classList.add('hidden');
+
+            // Remove blur effect from main content
+            if (mainContent) {
+                mainContent.classList.remove('video-playing');
+            }
+
+            // Remove splash screen from DOM after animation
+            setTimeout(() => {
+                if (videoSplash && videoSplash.parentNode) {
+                    videoSplash.style.display = 'none';
+                }
+            }, 500);
+        }
+
         // Team Card Hover Effects
         function initTeamCards() {
             const teamCards = document.querySelectorAll('.team-card-wrapper');
@@ -2872,6 +3067,30 @@
 
         // Initialize everything when page loads
         document.addEventListener('DOMContentLoaded', function () {
+            // Initialize video splash screen
+            const introVideo = document.getElementById('introVideo');
+            if (introVideo) {
+                // Show video only on first visit in this session
+                if (!sessionStorage.getItem('videoShown')) {
+                    initVideoSplash();
+                    sessionStorage.setItem('videoShown', 'true');
+
+                    // Try to play the video
+                    introVideo.play().catch(error => {
+                        console.log('Auto-play prevented:', error);
+                        // If auto-play is blocked, show skip button immediately
+                        const skipBtn = document.querySelector('.skip-btn');
+                        if (skipBtn) skipBtn.style.opacity = '1';
+                    });
+                } else {
+                    // Video already shown in this session, hide it immediately
+                    const videoSplash = document.getElementById('videoSplash');
+                    if (videoSplash) {
+                        videoSplash.style.display = 'none';
+                    }
+                }
+            }
+
             initTeamCards();
 
             // Add floating animation to team cards
@@ -2885,48 +3104,154 @@
         // Add CSS for float animation and social link colors
         const style = document.createElement('style');
         style.textContent = `
-            .float-animation {
-                animation: float 6s ease-in-out infinite;
-            }
-            
-            @keyframes float {
-                0%, 100% { transform: translateY(0); }
-                50% { transform: translateY(-10px); }
-            }
-            
-            .team-card-wrapper:nth-child(2) { animation-delay: 0.2s; }
-            .team-card-wrapper:nth-child(3) { animation-delay: 0.4s; }
-            .team-card-wrapper:nth-child(4) { animation-delay: 0.6s; }
-            
-            .footer-social-link:nth-child(1):hover { background: #1DA1F2 !important; }
-            .footer-social-link:nth-child(2):hover { background: #0077B5 !important; }
-            .footer-social-link:nth-child(3):hover { background: #333 !important; }
-            .footer-social-link:nth-child(4):hover { background: #FF0000 !important; }
-            .footer-social-link:nth-child(5):hover { background: #E4405F !important; }
-            
-            .social-links {
-                display: flex;
-                gap: 1rem;
-            }
-            
-            .social-link {
-                width: 45px;
-                height: 45px;
-                background: rgba(255, 255, 255, 0.05);
-                border-radius: 50%;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                color: white;
-                text-decoration: none;
-                transition: all 0.3s ease;
-            }
-            
-            .social-link:hover {
-                background: var(--green);
-                transform: translateY(-3px);
-            }
-        `;
+    .float-animation {
+        animation: float 6s ease-in-out infinite;
+    }
+    
+    @keyframes float {
+        0%, 100% { transform: translateY(0); }
+        50% { transform: translateY(-10px); }
+    }
+    
+    .team-card-wrapper:nth-child(2) { animation-delay: 0.2s; }
+    .team-card-wrapper:nth-child(3) { animation-delay: 0.4s; }
+    .team-card-wrapper:nth-child(4) { animation-delay: 0.6s; }
+    
+    .footer-social-link:nth-child(1):hover { background: #1DA1F2 !important; }
+    .footer-social-link:nth-child(2):hover { background: #0077B5 !important; }
+    .footer-social-link:nth-child(3):hover { background: #333 !important; }
+    .footer-social-link:nth-child(4):hover { background: #FF0000 !important; }
+    .footer-social-link:nth-child(5):hover { background: #E4405F !important; }
+    
+    .social-links {
+        display: flex;
+        gap: 1rem;
+    }
+    
+    .social-link {
+        width: 45px;
+        height: 45px;
+        background: rgba(255, 255, 255, 0.05);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        text-decoration: none;
+        transition: all 0.3s ease;
+    }
+    
+    .social-link:hover {
+        background: var(--green);
+        transform: translateY(-3px);
+    }
+    
+    /* === VIDEO SPLASH SCREEN === */
+    .video-splash {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: var(--darker);
+        z-index: 9999;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: opacity 0.5s ease, visibility 0.5s ease;
+    }
+    
+    .video-splash video {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+    
+    .video-controls {
+        position: absolute;
+        bottom: 40px;
+        left: 0;
+        right: 0;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 20px;
+        padding: 0 20px;
+        z-index: 10000;
+    }
+    
+    .skip-btn {
+        background: linear-gradient(135deg, var(--green), var(--teal));
+        color: white;
+        border: none;
+        padding: 12px 25px;
+        border-radius: 50px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        font-size: 1rem;
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+    
+    .skip-btn:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 15px 30px rgba(16, 185, 129, 0.4);
+    }
+    
+    .video-time {
+        background: rgba(0, 0, 0, 0.7);
+        color: white;
+        padding: 10px 20px;
+        border-radius: 50px;
+        font-weight: 600;
+        font-size: 1.1rem;
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    
+    .video-splash.hidden {
+        opacity: 0;
+        visibility: hidden;
+        pointer-events: none;
+    }
+    
+    /* Ensure content is hidden during video playback */
+    .main-content.video-playing {
+        filter: blur(5px);
+        pointer-events: none;
+    }
+    
+    /* Keyboard shortcut hint */
+    .keyboard-hint {
+        position: absolute;
+        top: 20px;
+        right: 20px;
+        background: rgba(0, 0, 0, 0.7);
+        color: var(--green);
+        padding: 8px 15px;
+        border-radius: 10px;
+        font-size: 0.9rem;
+        font-weight: 500;
+        border: 1px solid var(--green);
+        backdrop-filter: blur(10px);
+        animation: pulseHint 2s infinite;
+    }
+    
+    @keyframes pulseHint {
+        0%, 100% {
+            opacity: 0.8;
+            transform: scale(1);
+        }
+        50% {
+            opacity: 1;
+            transform: scale(1.05);
+        }
+    }
+`;
         document.head.appendChild(style);
 
         // Gallery data with random images from Unsplash (using specific tech/waste management related images)
@@ -3062,11 +3387,11 @@
 
             if (filteredData.length === 0) {
                 galleryGrid.innerHTML = `
-                <div class="text-center" style="grid-column: 1 / -1; padding: 3rem; color: rgba(255,255,255,0.5);">
-                    <i class="fas fa-images" style="font-size: 3rem; margin-bottom: 1rem;"></i>
-                    <h3>No projects found in this category</h3>
-                </div>
-            `;
+        <div class="text-center" style="grid-column: 1 / -1; padding: 3rem; color: rgba(255,255,255,0.5);">
+            <i class="fas fa-images" style="font-size: 3rem; margin-bottom: 1rem;"></i>
+            <h3>No projects found in this category</h3>
+        </div>
+    `;
                 return;
             }
 
@@ -3077,13 +3402,13 @@
                 galleryItem.setAttribute('data-index', index);
 
                 galleryItem.innerHTML = `
-                <img src="${item.image}" alt="${item.title}" loading="lazy">
-                <div class="gallery-overlay">
-                    <span class="gallery-category">${getCategoryLabel(item.category)}</span>
-                    <h3 class="gallery-title">${item.title}</h3>
-                    <p class="gallery-description">${item.description}</p>
-                </div>
-            `;
+        <img src="${item.image}" alt="${item.title}" loading="lazy">
+        <div class="gallery-overlay">
+            <span class="gallery-category">${getCategoryLabel(item.category)}</span>
+            <h3 class="gallery-title">${item.title}</h3>
+            <p class="gallery-description">${item.description}</p>
+        </div>
+    `;
 
                 galleryItem.addEventListener('click', () => openLightbox(item, index));
                 galleryGrid.appendChild(galleryItem);
@@ -3346,10 +3671,10 @@
                 videoTitle.textContent = featuredVideo.title;
                 videoDescription.textContent = featuredVideo.description;
                 videoMeta.innerHTML = `
-                <span><i class="fas fa-clock"></i> ${featuredVideo.duration}</span>
-                <span><i class="fas fa-eye"></i> ${featuredVideo.views} views</span>
-                <span><i class="fas fa-calendar"></i> ${featuredVideo.date}</span>
-            `;
+        <span><i class="fas fa-clock"></i> ${featuredVideo.duration}</span>
+        <span><i class="fas fa-eye"></i> ${featuredVideo.views} views</span>
+        <span><i class="fas fa-calendar"></i> ${featuredVideo.date}</span>
+    `;
             }
         }
 
@@ -3364,12 +3689,12 @@
 
             if (filteredVideos.length === 0) {
                 videoGrid.innerHTML = `
-                <div class="no-videos" style="grid-column: 1 / -1; text-align: center; padding: 3rem; color: rgba(255,255,255,0.5);">
-                    <i class="fas fa-video-slash" style="font-size: 3rem; margin-bottom: 1rem;"></i>
-                    <h3>No videos found in this category</h3>
-                    <p>Check back soon for new content!</p>
-                </div>
-            `;
+        <div class="no-videos" style="grid-column: 1 / -1; text-align: center; padding: 3rem; color: rgba(255,255,255,0.5);">
+            <i class="fas fa-video-slash" style="font-size: 3rem; margin-bottom: 1rem;"></i>
+            <h3>No videos found in this category</h3>
+            <p>Check back soon for new content!</p>
+        </div>
+    `;
                 return;
             }
 
@@ -3379,24 +3704,24 @@
                 videoCard.setAttribute('data-video-id', video.id);
 
                 videoCard.innerHTML = `
-                <div class="video-thumb-container">
-                    <img src="${video.thumbnail}" alt="${video.title}" loading="lazy">
-                    <div class="video-card-overlay">
-                        <div class="play-icon-small">
-                            <i class="fas fa-play"></i>
-                        </div>
-                    </div>
-                    <span class="video-duration">${video.duration}</span>
+        <div class="video-thumb-container">
+            <img src="${video.thumbnail}" alt="${video.title}" loading="lazy">
+            <div class="video-card-overlay">
+                <div class="play-icon-small">
+                    <i class="fas fa-play"></i>
                 </div>
-                <div class="video-card-content">
-                    <h3 class="video-card-title">${video.title}</h3>
-                    <p class="video-card-description">${video.description}</p>
-                    <div class="video-card-meta">
-                        <span><i class="fas fa-eye"></i> ${video.views} views</span>
-                        <span class="video-card-category">${getCategoryLabel(video.category)}</span>
-                    </div>
-                </div>
-            `;
+            </div>
+            <span class="video-duration">${video.duration}</span>
+        </div>
+        <div class="video-card-content">
+            <h3 class="video-card-title">${video.title}</h3>
+            <p class="video-card-description">${video.description}</p>
+            <div class="video-card-meta">
+                <span><i class="fas fa-eye"></i> ${video.views} views</span>
+                <span class="video-card-category">${getCategoryLabel(video.category)}</span>
+            </div>
+        </div>
+    `;
 
                 videoCard.addEventListener('click', () => playVideo(video));
                 videoGrid.appendChild(videoCard);
@@ -3467,12 +3792,12 @@
 
             // Load YouTube iframe
             videoPlayer.innerHTML = `
-            <iframe src="https://www.youtube.com/embed/${video.videoId}?autoplay=1&rel=0&modestbranding=1"
-                    frameborder="0"
-                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                    allowfullscreen>
-            </iframe>
-        `;
+    <iframe src="https://www.youtube.com/embed/${video.videoId}?autoplay=1&rel=0&modestbranding=1"
+            frameborder="0"
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+            allowfullscreen>
+    </iframe>
+`;
 
             // Update video info
             videoTitle.textContent = video.title;
@@ -3504,7 +3829,13 @@
         }
 
         // Initialize on page load
-        document.addEventListener('DOMContentLoaded', initVideoLibrary);
+        document.addEventListener('DOMContentLoaded', function () {
+            // Initialize video library
+            initVideoLibrary();
+
+            // Initialize gallery
+            initGallery();
+        });
     </script>
 </body>
 </html>

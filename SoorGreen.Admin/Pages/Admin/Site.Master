@@ -645,7 +645,7 @@
         <nav class="navbar navbar-expand-lg admin-navbar">
             <div class="container">
                 <!-- Brand -->
-                <a class="navbar-brand" href="../Default.aspx">
+                <a class="navbar-brand" href="../../Default.aspx">
                     <image src="favicon.ico"  />
                     <span class="brand-text">SoorGreen</span>
                 </a>
@@ -941,7 +941,6 @@
             <div class="container">
                 <div class="text-center footer-text">
                     <i class="fas fa-recycle me-2"></i>&copy; <%= DateTime.Now.Year %> SoorGreen Admin. Powered By eALIF Team.
-                    <span class="text-primary ms-2">🌿</span>
                 </div>
             </div>
         </footer>

@@ -1485,3 +1485,124 @@ body {
         transform: rotate(360deg);
     }
 }
+
+
+
+/* Custom Solution Platform Styles */
+.modal-xl {
+    max-width: 1200px;
+}
+
+.detail-section {
+    margin-bottom: 2rem;
+    padding-bottom: 1.5rem;
+    border-bottom: 1px solid rgba(0,0,0,0.1);
+}
+
+    .detail-section:last-child {
+        border-bottom: none;
+    }
+
+.team-collaboration-badge {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    margin: 1rem 0;
+}
+
+.collaborator {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 1rem;
+    background: rgba(0,0,0,0.03);
+    border-radius: 10px;
+    min-width: 180px;
+}
+
+.avatar-small {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    color: white;
+    margin-bottom: 0.5rem;
+}
+
+.collaborator-name {
+    font-weight: 600;
+    font-size: 0.9rem;
+    text-align: center;
+}
+
+.collaborator-role {
+    font-size: 0.8rem;
+    color: #666;
+    margin-top: 0.25rem;
+}
+
+.feature-list {
+    list-style: none;
+    padding-left: 0;
+}
+
+    .feature-list li {
+        margin-bottom: 0.75rem;
+        padding-left: 1.5rem;
+        position: relative;
+    }
+
+        .feature-list li i {
+            position: absolute;
+            left: 0;
+            top: 0.25rem;
+            color: #00b894;
+        }
+
+.modal-tech-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-top: 1rem;
+}
+
+.modal-tech-tag {
+    background: #e3f2fd;
+    color: #1976d2;
+    padding: 0.5rem 1rem;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    border: 1px solid #bbdefb;
+}
+
+/* Card styles for questionnaire */
+.card {
+    border: none;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+    transition: transform 0.3s ease;
+}
+
+    .card:hover {
+        transform: translateY(-5px);
+    }
+
+.card-header {
+    border-bottom: none;
+    font-weight: 600;
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, #00d4aa 0%, #00b894 100%);
+    border: none;
+    padding: 0.75rem 2rem;
+    font-weight: 600;
+}
+
+    .btn-primary:hover {
+        background: linear-gradient(135deg, #00b894 0%, #00a085 100%);
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(0, 180, 148, 0.4);
+    }

@@ -1,4 +1,4 @@
-﻿<%@ Master Language="C#" AutoEventWireup="true" Inherits="SoorGreen.SiteMaster" Codebehind="Site.master.cs" %>
+﻿<%@ Master Language="C#" AutoEventWireup="true" Inherits="SoorGreen.SiteMaster" CodeBehind="Site.master.cs" %>
 
 <!DOCTYPE html>
 <html lang="en">
@@ -1431,12 +1431,15 @@
                         <i class="fas fa-bars"></i>
                     </button>
 
-                    <a class="navbar-brand me-3" href="Default.aspx">
+                    <a class="navbar-brand me-3" href="../../Default.aspx">
                         <div class="brand-logo" style="width: 40px; height: 40px; font-size: 1.2rem;">
                             <asp:Image ID="imgLogo" runat="server" ImageUrl="~/favicon.ico"
                                 Width="28" Height="28" AlternateText="SoorGreen Logo" />
                         </div>
-                        <span>SoorGreen</span>
+                        <a class="navbar-brand me-3" href="../../Default.aspx">
+                            <%--<i class="fas fa-recycle"></i>--%>
+                            <span>SoorGreen</span>
+                        </a>
                     </a>
 
                     <!-- Desktop navbar toggler -->
@@ -1572,7 +1575,7 @@
                             <%--<div class="menu-title">Main</div>--%>
                             <ul class="menu-items">
                                 <li class="menu-item">
-                                    <asp:HyperLink ID="lnkMainDashboard" runat="server" >
+                                    <asp:HyperLink ID="lnkMainDashboard" runat="server">
                                         <%--<span class="menu-icon"><i class="fas fa-tachometer-alt"></i></span>
                                         <span class="menu-text">Dashboard</span>--%>
                                     </asp:HyperLink>
@@ -1605,7 +1608,7 @@
                                 <div class="menu-title">Collector Tools</div>
                                 <ul class="menu-items">
                                     <li class="menu-item">
-                                        <a href="CollectorDashboard.aspx" class="menu-link">
+                                        <a href="Dashboard.aspx" class="menu-link">
                                             <span class="menu-icon"><i class="fas fa-truck"></i></span>
                                             <span class="menu-text">Collector Dashboard</span>
                                         </a>
@@ -1842,7 +1845,7 @@
                                                     <i class="fas fa-chart-line"></i>
                                                     <span>Admin Dashboard</span>
                                                 </a>
-                                                <a href="CollectorDashboard.aspx" class="footer-link-item">
+                                                <a href="Dashboard.aspx" class="footer-link-item">
                                                     <i class="fas fa-truck"></i>
                                                     <span>Collector Portal</span>
                                                 </a>

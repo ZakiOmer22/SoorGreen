@@ -1,4 +1,4 @@
-﻿<%@ Master Language="C#" AutoEventWireup="true" Inherits="SoorGreen.Admin.Master" Codebehind="Site.master.cs" %>
+﻿<%@ Master Language="C#" AutoEventWireup="true" Inherits="SoorGreen.Admin.Master" CodeBehind="Site.master.cs" %>
 
 <!DOCTYPE html>
 <html lang="en">
@@ -18,6 +18,13 @@
 
     <!-- AOS Animation -->
     <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet" />
+
+    <!-- Leaflet CSS & JS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
     <style>
         :root {
@@ -61,11 +68,245 @@
             display: flex;
             flex-direction: column;
             transition: all 0.3s ease;
+            padding-top: 60px; /* Space for top banner ad */
         }
 
         /* Light Mode Body Background */
         [data-theme="light"] body {
             background: linear-gradient(135deg, var(--darker) 0%, var(--dark) 50%, #a5d8ff 100%);
+        }
+
+        /* ===== TOP BANNER AD ===== */
+        .top-banner-ad {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1050;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            color: white;
+            padding: 12px 0;
+            transform: translateY(-100%);
+            opacity: 0;
+            transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 0.3s ease;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+            .top-banner-ad.show {
+                transform: translateY(0);
+                opacity: 1;
+            }
+
+            .top-banner-ad.hiding {
+                transform: translateY(-100%);
+                opacity: 0;
+            }
+
+        .ad-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 20px;
+            position: relative;
+        }
+
+        .ad-brand {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex-shrink: 0;
+        }
+
+        .ad-icon {
+            width: 36px;
+            height: 36px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            color: white;
+        }
+
+        .ad-brand-text {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .ad-label {
+            font-size: 0.7rem;
+            font-weight: 700;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            opacity: 0.9;
+        }
+
+        .ad-title {
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+
+        .ad-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            align-items: center;
+        }
+
+        .ad-message {
+            font-size: 0.95rem;
+            text-align: center;
+        }
+
+        .ad-highlight {
+            font-weight: 700;
+            font-size: 1.05rem;
+            background: rgba(255, 255, 255, 0.2);
+            padding: 2px 8px;
+            border-radius: 4px;
+            margin-right: 5px;
+        }
+
+        .ad-subtext {
+            font-size: 0.9rem;
+            opacity: 0.95;
+            margin-left: 8px;
+        }
+
+        .ad-code {
+            background: rgba(255, 255, 255, 0.15);
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-family: monospace;
+            letter-spacing: 1px;
+            margin-left: 5px;
+        }
+
+        .ad-timer {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.85rem;
+            opacity: 0.9;
+        }
+
+        .timer-display {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            margin-left: 4px;
+        }
+
+        .timer-digit {
+            background: rgba(255, 255, 255, 0.15);
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-weight: 700;
+            min-width: 22px;
+            text-align: center;
+            font-family: monospace;
+        }
+
+        .ad-actions {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex-shrink: 0;
+        }
+
+        .ad-cta-btn {
+            background: white;
+            color: var(--primary);
+            padding: 8px 16px;
+            border-radius: 6px;
+            font-weight: 700;
+            font-size: 0.9rem;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.3s ease;
+            border: none;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+
+            .ad-cta-btn:hover {
+                transform: translateY(-2px);
+                box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
+                color: var(--primary);
+            }
+
+        .ad-close-btn {
+            background: rgba(255, 255, 255, 0.15);
+            border: none;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            color: white;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+            padding: 0;
+        }
+
+            .ad-close-btn:hover {
+                background: rgba(255, 255, 255, 0.25);
+                transform: rotate(90deg);
+            }
+
+        .ad-progress-bar {
+            position: absolute;
+            bottom: -12px;
+            left: 0;
+            width: 100%;
+            height: 3px;
+            background: rgba(255, 255, 255, 0.3);
+            overflow: hidden;
+        }
+
+            .ad-progress-bar::after {
+                content: '';
+                position: absolute;
+                top: 0;
+                left: 0;
+                height: 100%;
+                width: 100%;
+                background: white;
+                animation: progressCountdown 86400s linear forwards;
+                transform-origin: left;
+            }
+
+        @keyframes progressCountdown {
+            0% {
+                transform: scaleX(1);
+            }
+
+            100% {
+                transform: scaleX(0);
+            }
+        }
+
+        /* Light Mode */
+        [data-theme="light"] .top-banner-ad {
+            background: linear-gradient(135deg, var(--primary) 0%, #00b894 100%);
+        }
+
+        [data-theme="light"] .ad-cta-btn {
+            background: white;
+            color: var(--primary);
+        }
+
+        [data-theme="light"] .ad-code {
+            background: rgba(255, 255, 255, 0.25);
         }
 
         /* ===== THEME TOGGLE STYLES ===== */
@@ -85,11 +326,11 @@
             font-size: 0.85rem;
         }
 
-        .theme-toggle:hover {
-            background: rgba(255, 255, 255, 0.15);
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-        }
+            .theme-toggle:hover {
+                background: rgba(255, 255, 255, 0.15);
+                transform: translateY(-2px);
+                box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+            }
 
         .theme-icon {
             font-size: 1rem;
@@ -107,9 +348,9 @@
             color: var(--light);
         }
 
-        [data-theme="light"] .theme-toggle:hover {
-            background: rgba(33, 37, 41, 0.15);
-        }
+            [data-theme="light"] .theme-toggle:hover {
+                background: rgba(33, 37, 41, 0.15);
+            }
 
         /* ===== BEAUTIFUL PRELOADER ===== */
         .preloader {
@@ -126,10 +367,10 @@
             transition: opacity 0.8s ease, visibility 0.8s ease;
         }
 
-        .preloader.fade-out {
-            opacity: 0;
-            visibility: hidden;
-        }
+            .preloader.fade-out {
+                opacity: 0;
+                visibility: hidden;
+            }
 
         .preloader-content {
             text-align: center;
@@ -148,9 +389,11 @@
             0%, 20%, 50%, 80%, 100% {
                 transform: translateY(0) scale(1);
             }
+
             40% {
                 transform: translateY(-20px) scale(1.1);
             }
+
             60% {
                 transform: translateY(-10px) scale(1.05);
             }
@@ -199,18 +442,23 @@
             0% {
                 width: 0%;
             }
+
             20% {
                 width: 25%;
             }
+
             40% {
                 width: 50%;
             }
+
             60% {
                 width: 75%;
             }
+
             80% {
                 width: 90%;
             }
+
             100% {
                 width: 100%;
             }
@@ -232,9 +480,11 @@
             0%, 20% {
                 content: '.';
             }
+
             40% {
                 content: '..';
             }
+
             60%, 100% {
                 content: '...';
             }
@@ -297,15 +547,19 @@
             0% {
                 transform: translate(0, 0) rotate(0deg) scale(1);
             }
+
             25% {
                 transform: translate(100px, -50px) rotate(90deg) scale(1.1);
             }
+
             50% {
                 transform: translate(50px, -80px) rotate(180deg) scale(0.9);
             }
+
             75% {
                 transform: translate(-80px, -30px) rotate(270deg) scale(1.05);
             }
+
             100% {
                 transform: translate(0, 0) rotate(360deg) scale(1);
             }
@@ -319,8 +573,8 @@
             padding: 1.2rem 0;
             position: fixed;
             width: 100%;
-            top: 0;
-            z-index: 1000;
+            top: 60px; /* Adjusted for banner */
+            z-index: 1040; /* Below banner */
             transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
             box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
         }
@@ -331,10 +585,10 @@
             border-bottom: 1px solid rgba(33, 37, 41, 0.15);
         }
 
-        [data-theme="light"] .navbar.scrolled {
-            background: rgba(233, 236, 239, 0.98) !important;
-            border-bottom-color: rgba(33, 37, 41, 0.1);
-        }
+            [data-theme="light"] .navbar.scrolled {
+                background: rgba(233, 236, 239, 0.98) !important;
+                border-bottom-color: rgba(33, 37, 41, 0.1);
+            }
 
         .navbar.scrolled {
             background: rgba(5, 17, 34, 0.98) !important;
@@ -353,16 +607,16 @@
             transition: all 0.3s ease;
         }
 
-        .navbar-brand:hover {
-            transform: translateY(-2px);
-        }
+            .navbar-brand:hover {
+                transform: translateY(-2px);
+            }
 
-        .navbar-brand span {
-            background: linear-gradient(45deg, var(--primary), var(--secondary), var(--accent));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            text-shadow: 0 0 30px rgba(0, 212, 170, 0.3);
-        }
+            .navbar-brand span {
+                background: linear-gradient(45deg, var(--primary), var(--secondary), var(--accent));
+                -webkit-background-clip: text;
+                -webkit-text-fill-color: transparent;
+                text-shadow: 0 0 30px rgba(0, 212, 170, 0.3);
+            }
 
         .nav-link {
             color: rgba(255, 255, 255, 0.9) !important;
@@ -379,10 +633,10 @@
             color: rgba(33, 37, 41, 0.9) !important;
         }
 
-        [data-theme="light"] .nav-link:hover {
-            color: var(--primary) !important;
-            background: rgba(0, 212, 170, 0.1);
-        }
+            [data-theme="light"] .nav-link:hover {
+                color: var(--primary) !important;
+                background: rgba(0, 212, 170, 0.1);
+            }
 
         .nav-link:hover {
             color: var(--primary) !important;
@@ -412,9 +666,9 @@
             background: rgba(0, 212, 170, 0.15);
         }
 
-        .nav-link.active::before {
-            width: 80%;
-        }
+            .nav-link.active::before {
+                width: 80%;
+            }
 
         /* ===== ENHANCED MEGA DROPDOWN ===== */
         .nav-item.dropdown {
@@ -554,14 +808,14 @@
             border-radius: 12px;
         }
 
-        .account-dropdown .dropdown-item {
-            padding: 0.875rem 1.25rem;
-        }
+            .account-dropdown .dropdown-item {
+                padding: 0.875rem 1.25rem;
+            }
 
-        .account-dropdown .dropdown-divider {
-            border-color: rgba(255, 255, 255, 0.15);
-            margin: 0.5rem 0;
-        }
+            .account-dropdown .dropdown-divider {
+                border-color: rgba(255, 255, 255, 0.15);
+                margin: 0.5rem 0;
+            }
 
         [data-theme="light"] .account-dropdown .dropdown-divider {
             border-color: rgba(33, 37, 41, 0.15);
@@ -576,13 +830,13 @@
             border-radius: 8px;
         }
 
-        .btn-outline-light:hover {
-            background: var(--primary);
-            border-color: var(--primary);
-            color: var(--dark);
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(0, 212, 170, 0.3);
-        }
+            .btn-outline-light:hover {
+                background: var(--primary);
+                border-color: var(--primary);
+                color: var(--dark);
+                transform: translateY(-2px);
+                box-shadow: 0 5px 15px rgba(0, 212, 170, 0.3);
+            }
 
         .btn-warning {
             background: linear-gradient(135deg, var(--primary), var(--secondary));
@@ -594,16 +848,16 @@
             border-radius: 8px;
         }
 
-        .btn-warning:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 8px 25px rgba(0, 212, 170, 0.4);
-            background: linear-gradient(135deg, var(--primary-dark), var(--secondary));
-        }
+            .btn-warning:hover {
+                transform: translateY(-3px);
+                box-shadow: 0 8px 25px rgba(0, 212, 170, 0.4);
+                background: linear-gradient(135deg, var(--primary-dark), var(--secondary));
+            }
 
         /* ===== MAIN CONTENT ===== */
         .content-wrapper {
             flex: 1;
-            padding-top: 120px; /* Reduced padding since banner is removed */
+            padding-top: 140px; /* Adjusted for banner + navbar */
             min-height: calc(100vh - 200px);
         }
 
@@ -706,6 +960,7 @@
                 opacity: 0.3;
                 transform: scale(1);
             }
+
             100% {
                 opacity: 0.6;
                 transform: scale(1.1);
@@ -832,16 +1087,16 @@
             position: relative;
         }
 
-        .section-title::after {
-            content: '';
-            position: absolute;
-            bottom: -8px;
-            left: 0;
-            width: 30px;
-            height: 2px;
-            background: linear-gradient(90deg, var(--primary), var(--secondary));
-            border-radius: 2px;
-        }
+            .section-title::after {
+                content: '';
+                position: absolute;
+                bottom: -8px;
+                left: 0;
+                width: 30px;
+                height: 2px;
+                background: linear-gradient(90deg, var(--primary), var(--secondary));
+                border-radius: 2px;
+            }
 
         .footer-links-grid {
             display: flex;
@@ -1000,6 +1255,7 @@
             0% {
                 transform: rotate(0deg);
             }
+
             100% {
                 transform: rotate(360deg);
             }
@@ -1160,12 +1416,15 @@
             0%, 100% {
                 transform: translate(0, 0) rotate(0deg);
             }
+
             25% {
                 transform: translate(100px, -50px) rotate(90deg);
             }
+
             50% {
                 transform: translate(50px, -100px) rotate(180deg);
             }
+
             75% {
                 transform: translate(-100px, -50px) rotate(270deg);
             }
@@ -1173,6 +1432,34 @@
 
         /* Responsive Design */
         @media (max-width: 768px) {
+            body {
+                padding-top: 0; /* Banner hidden on mobile by default */
+            }
+
+            .top-banner-ad {
+                position: relative;
+                transform: none;
+                opacity: 1;
+                display: none; /* Hidden by default on mobile */
+            }
+
+                .top-banner-ad.show {
+                    display: block;
+                    transform: none;
+                }
+
+                .top-banner-ad.hiding {
+                    display: none;
+                }
+
+            .navbar {
+                top: 0; /* Reset top position when banner hidden */
+            }
+
+            .content-wrapper {
+                padding-top: 120px; /* Adjust for navbar only */
+            }
+
             .footer {
                 padding: 3rem 0 1rem;
             }
@@ -1214,6 +1501,97 @@
                 padding: 6px 10px;
                 font-size: 0.8rem;
             }
+
+            .ad-container {
+                flex-wrap: wrap;
+                justify-content: center;
+                text-align: center;
+                gap: 12px;
+            }
+
+            .ad-brand {
+                justify-content: center;
+                width: 100%;
+            }
+
+            .ad-content {
+                width: 100%;
+            }
+
+            .ad-actions {
+                width: 100%;
+                justify-content: center;
+            }
+
+            .ad-message {
+                display: flex;
+                flex-direction: column;
+                gap: 5px;
+            }
+
+            .ad-highlight, .ad-subtext {
+                display: block;
+                margin: 0;
+            }
+        }
+
+        @media (max-width: 576px) {
+            .top-banner-ad {
+                padding: 10px 0;
+            }
+
+            .ad-container {
+                padding: 0 15px;
+            }
+
+            .ad-message {
+                font-size: 0.85rem;
+            }
+
+            .ad-highlight {
+                font-size: 0.95rem;
+            }
+
+            .ad-timer {
+                font-size: 0.8rem;
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+
+            .ad-cta-btn {
+                padding: 6px 12px;
+                font-size: 0.85rem;
+            }
+
+            .ad-close-btn {
+                width: 28px;
+                height: 28px;
+            }
+        }
+
+        /* Animation for ad entry */
+        @keyframes slideDown {
+            from {
+                transform: translateY(-100%);
+                opacity: 0;
+            }
+
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        @keyframes slideUp {
+            from {
+                transform: translateY(0);
+                opacity: 1;
+            }
+
+            to {
+                transform: translateY(-100%);
+                opacity: 0;
+            }
         }
     </style>
 </head>
@@ -1243,6 +1621,52 @@
     </div>
 
     <form runat="server">
+        <!-- TOP BANNER AD -->
+        <div class="top-banner-ad" id="topBannerAd">
+            <div class="ad-container">
+                <!-- Left: Logo/Icon -->
+                <div class="ad-brand">
+                    <div class="ad-icon">
+                        <i class="fas fa-bolt"></i>
+                    </div>
+                    <div class="ad-brand-text">
+                        <span class="ad-label">SPECIAL OFFER</span>
+                        <span class="ad-title">LIMITED TIME ONLY</span>
+                    </div>
+                </div>
+
+                <!-- Center: Ad Content -->
+                <div class="ad-content">
+                    <div class="ad-message">
+                        <span class="ad-highlight">GET 30% OFF</span> on your first waste management subscription!
+                <span class="ad-subtext">Use code: <strong class="ad-code">SOORGREEN30</strong></span>
+                    </div>
+                    <div class="ad-timer">
+                        <i class="fas fa-clock"></i>
+                        <span class="timer-text">Offer ends in:</span>
+                        <div class="timer-display">
+                            <span class="timer-digit" id="timerHours">24</span>h
+                    <span class="timer-digit" id="timerMinutes">59</span>m
+                    <span class="timer-digit" id="timerSeconds">59</span>s
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right: CTA & Close -->
+                <div class="ad-actions">
+                    <a href="ChooseApp.aspx?promo=SOORGREEN30" class="ad-cta-btn">
+                        <i class="fas fa-gift"></i>
+                        CLAIM OFFER
+                    </a>
+                    <button class="ad-close-btn" id="closeBannerBtn" title="Close ad">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+
+                <!-- Progress Bar -->
+                <div class="ad-progress-bar"></div>
+            </div>
+        </div>
         <!-- ===== ENHANCED NAVBAR ===== -->
         <nav id="mainNavbar" class="navbar navbar-expand-lg navbar-dark">
             <div class="container">
@@ -1259,7 +1683,7 @@
                 <div class="collapse navbar-collapse" id="navMenu">
                     <ul class="navbar-nav ms-auto align-items-lg-center">
                         <li class="nav-item">
-                            <a class="nav-link" href="Default.aspx">Home</a>
+                            <a class="nav-link" href="Map.aspx">Waste Intelligence Map</a>
                         </li>
                         <li class="nav-item">
                             <a class="nav-link" href="About.aspx">About</a>
@@ -1285,7 +1709,7 @@
                                 </a></li>
                             </ul>
                         </li>
-                        <li class="nav-item dropdown">
+                        <%--<li class="nav-item dropdown">
                             <a class="nav-link dropdown-toggle" href="#">Platform
                             </a>
                             <ul class="dropdown-menu">
@@ -1302,7 +1726,7 @@
                                     <i class="fas fa-truck me-2"></i>Collector Portal
                                 </a></li>
                             </ul>
-                        </li>
+                        </li>--%>
                         <li class="nav-item">
                             <a class="nav-link" href="Contact.aspx">Contact</a>
                         </li>
@@ -1617,7 +2041,7 @@
                 setTimeout(() => {
                     preloader.style.display = 'none';
                 }, 800);
-            }, 1500); // Show preloader for at least 500ms
+            }, 1500); // Show preloader for at least 1.5 seconds
         });
 
         // Initialize AOS
@@ -1692,6 +2116,326 @@
 
         // Add event listener to theme toggle
         document.getElementById('themeToggle').addEventListener('click', toggleTheme);
+
+        // ===== TOP BANNER AD FUNCTIONALITY =====
+        document.addEventListener('DOMContentLoaded', function () {
+            const bannerAd = document.getElementById('topBannerAd');
+            const closeBtn = document.getElementById('closeBannerBtn');
+
+            // Always show the banner on page load (every time)
+            function showBannerOnLoad() {
+                // Reset display property
+                bannerAd.style.display = 'block';
+
+                // Small delay for smooth entrance
+                setTimeout(() => {
+                    bannerAd.classList.remove('hiding');
+                    bannerAd.classList.add('show');
+
+                    // Start timer animations
+                    startCountdownTimer();
+
+                    // Auto-hide after 30 seconds (optional)
+                    setTimeout(() => {
+                        if (bannerAd.classList.contains('show')) {
+                            closeTopBannerAd();
+                        }
+                    }, 30000); // 30 seconds
+                }, 1000); // 1 second delay
+            }
+
+            // Start countdown timer (24 hours from current time)
+            function startCountdownTimer() {
+                const timerHours = document.getElementById('timerHours');
+                const timerMinutes = document.getElementById('timerMinutes');
+                const timerSeconds = document.getElementById('timerSeconds');
+
+                // Set expiration time (24 hours from now)
+                let endTime = localStorage.getItem('bannerEndTime');
+
+                if (!endTime) {
+                    // First time - set expiration 24 hours from now
+                    endTime = new Date();
+                    endTime.setHours(endTime.getHours() + 24);
+                    localStorage.setItem('bannerEndTime', endTime.getTime());
+                } else {
+                    // Use stored end time
+                    endTime = new Date(parseInt(endTime));
+
+                    // Check if offer has expired
+                    const now = new Date();
+                    if (now > endTime) {
+                        // Offer expired - reset for next 24 hours
+                        endTime = new Date();
+                        endTime.setHours(endTime.getHours() + 24);
+                        localStorage.setItem('bannerEndTime', endTime.getTime());
+                    }
+                }
+
+                function updateTimer() {
+                    const now = new Date();
+                    const timeLeft = endTime - now;
+
+                    if (timeLeft <= 0) {
+                        // Offer expired
+                        timerHours.textContent = '00';
+                        timerMinutes.textContent = '00';
+                        timerSeconds.textContent = '00';
+
+                        // Show expired state
+                        updateAdForExpired();
+                        return;
+                    }
+
+                    const hours = Math.floor((timeLeft % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                    const minutes = Math.floor((timeLeft % (1000 * 60 * 60)) / (1000 * 60));
+                    const seconds = Math.floor((timeLeft % (1000 * 60)) / 1000);
+
+                    timerHours.textContent = hours.toString().padStart(2, '0');
+                    timerMinutes.textContent = minutes.toString().padStart(2, '0');
+                    timerSeconds.textContent = seconds.toString().padStart(2, '0');
+                }
+
+                // Update timer every second
+                setInterval(updateTimer, 1000);
+                updateTimer(); // Initial call
+            }
+
+            // Update ad when offer expires
+            function updateAdForExpired() {
+                const adMessage = document.querySelector('.ad-message');
+                const adCtaBtn = document.querySelector('.ad-cta-btn');
+                const adTimer = document.querySelector('.ad-timer');
+                const progressBar = document.querySelector('.ad-progress-bar');
+
+                if (adMessage) {
+                    adMessage.innerHTML = `
+                    <span class="ad-highlight">OFFER EXPIRED</span> 
+                    Check back soon for new promotions!
+                    <span class="ad-subtext">Refresh for latest offers</span>
+                `;
+                }
+
+                if (adCtaBtn) {
+                    adCtaBtn.innerHTML = '<i class="fas fa-sync-alt"></i> CHECK AGAIN';
+                    adCtaBtn.href = 'javascript:void(0)';
+                    adCtaBtn.onclick = function () {
+                        location.reload();
+                    };
+                }
+
+                if (adTimer) {
+                    adTimer.style.display = 'none';
+                }
+
+                if (progressBar) {
+                    progressBar.style.animation = 'none';
+                    progressBar.style.background = '#666';
+                }
+            }
+
+            // Close banner functionality
+            function closeTopBannerAd() {
+                // Smooth exit animation
+                bannerAd.classList.remove('show');
+                bannerAd.classList.add('hiding');
+
+                // Store close time for this session (only)
+                sessionStorage.setItem('bannerClosedAt', Date.now());
+
+                // Hide after animation completes
+                setTimeout(() => {
+                    bannerAd.style.display = 'none';
+                }, 400);
+            }
+
+            // Check if we should show the banner
+            function shouldShowBanner() {
+                // Check if banner was manually closed in this session
+                const bannerClosedAt = sessionStorage.getItem('bannerClosedAt');
+                if (bannerClosedAt) {
+                    const closedTime = parseInt(bannerClosedAt);
+                    const currentTime = Date.now();
+                    const minutesSinceClose = (currentTime - closedTime) / (1000 * 60);
+
+                    // Show again if closed more than 5 minutes ago
+                    if (minutesSinceClose < 5) {
+                        return false;
+                    }
+                }
+                return true;
+            }
+
+            // Initialize banner
+            if (bannerAd) {
+                if (shouldShowBanner()) {
+                    showBannerOnLoad();
+                } else {
+                    bannerAd.style.display = 'none';
+                }
+
+                // Close button event
+                if (closeBtn) {
+                    closeBtn.addEventListener('click', closeTopBannerAd);
+                }
+
+                // CTA button - close banner after click
+                const ctaBtn = document.querySelector('.ad-cta-btn');
+                if (ctaBtn) {
+                    ctaBtn.addEventListener('click', function (e) {
+                        // Only close if not expired state
+                        if (!this.href.includes('javascript')) {
+                            setTimeout(closeTopBannerAd, 500);
+                        }
+                    });
+                }
+
+                // Escape key to close
+                document.addEventListener('keydown', function (e) {
+                    if (e.key === 'Escape' && bannerAd.classList.contains('show')) {
+                        closeTopBannerAd();
+                    }
+                });
+            }
+
+            // Show banner when scrolling to top
+            window.addEventListener('scroll', function () {
+                if (window.scrollY < 100 && bannerAd && !bannerAd.classList.contains('show')) {
+                    bannerAd.style.display = 'block';
+                    setTimeout(() => {
+                        bannerAd.classList.add('show');
+                    }, 10);
+                }
+            });
+        });
+
+        // Function to manually close ad (for onclick attribute if needed)
+        function closeTopBannerAd() {
+            const closeBtn = document.getElementById('closeBannerBtn');
+            if (closeBtn) {
+                closeBtn.click();
+            }
+        }
+
+        // Function to show banner (for testing)
+        function showTopBannerAd() {
+            const bannerAd = document.getElementById('topBannerAd');
+            if (bannerAd) {
+                // Remove session storage restriction
+                sessionStorage.removeItem('bannerClosedAt');
+
+                bannerAd.style.display = 'block';
+                setTimeout(() => {
+                    bannerAd.classList.remove('hiding');
+                    bannerAd.classList.add('show');
+                }, 10);
+            }
+        }
+
+        // Cookie notice functionality (optional)
+        function showCookieNotice() {
+            if (!localStorage.getItem('adCookieAccepted')) {
+                setTimeout(() => {
+                    const notice = document.createElement('div');
+                    notice.className = 'cookie-notice';
+                    notice.innerHTML = `
+                    <div class="cookie-content">
+                        <p>We use cookies to improve your experience. By using our site, you agree to our use of cookies.</p>
+                        <div class="cookie-actions">
+                            <button class="cookie-btn accept" onclick="acceptCookies()">Accept</button>
+                            <button class="cookie-btn decline" onclick="declineCookies()">Decline</button>
+                        </div>
+                    </div>
+                `;
+
+                    notice.style.cssText = `
+                    position: fixed;
+                    bottom: 20px;
+                    left: 50%;
+                    transform: translateX(-50%);
+                    background: rgba(0, 0, 0, 0.9);
+                    color: white;
+                    padding: 15px 25px;
+                    border-radius: 10px;
+                    z-index: 10002;
+                    backdrop-filter: blur(10px);
+                    border: 1px solid rgba(255, 255, 255, 0.2);
+                    max-width: 500px;
+                    width: 90%;
+                `;
+
+                    document.body.appendChild(notice);
+                }, 5000);
+            }
+        }
+
+        function acceptCookies() {
+            localStorage.setItem('adCookieAccepted', 'true');
+            document.querySelector('.cookie-notice')?.remove();
+        }
+
+        function declineCookies() {
+            localStorage.setItem('adCookieAccepted', 'false');
+            document.querySelector('.cookie-notice')?.remove();
+            closeTopBannerAd();
+        }
+
+        // Add sparkle effect on close (optional)
+        function createAdCloseEffect(banner) {
+            if (!banner) return;
+
+            const rect = banner.getBoundingClientRect();
+
+            // Create sparkle effect
+            for (let i = 0; i < 10; i++) {
+                const sparkle = document.createElement('div');
+                const size = Math.random() * 6 + 3;
+                const color = ['#f9ca24', '#00d4aa', '#0984e3'][Math.floor(Math.random() * 3)];
+
+                sparkle.style.cssText = `
+                position: fixed;
+                width: ${size}px;
+                height: ${size}px;
+                background: ${color};
+                border-radius: 50%;
+                top: ${rect.bottom}px;
+                left: ${rect.left + Math.random() * rect.width}px;
+                pointer-events: none;
+                z-index: 10000;
+                box-shadow: 0 0 10px ${color};
+            `;
+
+                document.body.appendChild(sparkle);
+
+                // Animate sparkle
+                const angle = Math.random() * Math.PI * 2;
+                const distance = Math.random() * 80 + 30;
+                const duration = Math.random() * 600 + 300;
+
+                sparkle.animate([
+                    {
+                        transform: 'translateY(0) rotate(0deg) scale(1)',
+                        opacity: 1
+                    },
+                    {
+                        transform: `translateY(-${distance}px) rotate(${Math.random() * 360}deg) scale(0)`,
+                        opacity: 0
+                    }
+                ], {
+                    duration: duration,
+                    easing: 'cubic-bezier(0.4, 0, 0.2, 1)'
+                }).onfinish = () => {
+                    sparkle.remove();
+                };
+            }
+        }
+
+        // Initialize cookie notice on load
+        document.addEventListener('DOMContentLoaded', function () {
+            // Uncomment to enable cookie notice
+            // showCookieNotice();
+        });
+
     </script>
 
     <asp:ContentPlaceHolder ID="Scripts" runat="server" />

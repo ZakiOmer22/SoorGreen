@@ -1,197 +1,17 @@
 ﻿<%@ Page Title="Report Waste" Language="C#" MasterPageFile="~/Pages/Citizen/Site.Master"
-    AutoEventWireup="true" Inherits="SoorGreen.Admin.ReportWaste" Codebehind="ReportWaste.aspx.cs" %>
+    AutoEventWireup="True" Async="true" Inherits="SoorGreen.Admin.ReportWaste" CodeBehind="ReportWaste.aspx.cs" %>
 
 <asp:Content ID="Content3" ContentPlaceHolderID="HeadContent" runat="server">
     <link href='<%= ResolveUrl("~/Content/Pages/Citizen/citizenreportwaste.css") %>' rel="stylesheet" />
-    <style>
-        /* FIX: Scrollbar for main container */
-        .report-container {
-            position: relative;
-            min-height: calc(100vh - 150px);
-            overflow-y: auto;
-            padding-right: 10px;
-        }
-        
-        /* Custom scrollbar that works with both themes */
-        .report-container::-webkit-scrollbar {
-            width: 10px;
-        }
-        
-        .report-container::-webkit-scrollbar-track {
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 10px;
-            margin: 5px 0;
-        }
-        
-        .report-container::-webkit-scrollbar-thumb {
-            background: rgba(16, 185, 129, 0.6);
-            border-radius: 10px;
-            border: 2px solid transparent;
-            background-clip: content-box;
-        }
-        
-        .report-container::-webkit-scrollbar-thumb:hover {
-            background: rgba(16, 185, 129, 0.8);
-        }
-        
-        [data-theme="dark"] .report-container::-webkit-scrollbar-track {
-            background: rgba(0, 0, 0, 0.2);
-        }
-        
-        [data-theme="dark"] .report-container::-webkit-scrollbar-thumb {
-            background: rgba(16, 185, 129, 0.4);
-        }
-        
-        [data-theme="dark"] .report-container::-webkit-scrollbar-thumb:hover {
-            background: rgba(16, 185, 129, 0.6);
-        }
-        
-        /* Fix for message panel visibility */
-        .message-panel {
-            position: fixed;
-            top: 80px;
-            right: 20px;
-            width: 350px;
-            z-index: 9999;
-            display: block;
-            visibility: visible;
-        }
-        
-        .message-alert {
-            padding: 15px;
-            margin-bottom: 10px;
-            border-radius: 12px;
-            display: flex;
-            align-items: center;
-            animation: slideIn 0.3s ease;
-            box-shadow: 0 8px 25px rgba(0,0,0,0.2);
-            visibility: visible !important;
-            opacity: 1 !important;
-            transform: none !important;
-        }
-        
-        .message-alert.show {
-            display: flex !important;
-            visibility: visible !important;
-            opacity: 1 !important;
-        }
-        
-        .message-alert.success {
-            background: linear-gradient(135deg, #10B981, #059669);
-            color: white;
-            border-left: 4px solid #047857;
-        }
-        
-        .message-alert.error {
-            background: linear-gradient(135deg, #EF4444, #DC2626);
-            color: white;
-            border-left: 4px solid #B91C1C;
-        }
-        
-        .message-alert.warning {
-            background: linear-gradient(135deg, #F59E0B, #D97706);
-            color: white;
-            border-left: 4px solid #B45309;
-        }
-        
-        .message-alert i {
-            font-size: 24px;
-            margin-right: 15px;
-        }
-        
-        @keyframes slideIn {
-            from {
-                transform: translateX(100%);
-                opacity: 0;
-            }
-            to {
-                transform: translateX(0);
-                opacity: 1;
-            }
-        }
-        
-        /* Fix: Ensure selected waste type is visible in both themes */
-        .category-card-glass.selected {
-            border: 2px solid #22c55e !important;
-            background: rgba(34, 197, 94, 0.1) !important;
-            box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.2) !important;
-            transform: translateY(-2px);
-            transition: all 0.3s ease;
-        }
-        
-        .category-card-glass.selected .category-icon-glass {
-            background: linear-gradient(135deg, #22c55e, #16a34a) !important;
-            color: white !important;
-        }
-        
-        /* Fix: Ensure text is visible in both themes */
-        .card-header-glass h4,
-        .card-header-glass i {
-            color: white !important;
-            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3) !important;
-        }
-        
-        /* Fix: Ensure form labels are visible */
-        .form-label {
-            color: white !important;
-            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3) !important;
-        }
-        
-        /* Fix: Ensure text-muted is visible in dark mode */
-        [data-theme="dark"] .text-muted {
-            color: rgba(255, 255, 255, 0.7) !important;
-        }
-        
-        /* Fix: Ensure preview text is visible */
-        .preview-details .text-muted,
-        .detail-row .text-muted {
-            color: rgba(255, 255, 255, 0.8) !important;
-        }
-        
-        /* Fix: Ensure placeholders are visible */
-        .form-control-glass::placeholder {
-            color: rgba(255, 255, 255, 0.6) !important;
-        }
-        
-        /* Fix: Ensure form check labels are visible */
-        .form-check-label {
-            color: white !important;
-            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2) !important;
-        }
-        
-        /* Fix: Ensure stats cards text is visible */
-        .stats-card .stats-number,
-        .stats-card .stats-label {
-            color: white !important;
-            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3) !important;
-        }
-        
-        /* Fix: Ensure step labels are visible */
-        .step-label-glass {
-            color: rgba(255, 255, 255, 0.9) !important;
-        }
-        
-        /* Fix: Remove inline conflicting styles */
-        .card-glass {
-            background: transparent !important;
-            backdrop-filter: blur(20px) !important;
-            border: 1px solid rgba(255, 255, 255, 0.2) !important;
-        }
-        
-        .stats-card {
-            background: rgba(255, 255, 255, 0.1) !important;
-            backdrop-filter: blur(20px) !important;
-        }
-        
-        /* Fix: Ensure button text is visible */
-        .btn {
-            color: white !important;
-            text-shadow: 0 1px 1px rgba(0, 0, 0, 0.3) !important;
-        }
-    </style>
 </asp:Content>
 
 <asp:Content ID="MainContent" ContentPlaceHolderID="MainContent" runat="server">
+    <asp:ScriptManager ID="smMain" runat="server" EnablePageMethods="true" />
+
+    <!-- Hidden fields for AI data -->
+    <asp:HiddenField ID="hfAICategory" runat="server" />
+    <asp:HiddenField ID="hfAIWasteType" runat="server" />
+
     <!-- Message Panel -->
     <div class="message-panel" style="display: none;"></div>
 
@@ -199,7 +19,7 @@
         <div class="d-flex align-items-center mb-4">
             <h1 class="h3 mb-0 text-white">Report Waste Collection</h1>
         </div>
-        
+
         <!-- Stats Cards -->
         <div class="d-flex gap-3 mb-4 flex-wrap">
             <div class="stats-card rewards" style="flex: 1; min-width: 200px;">
@@ -300,8 +120,7 @@
                     <div class="info-box-glass mt-4">
                         <i class="fas fa-lightbulb"></i>
                         <div class="text-white">
-                            <strong>Tip:</strong> Select the waste type that best matches your materials. 
-                            Different types earn different reward rates based on their recycling value.
+                            <strong>Tip:</strong> You can also upload a photo in the next step and let AI automatically detect the waste type for you!
                         </div>
                     </div>
 
@@ -321,17 +140,47 @@
                     <span class="badge-glass">Step 2 of 4</span>
                 </div>
                 <div class="card-body">
-                    <p class="text-muted mb-4">Provide information about your waste submission. Accurate details help with proper collection.</p>
+                    <p class="text-muted mb-4">Provide information about your waste submission. Upload a photo for AI classification or describe it.</p>
 
                     <div class="row">
                         <div class="col-lg-8">
+                            <!-- IMAGE UPLOAD FOR AI -->
+                            <div class="form-group-glass mb-4">
+                                <label class="form-label"><i class="fas fa-camera me-2"></i>Upload Waste Image (Optional)</label>
+                                <div class="input-group-glass">
+                                    <asp:FileUpload ID="fuWasteImage" runat="server" CssClass="form-control"
+                                        onchange="showImagePreview()" accept=".jpg,.jpeg,.png,.gif,.bmp" />
+                                </div>
+                                <small class="text-muted">Upload a photo of your waste for AI-assisted classification</small>
+
+                                <!-- Image Preview -->
+                                <div id="imagePreviewContainer" class="mt-3" style="display: none;">
+                                    <img id="imagePreview" class="img-thumbnail" style="max-height: 150px;" />
+                                </div>
+
+                                <!-- AI Classification Button -->
+                                <div id="aiClassifySection" class="mt-3" style="display: none;">
+                                    <button type="button" class="btn btn-sm btn-primary" onclick="classifyWasteImage()">
+                                        <i class="fas fa-robot me-1"></i>Auto-Classify with AI
+                                    </button>
+                                    <small class="text-muted ms-2">Let AI analyze the waste type from image</small>
+                                </div>
+
+                                <!-- AI Results -->
+                                <div id="aiResults" class="mt-3" style="display: none;"></div>
+                            </div>
+
                             <div class="form-group-glass mb-4">
                                 <label class="form-label"><i class="fas fa-weight-hanging me-2"></i>Estimated Weight (kg) *</label>
                                 <div class="input-group-glass">
-                                    <i class="fas fa-weight-hanging input-icon"></i>
-                                    <asp:TextBox ID="txtWeight" runat="server" CssClass="form-control-glass"
-                                        TextMode="Number" step="0.1" min="0.1" placeholder="0.0"
-                                        OnTextChanged="txtWeight_TextChanged" AutoPostBack="true" />
+                                    <asp:TextBox
+                                        ID="txtWeight"
+                                        runat="server"
+                                        CssClass="form-control"
+                                        AutoPostBack="true"
+                                        OnTextChanged="txtWeight_TextChanged"
+                                        placeholder="Enter weight (kg)">
+                                    </asp:TextBox>
                                 </div>
                                 <small class="text-muted">Enter estimated weight in kilograms. More accurate = better rewards!</small>
 
@@ -350,12 +199,59 @@
                             <div class="form-group-glass mb-4">
                                 <label class="form-label"><i class="fas fa-align-left me-2"></i>Description (Optional)</label>
                                 <div class="input-group-glass">
-                                    <i class="fas fa-align-left input-icon"></i>
-                                    <asp:TextBox ID="txtDescription" runat="server" CssClass="form-control-glass"
-                                        TextMode="MultiLine" Rows="4"
-                                        placeholder="E.g., 'Clear plastic bottles', 'Mixed paper waste', 'Broken glass jars', 'Aluminum cans, etc.'" />
+                                    <asp:TextBox
+                                        ID="txtDescription"
+                                        runat="server"
+                                        TextMode="MultiLine"
+                                        AutoPostBack="true"
+                                        OnTextChanged="txtDescription_TextChanged"
+                                        Rows="3"
+                                        CssClass="form-control"
+                                        placeholder="Describe your waste (e.g., 'plastic bottles', 'newspapers', 'food waste')" />
                                 </div>
-                                <small class="text-muted">Add specific details about your waste materials</small>
+                                <small class="text-muted">Describe what you're recycling. AI can suggest waste type based on text too.</small>
+
+                                <!-- AI Suggestions from Text -->
+                                <asp:UpdatePanel ID="upAI" runat="server" UpdateMode="Conditional">
+                                    <ContentTemplate>
+                                        <div class="ai-suggestions-glass mb-4" id="textAISection" style="display: none;">
+                                            <h5 class="mb-2 text-white"><i class="fas fa-robot me-2"></i>AI Text Analysis</h5>
+                                            <div class="mb-2">
+                                                <strong>Predicted Waste Type:</strong>
+                                                <asp:Label ID="lblAIPredictedType" runat="server" CssClass="fw-bold text-white">-</asp:Label>
+                                            </div>
+                                            <div class="mb-2">
+                                                <strong>Suggested Weight:</strong>
+                                                <asp:Label ID="lblAIPredictedWeight" runat="server" CssClass="fw-bold text-success">- kg</asp:Label>
+                                            </div>
+                                            <div class="mb-2">
+                                                <strong>Reward Estimation:</strong>
+                                                <asp:Label ID="lblAIEstimatedReward" runat="server" CssClass="fw-bold text-success">- XP</asp:Label>
+                                            </div>
+                                            <asp:Button ID="btnUseAISuggestion" runat="server" CssClass="btn btn-outline-success btn-sm"
+                                                Text="Use AI Suggestion" OnClick="btnUseAISuggestion_Click" />
+                                        </div>
+                                    </ContentTemplate>
+                                    <Triggers>
+                                        <asp:AsyncPostBackTrigger ControlID="txtDescription" EventName="TextChanged" />
+                                    </Triggers>
+                                </asp:UpdatePanel>
+
+                                <!-- AI Validation Status -->
+                                <div id="aiValidationStatus" class="mt-2" style="display: none;">
+                                    <div class="alert alert-info">
+                                        <div class="d-flex align-items-center">
+                                            <i class="fas fa-spinner fa-spin me-2"></i>
+                                            <div>
+                                                <strong>AI Validation in Progress</strong>
+                                                <div class="small">Checking report credibility...</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- AI Analysis Results (will be populated by JavaScript) -->
+                                <div id="aiAnalysisResults" class="mt-3"></div>
                             </div>
                         </div>
 
@@ -497,8 +393,8 @@
                                                 placeholder="Longitude" />
                                         </div>
                                     </div>
-                                    <asp:Button ID="btnGetLocation" runat="server" Text="Use Current Location" 
-                                        CssClass="btn btn-outline-info btn-sm btn-with-icon w-100" 
+                                    <asp:Button ID="btnGetLocation" runat="server" Text="Use Current Location"
+                                        CssClass="btn btn-outline-info btn-sm btn-with-icon w-100"
                                         OnClick="btnGetLocation_Click" />
                                 </div>
 
@@ -540,6 +436,9 @@
                                     <div class="detail-row">
                                         <span class="text-muted">Waste Type:</span>
                                         <asp:Label ID="lblReviewWasteType" runat="server" Text="Not selected" CssClass="fw-bold text-white"></asp:Label>
+                                        <asp:Label ID="lblAIUsed" runat="server" Text="" CssClass="badge bg-info ms-2" Visible="false">
+                                            <i class="fas fa-robot me-1"></i>AI Detected
+                                        </asp:Label>
                                     </div>
                                     <div class="detail-row">
                                         <span class="text-muted">Estimated Weight:</span>
@@ -690,31 +589,614 @@
                             CssClass="btn btn-primary btn-with-icon">
                             <i class="fas fa-tachometer-alt me-2"></i>Go to Dashboard
                         </asp:HyperLink>
-                        <asp:Button ID="btnSubmitAnother" runat="server" Text="Submit Another" 
+                        <asp:Button ID="btnSubmitAnother" runat="server" Text="Submit Another"
                             CssClass="btn btn-outline-primary btn-with-icon" OnClick="btnSubmitAnother_Click" />
                     </div>
                 </div>
             </div>
         </asp:Panel>
     </div>
-    
-    <!-- JavaScript to ensure functions exist -->
+
+    <!-- JavaScript for AI Image Classification - UPDATED FOR YOUR API FORMAT -->
     <script type="text/javascript">
+        // Show image preview when file is selected
+        function showImagePreview() {
+            var fileUpload = document.getElementById('<%= fuWasteImage.ClientID %>');
+            var previewContainer = document.getElementById('imagePreviewContainer');
+            var preview = document.getElementById('imagePreview');
+            var aiSection = document.getElementById('aiClassifySection');
+            var aiResults = document.getElementById('aiResults');
+
+            if (fileUpload.files && fileUpload.files[0]) {
+                // Check file size (max 5MB)
+                if (fileUpload.files[0].size > 5 * 1024 * 1024) {
+                    alert('Image size should be less than 5MB.');
+                    fileUpload.value = '';
+                    return;
+                }
+
+                // Check file type
+                var fileName = fileUpload.files[0].name.toLowerCase();
+                if (!fileName.match(/\.(jpg|jpeg|png|gif|bmp)$/)) {
+                    alert('Please upload a valid image file (JPG, PNG, GIF, BMP).');
+                    fileUpload.value = '';
+                    return;
+                }
+
+                var reader = new FileReader();
+                reader.onload = function (e) {
+                    preview.src = e.target.result;
+                    previewContainer.style.display = 'block';
+                    aiSection.style.display = 'block';
+
+                    // Hide previous results
+                    if (aiResults) {
+                        aiResults.style.display = 'none';
+                        aiResults.innerHTML = '';
+                    }
+                }
+                reader.readAsDataURL(fileUpload.files[0]);
+            } else {
+                previewContainer.style.display = 'none';
+                aiSection.style.display = 'none';
+                if (aiResults) {
+                    aiResults.style.display = 'none';
+                    aiResults.innerHTML = '';
+                }
+            }
+        }
+
+        // AI Image Classification - FOR YOUR API RESPONSE FORMAT
+        function classifyWasteImage() {
+            var fileUpload = document.getElementById('<%= fuWasteImage.ClientID %>');
+            if (!fileUpload.files || !fileUpload.files[0]) {
+                alert('Please select an image first.');
+                return;
+            }
+
+            // Show loading
+            var aiResults = document.getElementById('aiResults');
+            aiResults.innerHTML = '<div class="alert alert-info ai-loading">' +
+                '<div class="text-center p-2">' +
+                '   <div class="spinner-border spinner-border-sm me-2"></div>' +
+                '   Analyzing waste image with AI...' +
+                '</div>' +
+                '</div>';
+            aiResults.style.display = 'block';
+
+            // Create FormData for Flask API
+            var formData = new FormData();
+            formData.append('image', fileUpload.files[0]);
+            formData.append('filename', fileUpload.files[0].name);
+
+            console.log('Sending request to AI API...');
+
+            // Send to your Flask API
+            fetch('http://127.0.0.1:5000/api/ai/classify-waste', {
+                method: 'POST',
+                body: formData,
+                // Don't set Content-Type header for FormData - browser does it automatically
+            })
+                .then(response => {
+                    console.log('Response received:', response.status, response.statusText);
+                    if (!response.ok) {
+                        return response.text().then(text => {
+                            throw new Error(`API Error ${response.status}: ${text}`);
+                        });
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    console.log('API Response:', data);
+
+                    if (data.status === 'ok' && data.result && data.result.status === 'success') {
+                        // Process the detections from your API
+                        processDetections(data.result.detections, fileUpload.files[0]);
+                    } else {
+                        onClassificationError(data.result?.error || 'Invalid response from AI service');
+                    }
+                })
+                .catch(error => {
+                    console.error('API Call Error:', error);
+                    onClassificationError('Failed to connect to AI service: ' + error.message);
+                });
+        }
+
+        // Process detections from API response
+        function processDetections(detections, file) {
+            if (!detections || detections.length === 0) {
+                onClassificationError('No waste detected in the image');
+                return;
+            }
+
+            // Sort detections by confidence (highest first)
+            detections.sort((a, b) => b.confidence - a.confidence);
+
+            // Get the top detection
+            var topDetection = detections[0];
+            var wasteType = mapAIClassToWasteType(topDetection.class);
+            var confidence = topDetection.confidence;
+
+            // Calculate estimated weight
+            var estimatedWeight = calculateWeightFromDetections(detections, file);
+
+            // Show all detections
+            showDetectionResults(detections, wasteType, confidence, estimatedWeight);
+
+            // Store data for later use
+            var aiResults = document.getElementById('aiResults');
+            aiResults.dataset.estimatedWeight = estimatedWeight;
+            aiResults.dataset.wasteType = wasteType;
+            aiResults.dataset.allDetections = JSON.stringify(detections);
+        }
+
+        // Map AI class names to waste type names
+        function mapAIClassToWasteType(aiClass) {
+            var mapping = {
+                'plastic': 'Plastic',
+                'paper': 'Paper',
+                'metal': 'Metal',
+                'glass': 'Glass',
+                'organic': 'Organic',
+                'food': 'Organic',
+                'electronics': 'Electronics',
+                'e-waste': 'Electronics',
+                'textile': 'Textiles',
+                'cloth': 'Textiles',
+                'hazardous': 'Hazardous',
+                'medical': 'Hazardous',
+                'mixed': 'Mixed',
+                'other': 'Mixed'
+            };
+
+            // Default to capitalized version if not in mapping
+            return mapping[aiClass.toLowerCase()] ||
+                aiClass.charAt(0).toUpperCase() + aiClass.slice(1);
+        }
+
+        // Calculate weight based on detections
+        function calculateWeightFromDetections(detections, file) {
+            // Use file size as base weight estimate
+            var fileSizeMB = file.size / (1024 * 1024);
+            var baseWeight = 1.0;
+
+            if (fileSizeMB < 0.3) baseWeight = 0.5;
+            else if (fileSizeMB < 0.6) baseWeight = 1.0;
+            else if (fileSizeMB < 1.2) baseWeight = 2.0;
+            else if (fileSizeMB < 2.5) baseWeight = 5.0;
+            else baseWeight = 10.0;
+
+            // Adjust based on detection confidence
+            var topConfidence = detections[0].confidence;
+            var adjustedWeight = baseWeight * (0.5 + topConfidence * 0.5);
+
+            return Math.max(0.5, Math.min(20, adjustedWeight)); // Clamp between 0.5-20kg
+        }
+
+        // Show detection results
+        function showDetectionResults(detections, primaryType, confidence, estimatedWeight) {
+            var aiResults = document.getElementById('aiResults');
+
+            // Create HTML for all detections
+            var detectionsHTML = '';
+            detections.forEach((detection, index) => {
+                var wasteType = mapAIClassToWasteType(detection.class);
+                var confidencePercent = Math.round(detection.confidence * 100);
+                var isPrimary = index === 0;
+
+                detectionsHTML += '<div class="detection-row ' + (isPrimary ? 'primary-detection' : '') + '">' +
+                    '<div class="d-flex justify-content-between align-items-center">' +
+                    '<span>' + wasteType + '</span>' +
+                    '<div class="d-flex align-items-center">' +
+                    '<div class="confidence-bar me-2" style="width: 100px;">' +
+                    '<div class="confidence-fill" style="width: ' + confidencePercent + '%;"></div>' +
+                    '</div>' +
+                    '<span class="confidence-value">' + confidencePercent + '%</span>' +
+                    '</div>' +
+                    '</div>' +
+                    '</div>';
+            });
+
+            aiResults.innerHTML = '<div class="alert alert-success ai-success">' +
+                '<h6><i class="fas fa-robot me-2"></i> AI Waste Detection Results</h6>' +
+                '<div class="mt-3">' +
+                '<div class="primary-result mb-3 p-3 bg-light rounded">' +
+                '<div class="d-flex justify-content-between align-items-center">' +
+                '<div>' +
+                '<h5 class="mb-1">Primary Detection</h5>' +
+                '<div class="d-flex align-items-center">' +
+                '<span class="badge bg-primary me-2">' + primaryType + '</span>' +
+                '<span class="text-muted">' + Math.round(confidence * 100) + '% confidence</span>' +
+                '</div>' +
+                '</div>' +
+                '<div class="text-end">' +
+                '<div class="estimated-weight h4 text-success mb-0">' + estimatedWeight.toFixed(1) + ' kg</div>' +
+                '<small class="text-muted">Estimated weight</small>' +
+                '</div>' +
+                '</div>' +
+                '</div>' +
+
+                '<div class="all-detections mt-3">' +
+                '<h6 class="mb-2">All Detections:</h6>' +
+                '<div class="detections-list">' + detectionsHTML + '</div>' +
+                '</div>' +
+
+                '<div class="mt-4">' +
+                '<button type="button" class="btn btn-success me-2" onclick="applyAIResultsWithWeight(' + estimatedWeight + ', \'' + primaryType + '\')">' +
+                '<i class="fas fa-check me-1"></i> Apply Primary Detection' +
+                '</button>' +
+                '<button type="button" class="btn btn-outline-secondary me-2" onclick="showAllWasteTypeOptions()">' +
+                '<i class="fas fa-list me-1"></i> Choose Different Type' +
+                '</button>' +
+                '<button type="button" class="btn btn-outline-secondary" onclick="ignoreAIResults()">' +
+                '<i class="fas fa-times me-1"></i> Ignore All' +
+                '</button>' +
+                '</div>' +
+                '</div>' +
+                '</div>';
+
+            aiResults.classList.add('ai-highlight');
+            aiResults.style.display = 'block';
+        }
+
+        // Show all waste type options from detections
+        function showAllWasteTypeOptions() {
+            var aiResults = document.getElementById('aiResults');
+            var detections = JSON.parse(aiResults.dataset.allDetections || '[]');
+            var estimatedWeight = parseFloat(aiResults.dataset.estimatedWeight) || 1.0;
+
+            if (detections.length === 0) return;
+
+            var optionsHTML = '';
+            detections.forEach((detection, index) => {
+                var wasteType = mapAIClassToWasteType(detection.class);
+                var confidencePercent = Math.round(detection.confidence * 100);
+
+                optionsHTML += '<div class="option-card p-3 mb-2 border rounded">' +
+                    '<div class="d-flex justify-content-between align-items-center">' +
+                    '<div>' +
+                    '<h6 class="mb-1">' + wasteType + '</h6>' +
+                    '<small class="text-muted">AI Confidence: ' + confidencePercent + '%</small>' +
+                    '</div>' +
+                    '<div>' +
+                    '<button type="button" class="btn btn-sm btn-outline-primary" ' +
+                    'onclick="applyAIResultsWithWeight(' + estimatedWeight + ', \'' + wasteType + '\')">' +
+                    'Select' +
+                    '</button>' +
+                    '</div>' +
+                    '</div>' +
+                    '</div>';
+            });
+
+            aiResults.innerHTML = '<div class="alert alert-info">' +
+                '<h6><i class="fas fa-th-list me-2"></i> Select Waste Type</h6>' +
+                '<div class="mt-3">' +
+                '<p>Choose from AI detections:</p>' +
+                '<div class="options-list">' + optionsHTML + '</div>' +
+                '<div class="mt-3">' +
+                '<button type="button" class="btn btn-sm btn-outline-secondary" onclick="classifyWasteImage()">' +
+                '<i class="fas fa-arrow-left me-1"></i> Back to Results' +
+                '</button>' +
+                '</div>' +
+                '</div>' +
+                '</div>';
+        }
+
+        // Apply AI results WITH WEIGHT
+        function applyAIResultsWithWeight(estimatedWeight, wasteType) {
+            console.log('Applying AI results:', { weight: estimatedWeight, type: wasteType });
+
+            // 1. Set the weight in the textbox
+            var weightInput = document.getElementById('<%= txtWeight.ClientID %>');
+            if (weightInput && estimatedWeight) {
+                weightInput.value = estimatedWeight.toFixed(1);
+
+                // Trigger ASP.NET TextChanged event
+                __doPostBack('<%= txtWeight.ClientID %>', '');
+            }
+
+            // 2. Select the waste type
+            if (wasteType) {
+                selectWasteTypeByAI(wasteType);
+            }
+
+            // 3. Update UI feedback
+            var aiResults = document.getElementById('aiResults');
+            aiResults.innerHTML = '<div class="alert alert-success">' +
+                '<div class="d-flex align-items-center">' +
+                '<i class="fas fa-check-circle fa-2x text-success me-3"></i>' +
+                '<div>' +
+                '<h5 class="mb-1">✓ AI Suggestions Applied</h5>' +
+                '<p class="mb-0">' +
+                'Weight: <strong>' + estimatedWeight.toFixed(1) + ' kg</strong> | ' +
+                'Type: <strong>' + wasteType + '</strong>' +
+                '</p>' +
+                '</div>' +
+                '</div>' +
+                '</div>';
+
+            // 4. Show success message
+            showMessage('✓ AI applied: ' + wasteType + ' (' + estimatedWeight.toFixed(1) + ' kg)', 'success');
+
+            // 5. Mark AI as used in hidden field
+            document.getElementById('<%= hfAICategory.ClientID %>').value = 'ai_used_' + wasteType.toLowerCase();
+
+            // 6. Auto-advance to next step after 2 seconds
+            setTimeout(function () {
+                var nextButton = document.getElementById('<%= btnNextStep2.ClientID %>');
+                if (nextButton && !nextButton.disabled) {
+                    // Uncomment to auto-advance
+                    // nextButton.click();
+                }
+            }, 2000);
+        }
+
+        // Helper function to select waste type by name
+        function selectWasteTypeByAI(wasteTypeName) {
+            console.log('Selecting waste type:', wasteTypeName);
+
+            var wasteCards = document.querySelectorAll('.waste-type-select');
+            var found = false;
+            var cleanWasteType = wasteTypeName.toLowerCase().trim();
+
+            // First pass: exact match
+            wasteCards.forEach(function (card) {
+                var cardText = (card.textContent || card.innerText).toLowerCase();
+                if (cardText.includes(cleanWasteType)) {
+                    card.click();
+                    found = true;
+                    highlightCard(card);
+                }
+            });
+
+            // Second pass: keyword match
+            if (!found) {
+                wasteCards.forEach(function (card) {
+                    var cardText = (card.textContent || card.innerText).toLowerCase();
+                    var keywords = {
+                        'plastic': ['plastic', 'bottle', 'container'],
+                        'paper': ['paper', 'cardboard', 'newspaper'],
+                        'metal': ['metal', 'can', 'aluminum'],
+                        'glass': ['glass', 'bottle', 'jar'],
+                        'organic': ['organic', 'food', 'compost'],
+                        'electronics': ['electronic', 'battery', 'e-waste'],
+                        'mixed': ['mixed', 'general', 'other']
+                    };
+
+                    for (var key in keywords) {
+                        if (cleanWasteType.includes(key) ||
+                            keywords[key].some(word => cleanWasteType.includes(word))) {
+                            if (cardText.includes(key)) {
+                                card.click();
+                                found = true;
+                                highlightCard(card);
+                                break;
+                            }
+                        }
+                    }
+                });
+            }
+
+            return found;
+        }
+
+        function highlightCard(card) {
+            var cardElement = card.closest('.category-card-glass');
+            if (cardElement) {
+                cardElement.classList.add('selected');
+                cardElement.style.boxShadow = '0 0 20px rgba(40, 167, 69, 0.5)';
+                cardElement.style.transform = 'translateY(-5px)';
+                setTimeout(function () {
+                    cardElement.style.boxShadow = '';
+                    cardElement.style.transform = '';
+                }, 2000);
+            }
+        }
+
+        // Test API connection
+        function testAIConnection() {
+            showMessage('Testing AI API connection...', 'info');
+
+            fetch('http://127.0.0.1:5000/api/health', {
+                method: 'GET'
+            })
+                .then(response => response.json())
+                .then(data => {
+                    showMessage('✓ AI API is running: ' + (data.status || 'Connected'), 'success');
+                })
+                .catch(error => {
+                    showMessage('✗ Cannot connect to AI API. Make sure Flask is running on port 5000.', 'error');
+                });
+        }
+
+        // Error callback
+        function onClassificationError(error) {
+            var aiResults = document.getElementById('aiResults');
+            aiResults.innerHTML = '<div class="alert alert-danger ai-error">' +
+                '<i class="fas fa-exclamation-triangle me-2"></i> ' + error +
+                '<div class="mt-3">' +
+                '<button type="button" class="btn btn-sm btn-warning me-2" onclick="testAIConnection()">' +
+                '<i class="fas fa-wifi me-1"></i> Test Connection' +
+                '</button>' +
+                '<button type="button" class="btn btn-sm btn-outline-info" onclick="useMockDetection()">' +
+                '<i class="fas fa-magic me-1"></i> Use Mock Detection' +
+                '</button>' +
+                '</div>' +
+                '</div>';
+        }
+
+        // Mock detection for testing
+        function useMockDetection() {
+            var fileUpload = document.getElementById('<%= fuWasteImage.ClientID %>');
+
+            // Mock response matching your API format
+            var mockResponse = {
+                status: 'ok',
+                result: {
+                    status: 'success',
+                    detections: [
+                        { class: 'plastic', confidence: 0.85 },
+                        { class: 'metal', confidence: 0.65 },
+                        { class: 'paper', confidence: 0.45 }
+                    ]
+                }
+            };
+
+            processDetections(mockResponse.result.detections, fileUpload.files[0]);
+        }
+
+        // Ignore AI results
+        function ignoreAIResults() {
+            var aiResults = document.getElementById('aiResults');
+            aiResults.innerHTML = '<div class="alert alert-secondary">' +
+                '<i class="fas fa-info-circle me-2"></i> AI suggestions ignored. Please select waste type manually.' +
+                '</div>';
+        }
+
+        // Show message function
+        function showMessage(message, type) {
+            var messagePanel = document.querySelector('.message-panel');
+            if (messagePanel) {
+                var icon = type === 'success' ? 'check-circle' :
+                    type === 'error' ? 'exclamation-circle' :
+                        type === 'warning' ? 'exclamation-triangle' : 'info-circle';
+
+                messagePanel.innerHTML =
+                    '<div class="message-alert ' + type + ' show">' +
+                    '    <i class="fas fa-' + icon + '"></i>' +
+                    '    <div>' +
+                    '        <strong>' + type.toUpperCase() + '</strong>' +
+                    '        <p class="mb-0">' + message + '</p>' +
+                    '    </div>' +
+                    '</div>';
+                messagePanel.style.display = 'block';
+                setTimeout(function () {
+                    messagePanel.style.display = 'none';
+                }, 5000);
+            }
+        }
+
+        // Initialize when page loads
+        document.addEventListener('DOMContentLoaded', function () {
+            console.log('Waste AI Classification initialized');
+
+            // Attach file upload handler
+            var fileUpload = document.getElementById('<%= fuWasteImage.ClientID %>');
+            if (fileUpload) {
+                fileUpload.onchange = showImagePreview;
+            }
+
+            // Add CSS for detection results
+            var style = document.createElement('style');
+            style.textContent = `
+            .ai-loading {
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                color: white;
+                border: none;
+            }
+            .ai-success {
+                animation: fadeIn 0.5s ease;
+                border-left: 4px solid #28a745;
+            }
+            .ai-error {
+                animation: fadeIn 0.5s ease;
+                border-left: 4px solid #dc3545;
+            }
+            .ai-highlight {
+                animation: pulse 2s infinite;
+            }
+            .detection-row {
+                padding: 8px 12px;
+                margin-bottom: 8px;
+                background: rgba(0,0,0,0.03);
+                border-radius: 6px;
+                border-left: 3px solid #6c757d;
+            }
+            .detection-row.primary-detection {
+                background: rgba(40, 167, 69, 0.1);
+                border-left-color: #28a745;
+            }
+            .confidence-bar {
+                height: 6px;
+                background: #e9ecef;
+                border-radius: 3px;
+                overflow: hidden;
+            }
+            .confidence-fill {
+                height: 100%;
+                background: linear-gradient(90deg, #28a745, #20c997);
+                transition: width 1s ease;
+            }
+            .confidence-value {
+                font-size: 0.85rem;
+                color: #6c757d;
+                min-width: 40px;
+                text-align: right;
+            }
+            .primary-result {
+                background: linear-gradient(135deg, rgba(40, 167, 69, 0.1), rgba(32, 201, 151, 0.1));
+                border: 1px solid rgba(40, 167, 69, 0.2);
+            }
+            .option-card {
+                transition: all 0.3s ease;
+            }
+            .option-card:hover {
+                transform: translateY(-2px);
+                box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+                border-color: #007bff;
+            }
+            @keyframes fadeIn {
+                from { opacity: 0; transform: translateY(-10px); }
+                to { opacity: 1; transform: translateY(0); }
+            }
+            @keyframes pulse {
+                0% { box-shadow: 0 0 0 0 rgba(40, 167, 69, 0.4); }
+                70% { box-shadow: 0 0 0 10px rgba(40, 167, 69, 0); }
+                100% { box-shadow: 0 0 0 0 rgba(40, 167, 69, 0); }
+            }
+        `;
+            document.head.appendChild(style);
+
+            // Add test button
+            var aiSection = document.getElementById('aiClassifySection');
+            if (aiSection) {
+                var testBtn = document.createElement('button');
+                testBtn.type = 'button';
+                testBtn.className = 'btn btn-sm btn-outline-info mt-2';
+                testBtn.innerHTML = '<i class="fas fa-vial me-1"></i> Test AI Connection';
+                testBtn.onclick = testAIConnection;
+                aiSection.appendChild(testBtn);
+            }
+        });
+    </script>
+
+    <script>
+        addEventListener('DOMContentLoaded', function () {
+            const btnAI = document.getElementById('<%= btnUseAISuggestion.ClientID %>');
+            if (btnAI) {
+                btnAI.addEventListener('mouseover', function () {
+                    this.classList.add('btn-glow');
+                });
+                btnAI.addEventListener('mouseout', function () {
+                    this.classList.remove('btn-glow');
+                });
+            }
+        });
         // Ensure global functions exist
         if (typeof showDatabaseConfirmation === 'undefined') {
-            window.showDatabaseConfirmation = function() {
+            window.showDatabaseConfirmation = function () {
                 var successCard = document.querySelector('.success-card-glass');
                 if (successCard) {
                     successCard.style.animation = 'none';
-                    setTimeout(function() {
+                    setTimeout(function () {
                         successCard.style.animation = 'pulse 2s infinite';
                     }, 10);
                 }
             };
         }
-        
+
         if (typeof updateProgressSteps === 'undefined') {
-            window.updateProgressSteps = function(currentStep) {
+            window.updateProgressSteps = function (currentStep) {
                 for (var i = 1; i <= 4; i++) {
                     var stepElement = document.getElementById('step' + i);
                     var lineElement = document.getElementById('line' + i);
@@ -730,17 +1212,17 @@
                 }
             };
         }
-        
+
         // Function to handle waste type selection (safe version)
-        window.selectWasteTypeSafe = function(wasteName) {
+        window.selectWasteTypeSafe = function (wasteName) {
             try {
                 var wasteCards = document.querySelectorAll('.category-card-glass');
-                wasteCards.forEach(function(card) {
+                wasteCards.forEach(function (card) {
                     card.classList.remove('selected');
                 });
-                
+
                 var selectedCards = document.querySelectorAll('.waste-type-select');
-                selectedCards.forEach(function(card) {
+                selectedCards.forEach(function (card) {
                     if (card.textContent.indexOf(wasteName) > -1) {
                         var parent = card.closest('.category-card-glass');
                         if (parent) {
@@ -752,18 +1234,18 @@
                 console.log('Error selecting waste type:', e);
             }
         };
-        
+
         // Initialize on page load
-        document.addEventListener('DOMContentLoaded', function() {
+        document.addEventListener('DOMContentLoaded', function () {
             // Make sure message panel exists
             if (!document.querySelector('.message-panel')) {
                 var messagePanel = document.createElement('div');
                 messagePanel.className = 'message-panel';
                 document.body.appendChild(messagePanel);
             }
-            
+
             // Add keyboard shortcuts
-            document.addEventListener('keydown', function(e) {
+            document.addEventListener('keydown', function (e) {
                 if (e.ctrlKey && e.key === 'Enter') {
                     var submitBtn = document.getElementById('<%= btnSubmitReport.ClientID %>');
                     if (submitBtn && submitBtn.offsetParent !== null) {

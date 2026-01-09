@@ -38,13 +38,13 @@ public partial class SiteMaster : MasterPage
             if (!IsAdminRole(userRole))
             {
                 // Redirect non-admin users to access denied page
-                Response.Redirect("../AccessDenied.aspx");
+                Response.Redirect("Login.aspx");
             }
         }
         else
         {
             // No role found, redirect to login
-            Response.Redirect("../Login.aspx");
+            Response.Redirect("Login.aspx");
         }
     }
 
@@ -148,6 +148,6 @@ public partial class SiteMaster : MasterPage
         }
 
         // Redirect to home page
-        Response.Redirect("../Default.aspx");
+        Response.Redirect("Default.aspx");
     }
 }

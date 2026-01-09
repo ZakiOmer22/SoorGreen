@@ -15,7 +15,7 @@ namespace SoorGreen
                 // Check if user is logged in and is a collector
                 if (Session["UserId"] == null || Session["UserRole"] == null)
                 {
-                    Response.Redirect("Login.aspx?redirect=CollectorDashboard.aspx");
+                    Response.Redirect("Login.aspx?redirect=Dashboard.aspx");
                     return;
                 }
 
@@ -423,6 +423,16 @@ namespace SoorGreen
         private string GetConnectionString()
         {
             return System.Configuration.ConfigurationManager.ConnectionStrings["SoorGreenDBConnectionString"].ConnectionString;
+        }
+
+        protected void btnRefresh_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        protected void btnNavigate_Click(object sender, EventArgs e)
+        {
+
         }
     }
 }

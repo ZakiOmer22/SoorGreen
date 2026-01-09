@@ -1,0 +1,2418 @@
+knowing the project  where we can add those where we can add the ai engine 
+
+-- ========================================
+-- SoorGreenDB Setup Script
+-- Project Codename: DIBUCELIN
+-- Description: Smart sustainability app rewarding citizens 
+-- for recycling and helping cities manage waste efficiently.
+-- ========================================
+
+-- 1. Create Database
+CREATE DATABASE SoorGreenDB;
+GO
+
+USE SoorGreenDB;
+GO
+
+-- ========================================
+-- 2. TABLES
+-- ========================================
+
+-- ROLES: Defines system access roles
+CREATE TABLE Roles (
+    RoleId CHAR(4) PRIMARY KEY,
+    RoleName NVARCHAR(50) NOT NULL
+);
+
+-- USERS: Registered accounts (citizens, collectors, admins, companies)
+CREATE TABLE Users (
+    UserId CHAR(4) PRIMARY KEY,
+    FullName NVARCHAR(150) NOT NULL,
+    Phone NVARCHAR(20) UNIQUE NOT NULL,
+    Email NVARCHAR(256),
+	Password NVARCHAR(100) NULL,
+    RoleId CHAR(4) NOT NULL,
+    XP_Credits DECIMAL(10,2) DEFAULT 0,
+    CreatedAt DATETIME DEFAULT GETDATE(),
+    LastLogin DATETIME NULL,
+    IsVerified BIT DEFAULT 0,
+    CONSTRAINT FK_Users_Roles FOREIGN KEY(RoleId) REFERENCES Roles(RoleId)
+);
+
+-- MUNICIPALITIES: Defines city or zone
+CREATE TABLE Municipalities (
+    MunicipalityId CHAR(4) PRIMARY KEY,
+    Name NVARCHAR(100) NOT NULL,
+	Region NVARCHAR(100) NULL,
+    Status NVARCHAR(20) DEFAULT 'Active',
+    Population BIGINT DEFAULT 0,
+    Area DECIMAL(10,2) DEFAULT 0,
+    ContactPerson NVARCHAR(100) NULL,
+    ContactNumber NVARCHAR(20) NULL,
+    Email NVARCHAR(100) NULL,
+    Address NVARCHAR(300) NULL,
+    EstablishedDate DATETIME NULL,
+    Description NVARCHAR(500) NULL
+);
+
+-- WASTE TYPES: Categories of waste
+CREATE TABLE WasteTypes (
+    WasteTypeId CHAR(4) PRIMARY KEY,
+    Name NVARCHAR(50) NOT NULL,
+	ColorCode NVARCHAR(7) NULL,
+    Description NVARCHAR(500) NULL,
+    Category NVARCHAR(50) DEFAULT 'Other',
+    CreditPerKg DECIMAL(5,2) NOT NULL
+);
+
+-- WASTE REPORTS: Citizen submits report of waste to collect
+CREATE TABLE WasteReports (
+    ReportId CHAR(4) PRIMARY KEY,
+    UserId CHAR(4) NOT NULL,
+    WasteTypeId CHAR(4) NOT NULL,
+    EstimatedKg DECIMAL(6,2) NOT NULL,
+    Address NVARCHAR(300) NOT NULL,
+    Lat DECIMAL(10,6),
+    Lng DECIMAL(10,6),
+    Landmark NVARCHAR(200) NULL,
+    PhotoUrl NVARCHAR(512),
+    CreatedAt DATETIME DEFAULT GETDATE(),
+    CONSTRAINT FK_WasteReports_Users FOREIGN KEY(UserId) REFERENCES Users(UserId),
+    CONSTRAINT FK_WasteReports_WasteTypes FOREIGN KEY(WasteTypeId) REFERENCES WasteTypes(WasteTypeId)
+);
+
+-- PICKUP REQUESTS: Links collectors to reports
+CREATE TABLE PickupRequests (
+    PickupId CHAR(4) PRIMARY KEY,
+    ReportId CHAR(4) NOT NULL,
+    CollectorId CHAR(4) NULL,
+    Status NVARCHAR(20) DEFAULT 'Requested',
+    ScheduledAt DATETIME NULL,
+    CompletedAt DATETIME NULL,
+    CONSTRAINT FK_PickupRequests_Reports FOREIGN KEY(ReportId) REFERENCES WasteReports(ReportId),
+    CONSTRAINT FK_PickupRequests_Collector FOREIGN KEY(CollectorId) REFERENCES Users(UserId)
+);
+
+-- REWARD POINTS: XP/credit transactions for users
+CREATE TABLE RewardPoints (
+    RewardId CHAR(4) PRIMARY KEY,
+    UserId CHAR(4) NOT NULL,
+    Amount DECIMAL(10,2) NOT NULL,
+    Type NVARCHAR(50),
+    Reference NVARCHAR(100),
+    CreatedAt DATETIME DEFAULT GETDATE(),
+    CONSTRAINT FK_RewardPoints_User FOREIGN KEY(UserId) REFERENCES Users(UserId)
+);
+
+-- REDEMPTION REQUESTS: Users cash out credits
+CREATE TABLE RedemptionRequests (
+    RedemptionId CHAR(4) PRIMARY KEY,
+    UserId CHAR(4) NOT NULL,
+    Amount DECIMAL(10,2) NOT NULL,
+    Method NVARCHAR(50),
+    Status NVARCHAR(20) DEFAULT 'Pending',
+    RequestedAt DATETIME DEFAULT GETDATE(),
+    ProcessedAt DATETIME NULL,
+    CONSTRAINT FK_RedemptionRequests_User FOREIGN KEY(UserId) REFERENCES Users(UserId)
+);
+
+-- NOTIFICATIONS: User alerts
+CREATE TABLE Notifications (
+    NotificationId CHAR(4) PRIMARY KEY,
+    UserId CHAR(4) NOT NULL,
+    Title NVARCHAR(200),
+    Message NVARCHAR(1000),
+    IsRead BIT DEFAULT 0,
+    CreatedAt DATETIME DEFAULT GETDATE(),
+    CONSTRAINT FK_Notifications_User FOREIGN KEY(UserId) REFERENCES Users(UserId)
+);
+
+-- AUDIT LOGS: Logs key system actions
+CREATE TABLE AuditLogs (
+    AuditId CHAR(4) PRIMARY KEY,
+    UserId CHAR(4) NULL,
+    Action NVARCHAR(100),
+    Details NVARCHAR(MAX),
+    Timestamp DATETIME DEFAULT GETDATE(),
+    CONSTRAINT FK_AuditLogs_User FOREIGN KEY(UserId) REFERENCES Users(UserId)
+);
+
+-- FEEDBACKS: Citizen suggestions
+CREATE TABLE Feedbacks (
+    FeedbackId CHAR(4) PRIMARY KEY,
+    UserId CHAR(4) NOT NULL,
+	Category NVARCHAR(50) DEFAULT 'General',
+	Priority NVARCHAR(20) DEFAULT 'Medium',
+	Subject NVARCHAR(200),
+	Rating INT DEFAULT 0,
+	FollowUp BIT DEFAULT 0;
+    Message NVARCHAR(1000),
+    CreatedAt DATETIME DEFAULT GETDATE(),
+    CONSTRAINT FK_Feedbacks_User FOREIGN KEY(UserId) REFERENCES Users(UserId)
+);
+WHERE Category IS NULL;
+CREATE TABLE PickupVerifications (
+    VerificationId CHAR(4) PRIMARY KEY,
+    PickupId CHAR(4) NOT NULL,
+    VerifiedKg DECIMAL(6,2) NOT NULL,
+    MaterialType NVARCHAR(50),
+    VerificationMethod NVARCHAR(50),
+    VerifiedAt DATETIME DEFAULT GETDATE(),
+    CONSTRAINT FK_PickupVerifications_Pickup FOREIGN KEY(PickupId) REFERENCES PickupRequests(PickupId)
+);
+
+-- Create UserActivities table for recent activity feed
+CREATE TABLE UserActivities (
+    ActivityId INT IDENTITY(1,1) PRIMARY KEY,
+    UserId CHAR(4) NOT NULL,
+    ActivityType NVARCHAR(50) NOT NULL,
+    Description NVARCHAR(255) NOT NULL,
+    Points DECIMAL(10,2) DEFAULT 0,
+    Timestamp DATETIME DEFAULT GETDATE(),
+    CONSTRAINT FK_UserActivities_Users FOREIGN KEY(UserId) REFERENCES Users(UserId)
+);
+
+-- Error Log for analytics
+CREATE TABLE ErrorLogs (
+    ErrorId INT IDENTITY(1,1) PRIMARY KEY,
+    ErrorType NVARCHAR(50) NOT NULL,
+    Url NVARCHAR(500) NOT NULL,
+    UserIP NVARCHAR(50),
+    UserAgent NVARCHAR(500),
+    Referrer NVARCHAR(500),
+    CreatedAt DATETIME DEFAULT GETDATE()
+);
+
+-- Support Tickets for User Related Issues
+CREATE TABLE SupportTickets (
+    TicketId NVARCHAR(50) PRIMARY KEY,
+    UserId NVARCHAR(50) NULL,
+    FullName NVARCHAR(100) NOT NULL,
+    Email NVARCHAR(100) NOT NULL,
+    IssueType NVARCHAR(50) NOT NULL,
+    Priority NVARCHAR(20) NOT NULL,
+    Description NVARCHAR(MAX) NOT NULL,
+    AttachScreenshot BIT NOT NULL DEFAULT 0,
+    Status NVARCHAR(20) NOT NULL DEFAULT 'Open',
+    CreatedDate DATETIME NOT NULL DEFAULT GETDATE(),
+    ResolvedDate DATETIME NULL
+);
+
+-- Collector Routes table
+CREATE TABLE CollectorRoutes (
+    RouteId NVARCHAR(50) PRIMARY KEY,
+    CollectorId CHAR(4) NOT NULL,
+    RouteDate DATETIME NOT NULL,
+    VehicleId NVARCHAR(50) NULL,
+    RouteType NVARCHAR(50) DEFAULT 'daily',
+    StartTime DATETIME NULL,
+    BreakTime DATETIME NULL,
+    EndTime DATETIME NULL,
+    TotalDistance DECIMAL(10,2) DEFAULT 0,
+    TotalWeight DECIMAL(10,2) DEFAULT 0,
+    Notes NVARCHAR(MAX) NULL,
+    Status NVARCHAR(20) DEFAULT 'Planned',
+    CreatedAt DATETIME DEFAULT GETDATE(),
+    LastUpdated DATETIME NULL,
+    CONSTRAINT FK_CollectorRoutes_Collector FOREIGN KEY(CollectorId) REFERENCES Users(UserId)
+);
+
+-- Collector Locations for real-time tracking
+CREATE TABLE CollectorLocations (
+    LocationId INT IDENTITY(1,1) PRIMARY KEY,
+    CollectorId CHAR(4) NOT NULL,
+    Lat DECIMAL(10,6) NOT NULL,
+    Lng DECIMAL(10,6) NOT NULL,
+    Timestamp DATETIME DEFAULT GETDATE(),
+    CONSTRAINT FK_CollectorLocations_Collector FOREIGN KEY(CollectorId) REFERENCES Users(UserId)
+);
+
+-- Vehicles table
+CREATE TABLE Vehicles (
+    VehicleId NVARCHAR(50) PRIMARY KEY,
+    VehicleType NVARCHAR(50) NOT NULL,
+    LicensePlate NVARCHAR(20) UNIQUE NOT NULL,
+    Capacity DECIMAL(10,2) NOT NULL, -- in kg
+    FuelType NVARCHAR(20) DEFAULT 'Diesel',
+    Status NVARCHAR(20) DEFAULT 'Active',
+    AssignedTo CHAR(4) NULL,
+    LastMaintenance DATE NULL,
+    NextMaintenance DATE NULL,
+    CreatedAt DATETIME DEFAULT GETDATE(),
+    CONSTRAINT FK_Vehicles_Collector FOREIGN KEY(AssignedTo) REFERENCES Users(UserId)
+);
+
+-- Route Optimizations table
+CREATE TABLE RouteOptimizations (
+    OptimizationId INT IDENTITY(1,1) PRIMARY KEY,
+    RouteId NVARCHAR(50) NOT NULL,
+    OptimizationType NVARCHAR(50) NOT NULL,
+    OriginalDistance DECIMAL(10,2) NOT NULL,
+    OptimizedDistance DECIMAL(10,2) NOT NULL,
+    TimeSaved INT NOT NULL, -- in minutes
+    FuelSaved DECIMAL(10,2) NOT NULL, -- in liters
+    OptimizationData NVARCHAR(MAX) NULL,
+    CreatedAt DATETIME DEFAULT GETDATE(),
+    CONSTRAINT FK_RouteOptimizations_Route FOREIGN KEY(RouteId) REFERENCES CollectorRoutes(RouteId)
+);
+
+
+-- ========================================
+-- 3. INDEXES
+-- ========================================
+CREATE INDEX IX_Users_Email ON Users(Email);
+CREATE INDEX IX_WasteReports_Date ON WasteReports(CreatedAt);
+CREATE INDEX IX_PickupRequests_Status ON PickupRequests(Status);
+CREATE INDEX IX_RewardPoints_UserId ON RewardPoints(UserId);
+CREATE INDEX IX_Notifications_IsRead ON Notifications(IsRead);
+CREATE INDEX IX_ErrorLogs_CreatedAt ON ErrorLogs(CreatedAt);
+CREATE INDEX IX_ErrorLogs_ErrorType ON ErrorLogs(ErrorType);
+CREATE INDEX IX_CollectorRoutes_CollectorDate ON CollectorRoutes(CollectorId, RouteDate);
+CREATE INDEX IX_PickupRequests_CollectorStatus ON PickupRequests(CollectorId, Status);
+CREATE INDEX IX_PickupRequests_ScheduledDate ON PickupRequests(ScheduledAt);
+-- ========================================
+-- 4. VIEWS
+-- ========================================
+
+-- vw_ActivePickups: Displays all pickups that are pending or assigned
+CREATE VIEW vw_ActivePickups AS
+SELECT p.PickupId, w.Address, w.PhotoUrl, u.FullName AS CitizenName,
+       c.FullName AS CollectorName, p.Status
+FROM PickupRequests p
+JOIN WasteReports w ON p.ReportId = w.ReportId
+JOIN Users u ON w.UserId = u.UserId
+LEFT JOIN Users c ON p.CollectorId = c.UserId
+WHERE p.Status IN ('Requested','Assigned');
+
+-- vw_UserRewardSummary: Summarizes total reward points per user
+CREATE VIEW vw_UserRewardSummary AS
+SELECT u.FullName, u.Phone, SUM(r.Amount) AS TotalCredits
+FROM Users u
+LEFT JOIN RewardPoints r ON u.UserId = r.UserId
+GROUP BY u.FullName, u.Phone;
+
+-- ========================================
+-- 5. STORED PROCEDURES
+-- ========================================
+
+ALTER PROCEDURE sp_AddWasteReport
+    @UserId CHAR(4),
+    @WasteTypeId CHAR(4),
+    @EstimatedKg DECIMAL(6,2),
+    @Address NVARCHAR(300),
+    @Lat DECIMAL(10,6) = NULL,
+    @Lng DECIMAL(10,6) = NULL,
+    @PhotoUrl NVARCHAR(512) = NULL
+AS
+BEGIN
+    INSERT INTO WasteReports(UserId, WasteTypeId, EstimatedKg, Address, Lat, Lng, PhotoUrl)
+    VALUES(@UserId, @WasteTypeId, @EstimatedKg, @Address, @Lat, @Lng, @PhotoUrl);
+END
+GO
+-- sp_AddWasteReport: Inserts a new citizen waste report
+CREATE PROCEDURE sp_AddWasteReport
+    @UserId UNIQUEIDENTIFIER,
+    @WasteTypeId INT,
+    @EstimatedKg DECIMAL(6,2),
+    @Address NVARCHAR(300),
+    @Lat DECIMAL(10,6) = NULL,
+    @Lng DECIMAL(10,6) = NULL,
+    @PhotoUrl NVARCHAR(512) = NULL
+AS
+BEGIN
+    INSERT INTO WasteReports(UserId, WasteTypeId, EstimatedKg, Address, Lat, Lng, PhotoUrl)
+    VALUES(@UserId, @WasteTypeId, @EstimatedKg, @Address, @Lat, @Lng, @PhotoUrl);
+END
+GO
+
+-- sp_AssignPickup: Assigns a collector to a pending pickup request
+CREATE PROCEDURE sp_AssignPickup
+    @PickupId UNIQUEIDENTIFIER,
+    @CollectorId UNIQUEIDENTIFIER
+AS
+BEGIN
+    UPDATE PickupRequests
+    SET CollectorId = @CollectorId,
+        Status = 'Assigned'
+    WHERE PickupId = @PickupId;
+END
+GO
+
+-- sp_CompletePickup: Verifies a pickup, adds reward points and logs completion
+CREATE PROCEDURE sp_CompletePickup
+    @PickupId UNIQUEIDENTIFIER,
+    @VerifiedKg DECIMAL(6,2),
+    @MaterialType NVARCHAR(50)
+AS
+BEGIN
+    INSERT INTO PickupVerifications(PickupId, VerifiedKg, MaterialType, VerificationMethod)
+    VALUES(@PickupId, @VerifiedKg, @MaterialType, 'Manual');
+
+    DECLARE @UserId UNIQUEIDENTIFIER = (SELECT w.UserId FROM WasteReports w
+                                        JOIN PickupRequests p ON w.ReportId = p.ReportId
+                                        WHERE p.PickupId = @PickupId);
+
+    DECLARE @CreditRate DECIMAL(5,2) = (SELECT CreditPerKg FROM WasteTypes WHERE Name = @MaterialType);
+
+    INSERT INTO RewardPoints(UserId, Amount, Type, Reference)
+    VALUES(@UserId, @VerifiedKg * @CreditRate, 'Credit', 'Pickup ' + CAST(@PickupId AS NVARCHAR(36)));
+
+    UPDATE PickupRequests
+    SET Status = 'Collected',
+        CompletedAt = GETDATE()
+    WHERE PickupId = @PickupId;
+END
+GO
+
+-- ========================================
+-- 6. TRIGGERS
+-- ========================================
+
+-- trg_LogWasteReport: Logs every new waste report for auditing
+CREATE TRIGGER trg_LogWasteReport
+ON WasteReports
+AFTER INSERT
+AS
+BEGIN
+    DECLARE @NextAuditId INT;
+    
+    -- Get the next AuditId
+    SELECT @NextAuditId = ISNULL(MAX(CAST(SUBSTRING(AuditId, 3, LEN(AuditId)) AS INT)), 0) + 1 
+    FROM AuditLogs 
+    WHERE AuditId LIKE 'AL%';
+    
+    -- Insert with generated AuditId
+    INSERT INTO AuditLogs (AuditId, UserId, Action, Details, Timestamp)
+    SELECT 
+        'AL' + RIGHT('00' + CAST(@NextAuditId + ROW_NUMBER() OVER (ORDER BY (SELECT NULL)) - 1 AS VARCHAR(2)), 2),
+        UserId, 
+        'New Waste Report', 
+        'ReportId: ' + CAST(ReportId AS NVARCHAR(10)),
+        GETDATE()
+    FROM inserted;
+END
+GO
+
+-- ========================================
+-- 7. ADDITIONAL TRIGGERS FOR USER ACTIVITIES
+-- ========================================
+
+-- Trigger for new waste reports
+IF NOT EXISTS (SELECT * FROM sys.triggers WHERE name = 'trg_AfterWasteReport')
+BEGIN
+    EXEC('CREATE TRIGGER trg_AfterWasteReport
+    ON WasteReports
+    AFTER INSERT
+    AS
+    BEGIN
+        DECLARE @UserId CHAR(4), @ReportId CHAR(4), @WasteType NVARCHAR(50)
+        
+        SELECT @UserId = UserId, @ReportId = ReportId FROM inserted
+        SELECT @WasteType = Name FROM WasteTypes wt 
+        JOIN inserted i ON wt.WasteTypeId = i.WasteTypeId
+        
+        INSERT INTO UserActivities (UserId, ActivityType, Description, Points, Timestamp)
+        VALUES (@UserId, ''WasteReport'', 
+                ''Reported '' + @WasteType + '' for collection'', 
+                5, GETDATE())
+    END')
+END
+GO
+
+-- Trigger for completed pickups
+IF NOT EXISTS (SELECT * FROM sys.triggers WHERE name = 'trg_AfterPickupComplete')
+BEGIN
+    EXEC('CREATE TRIGGER trg_AfterPickupComplete
+    ON PickupRequests
+    AFTER UPDATE
+    AS
+    BEGIN
+        IF UPDATE(Status) AND EXISTS(SELECT 1 FROM inserted WHERE Status = ''Collected'')
+        BEGIN
+            DECLARE @UserId CHAR(4), @PickupId CHAR(4), @Points DECIMAL(10,2)
+            
+            SELECT @PickupId = PickupId FROM inserted
+            SELECT @UserId = wr.UserId, @Points = pv.VerifiedKg * wt.CreditPerKg
+            FROM PickupRequests pr
+            JOIN WasteReports wr ON pr.ReportId = wr.ReportId
+            JOIN PickupVerifications pv ON pr.PickupId = pv.PickupId
+            JOIN WasteTypes wt ON wr.WasteTypeId = wt.WasteTypeId
+            WHERE pr.PickupId = @PickupId
+            
+            INSERT INTO UserActivities (UserId, ActivityType, Description, Points, Timestamp)
+            VALUES (@UserId, ''PickupComplete'', 
+                    ''Pickup completed - '' + CAST(@Points AS NVARCHAR(10)) + '' credits earned'', 
+                    @Points, GETDATE())
+        END
+    END')
+END
+GO
+
+-- Trigger for reward points
+IF NOT EXISTS (SELECT * FROM sys.triggers WHERE name = 'trg_AfterRewardPoints')
+BEGIN
+    EXEC('CREATE TRIGGER trg_AfterRewardPoints
+    ON RewardPoints
+    AFTER INSERT
+    AS
+    BEGIN
+        DECLARE @UserId CHAR(4), @Amount DECIMAL(10,2), @Type NVARCHAR(50)
+        
+        SELECT @UserId = UserId, @Amount = Amount, @Type = Type FROM inserted
+        
+        UPDATE Users 
+        SET XP_Credits = XP_Credits + @Amount 
+        WHERE UserId = @UserId
+    END')
+END
+GO
+
+-- ========================================
+-- ADDITIONAL STORED PROCEDURES FOR CITIZEN ACTIVITIES
+-- ========================================
+
+-- Procedure to get citizen dashboard data
+IF NOT EXISTS (SELECT * FROM sys.procedures WHERE name = 'sp_GetCitizenDashboard')
+BEGIN
+    EXEC('CREATE PROCEDURE sp_GetCitizenDashboard
+        @UserId CHAR(4)
+    AS
+    BEGIN
+        -- Total credits
+        SELECT ISNULL(SUM(Amount), 0) AS TotalCredits 
+        FROM RewardPoints 
+        WHERE UserId = @UserId
+        
+        -- Recent activities
+        SELECT TOP 5 ActivityType, Description, Points, Timestamp
+        FROM UserActivities 
+        WHERE UserId = @UserId 
+        ORDER BY Timestamp DESC
+        
+        -- Pending pickups
+        SELECT COUNT(*) AS PendingPickups
+        FROM PickupRequests pr
+        JOIN WasteReports wr ON pr.ReportId = wr.ReportId
+        WHERE wr.UserId = @UserId AND pr.Status IN (''Requested'', ''Assigned'')
+        
+        -- Monthly stats
+        SELECT 
+            DATENAME(MONTH, CreatedAt) AS MonthName,
+            COUNT(*) AS ReportsCount,
+            ISNULL(SUM(EstimatedKg), 0) AS TotalKg
+        FROM WasteReports 
+        WHERE UserId = @UserId AND YEAR(CreatedAt) = YEAR(GETDATE())
+        GROUP BY DATENAME(MONTH, CreatedAt), MONTH(CreatedAt)
+        ORDER BY MONTH(CreatedAt)
+    END')
+END
+GO
+
+-- Procedure for waste reporting with activity tracking
+IF NOT EXISTS (SELECT * FROM sys.procedures WHERE name = 'sp_SubmitWasteReport')
+BEGIN
+    EXEC('CREATE PROCEDURE sp_SubmitWasteReport
+        @UserId CHAR(4),
+        @WasteTypeId CHAR(4),
+        @EstimatedKg DECIMAL(6,2),
+        @Address NVARCHAR(300),
+        @Lat DECIMAL(10,6) = NULL,
+        @Lng DECIMAL(10,6) = NULL,
+        @PhotoUrl NVARCHAR(512) = NULL
+    AS
+    BEGIN
+        DECLARE @ReportId CHAR(4)
+        
+        -- Generate ReportId
+        SELECT @ReportId = ''WR'' + RIGHT(''00'' + CAST(ISNULL(MAX(CAST(SUBSTRING(ReportId, 3, 2) AS INT)), 0) + 1 AS VARCHAR(2)), 2)
+        FROM WasteReports
+        
+        -- Insert waste report
+        INSERT INTO WasteReports (ReportId, UserId, WasteTypeId, EstimatedKg, Address, Lat, Lng, PhotoUrl)
+        VALUES (@ReportId, @UserId, @WasteTypeId, @EstimatedKg, @Address, @Lat, @Lng, @PhotoUrl)
+        
+        -- Create pickup request
+        DECLARE @PickupId CHAR(4)
+        SELECT @PickupId = ''PK'' + RIGHT(''00'' + CAST(ISNULL(MAX(CAST(SUBSTRING(PickupId, 3, 2) AS INT)), 0) + 1 AS VARCHAR(2)), 2)
+        FROM PickupRequests
+        
+        INSERT INTO PickupRequests (PickupId, ReportId, Status)
+        VALUES (@PickupId, @ReportId, ''Requested'')
+    END')
+END
+GO
+
+-- ========================================
+-- ADDITIONAL INDEXES FOR PERFORMANCE
+-- ========================================
+
+IF NOT EXISTS (SELECT * FROM sys.indexes WHERE name = 'IX_UserActivities_UserId')
+BEGIN
+    CREATE INDEX IX_UserActivities_UserId ON UserActivities(UserId);
+END
+
+IF NOT EXISTS (SELECT * FROM sys.indexes WHERE name = 'IX_UserActivities_Timestamp')
+BEGIN
+    CREATE INDEX IX_UserActivities_Timestamp ON UserActivities(Timestamp DESC);
+END
+
+IF NOT EXISTS (SELECT * FROM sys.indexes WHERE name = 'IX_PickupVerifications_PickupId')
+BEGIN
+    CREATE INDEX IX_PickupVerifications_PickupId ON PickupVerifications(PickupId);
+END
+
+IF NOT EXISTS (SELECT * FROM sys.indexes WHERE name = 'IX_RewardPoints_CreatedAt')
+BEGIN
+    CREATE INDEX IX_RewardPoints_CreatedAt ON RewardPoints(CreatedAt DESC);
+END
+GO
+
+-- ========================================
+-- ADDITIONAL VIEWS FOR REPORTING
+-- ========================================
+
+IF NOT EXISTS (SELECT * FROM sys.views WHERE name = 'vw_CitizenActivitySummary')
+BEGIN
+    EXEC('CREATE VIEW vw_CitizenActivitySummary AS
+    SELECT 
+        u.UserId,
+        u.FullName,
+        u.Phone,
+        ISNULL(SUM(rp.Amount), 0) AS TotalCredits,
+        COUNT(DISTINCT wr.ReportId) AS TotalReports,
+        COUNT(DISTINCT pr.PickupId) AS TotalPickups,
+        ISNULL(SUM(pv.VerifiedKg), 0) AS TotalKgRecycled,
+        MAX(ua.Timestamp) AS LastActivity
+    FROM Users u
+    LEFT JOIN WasteReports wr ON u.UserId = wr.UserId
+    LEFT JOIN PickupRequests pr ON wr.ReportId = pr.ReportId
+    LEFT JOIN PickupVerifications pv ON pr.PickupId = pv.PickupId
+    LEFT JOIN RewardPoints rp ON u.UserId = rp.UserId
+    LEFT JOIN UserActivities ua ON u.UserId = ua.UserId
+    WHERE u.RoleId IN (''CITZ'', ''R001'')
+    GROUP BY u.UserId, u.FullName, u.Phone')
+END
+GO
+
+IF NOT EXISTS (SELECT * FROM sys.views WHERE name = 'vw_RecentUserActivities')
+BEGIN
+    EXEC('CREATE VIEW vw_RecentUserActivities AS
+    SELECT 
+        ua.ActivityId,
+        ua.UserId,
+        u.FullName,
+        ua.ActivityType,
+        ua.Description,
+        ua.Points,
+        ua.Timestamp
+    FROM UserActivities ua
+    JOIN Users u ON ua.UserId = u.UserId
+    WHERE ua.Timestamp >= DATEADD(DAY, -30, GETDATE())')
+END
+GO
+
+
+-- ========================================
+-- 8. PHASE TWO (C2 FILE)
+-- ========================================
+USE SoorGreenDB;
+GO
+
+/**********************************************
+  PHASE 2 ENHANCEMENT SCRIPT - SoorGreenDB
+  - Add RBAC tables
+  - Soft delete + MunicipalityId on business tables
+  - AI tables and columns
+  - MediaFiles, EventLog, Validation tables
+  - Extended AuditLogs
+  - RLS predicate functions & policies (SQL Server)
+  - Partition function/scheme placeholders
+  - Helpful indexes
+**********************************************/
+
+-------------------------------------------------------------------
+-- 1) RBAC: Permissions, RolePermissions, UserRoles
+-------------------------------------------------------------------
+IF NOT EXISTS (SELECT 1 FROM sys.tables WHERE name = 'Permissions')
+BEGIN
+CREATE TABLE Permissions (
+    PermissionCode NVARCHAR(100) PRIMARY KEY,
+    Description NVARCHAR(300) NULL
+);
+END
+
+IF NOT EXISTS (SELECT 1 FROM sys.tables WHERE name = 'RolePermissions')
+BEGIN
+CREATE TABLE RolePermissions (
+    RoleId CHAR(4) NOT NULL,
+    PermissionCode NVARCHAR(100) NOT NULL,
+    CONSTRAINT FK_RP_Roles FOREIGN KEY (RoleId) REFERENCES Roles(RoleId),
+    CONSTRAINT FK_RP_Perms FOREIGN KEY (PermissionCode) REFERENCES Permissions(PermissionCode),
+    CONSTRAINT PK_RolePermissions PRIMARY KEY (RoleId, PermissionCode)
+);
+END
+
+IF NOT EXISTS (SELECT 1 FROM sys.tables WHERE name = 'UserRoles')
+BEGIN
+CREATE TABLE UserRoles (
+    UserRoleId INT IDENTITY(1,1) PRIMARY KEY,
+    UserId CHAR(4) NOT NULL,
+    RoleId CHAR(4) NOT NULL,
+    AssignedAt DATETIME DEFAULT GETDATE(),
+    CONSTRAINT FK_UserRoles_Users FOREIGN KEY (UserId) REFERENCES Users(UserId),
+    CONSTRAINT FK_UserRoles_Roles FOREIGN KEY (RoleId) REFERENCES Roles(RoleId)
+);
+END
+
+-- Seed some permissions if they don't exist
+IF NOT EXISTS (SELECT 1 FROM Permissions WHERE PermissionCode = 'REPORT_CREATE')
+    INSERT INTO Permissions (PermissionCode, Description) VALUES ('REPORT_CREATE','Create a waste report');
+IF NOT EXISTS (SELECT 1 FROM Permissions WHERE PermissionCode = 'PICKUP_ASSIGN')
+    INSERT INTO Permissions (PermissionCode, Description) VALUES ('PICKUP_ASSIGN','Assign pickup to collector');
+IF NOT EXISTS (SELECT 1 FROM Permissions WHERE PermissionCode = 'VIEW_ANALYTICS')
+    INSERT INTO Permissions (PermissionCode, Description) VALUES ('VIEW_ANALYTICS','View analytics and dashboards');
+
+-------------------------------------------------------------------
+-- 2) Soft delete + MunicipalityId and extra columns for business tables
+-- Add columns with IF NOT EXISTS checks so it's safe to re-run
+-------------------------------------------------------------------
+
+-- Utility: add column if not exists
+CREATE PROCEDURE dbo.__AddColumnIfNotExists
+    @SchemaName SYSNAME,
+    @TableName SYSNAME,
+    @ColumnDDL NVARCHAR(MAX)
+AS
+BEGIN
+    DECLARE @sql NVARCHAR(MAX);
+    IF NOT EXISTS (
+        SELECT 1
+        FROM sys.columns c
+        JOIN sys.objects o ON c.object_id = o.object_id
+        JOIN sys.schemas s ON o.schema_id = s.schema_id
+        WHERE s.name = @SchemaName AND o.name = @TableName AND c.name = PARSENAME(REPLACE(@ColumnDDL,' ','.'),1)
+    )
+    BEGIN
+        SET @sql = N'ALTER TABLE ' + QUOTENAME(@SchemaName) + '.' + QUOTENAME(@TableName) + ' ADD ' + @ColumnDDL;
+        EXEC sp_executesql @sql;
+    END
+END;
+GO
+
+-- Add common lifecycle/soft-delete fields to core tables
+EXEC dbo.__AddColumnIfNotExists 'dbo','Users','IsDeleted BIT DEFAULT 0';
+EXEC dbo.__AddColumnIfNotExists 'dbo','Users','DeletedAt DATETIME NULL';
+EXEC dbo.__AddColumnIfNotExists 'dbo','Users','DeletedBy CHAR(4) NULL';
+EXEC dbo.__AddColumnIfNotExists 'dbo','Users','DeviceId NVARCHAR(100) NULL';
+EXEC dbo.__AddColumnIfNotExists 'dbo','Users','TwoFactorEnabled BIT DEFAULT 0';
+
+EXEC dbo.__AddColumnIfNotExists 'dbo','WasteReports','IsDeleted BIT DEFAULT 0';
+EXEC dbo.__AddColumnIfNotExists 'dbo','WasteReports','DeletedAt DATETIME NULL';
+EXEC dbo.__AddColumnIfNotExists 'dbo','WasteReports','DeletedBy CHAR(4) NULL';
+EXEC dbo.__AddColumnIfNotExists 'dbo','WasteReports','MunicipalityId CHAR(4) NULL';
+EXEC dbo.__AddColumnIfNotExists 'dbo','WasteReports','Severity INT NULL';
+EXEC dbo.__AddColumnIfNotExists 'dbo','WasteReports','PredictedWasteType NVARCHAR(100) NULL';
+EXEC dbo.__AddColumnIfNotExists 'dbo','WasteReports','AIConfidence FLOAT NULL';
+EXEC dbo.__AddColumnIfNotExists 'dbo','WasteReports','Metadata NVARCHAR(MAX) NULL'; -- JSON / bounding boxes
+EXEC dbo.__AddColumnIfNotExists 'dbo','WasteReports','IsHazardous BIT DEFAULT 0';
+EXEC dbo.__AddColumnIfNotExists 'dbo','WasteReports','VerifiedByAdminID CHAR(4) NULL';
+EXEC dbo.__AddColumnIfNotExists 'dbo','WasteReports','VerifiedAt DATETIME NULL';
+EXEC dbo.__AddColumnIfNotExists 'dbo','WasteReports','StatusUpdatedAt DATETIME NULL';
+
+-- Ensure foreign key to Municipalities (nullable)
+IF NOT EXISTS (SELECT 1 FROM sys.foreign_keys WHERE name = 'FK_WasteReports_Municipalities')
+BEGIN
+    ALTER TABLE dbo.WasteReports
+    ADD CONSTRAINT FK_WasteReports_Municipalities FOREIGN KEY (MunicipalityId) REFERENCES Municipalities(MunicipalityId);
+END
+
+EXEC dbo.__AddColumnIfNotExists 'dbo','PickupRequests','IsDeleted BIT DEFAULT 0';
+EXEC dbo.__AddColumnIfNotExists 'dbo','PickupRequests','DeletedAt DATETIME NULL';
+EXEC dbo.__AddColumnIfNotExists 'dbo','PickupRequests','DeletedBy CHAR(4) NULL';
+EXEC dbo.__AddColumnIfNotExists 'dbo','PickupRequests','MunicipalityId CHAR(4) NULL';
+EXEC dbo.__AddColumnIfNotExists 'dbo','PickupRequests','AutoAssignedByAI BIT DEFAULT 0';
+EXEC dbo.__AddColumnIfNotExists 'dbo','PickupRequests','CompletionProofImage NVARCHAR(512) NULL';
+EXEC dbo.__AddColumnIfNotExists 'dbo','PickupRequests','CompletionGPSLat DECIMAL(10,6) NULL';
+EXEC dbo.__AddColumnIfNotExists 'dbo','PickupRequests','CompletionGPSLong DECIMAL(10,6) NULL';
+EXEC dbo.__AddColumnIfNotExists 'dbo','PickupRequests','IsOverdue BIT DEFAULT 0';
+
+-- Add municipality to CollectorRoutes, CollectorLocations, RewardPoints, Notifications, AuditLogs, Feedbacks
+EXEC dbo.__AddColumnIfNotExists 'dbo','CollectorRoutes','MunicipalityId CHAR(4) NULL';
+EXEC dbo.__AddColumnIfNotExists 'dbo','CollectorLocations','MunicipalityId CHAR(4) NULL';
+EXEC dbo.__AddColumnIfNotExists 'dbo','RewardPoints','MunicipalityId CHAR(4) NULL';
+EXEC dbo.__AddColumnIfNotExists 'dbo','Notifications','MunicipalityId CHAR(4) NULL';
+EXEC dbo.__AddColumnIfNotExists 'dbo','AuditLogs','MunicipalityId CHAR(4) NULL';
+EXEC dbo.__AddColumnIfNotExists 'dbo','Feedbacks','MunicipalityId CHAR(4) NULL';
+
+-- Add FK from these tables to Municipalities if not exists (safe because nullable)
+IF NOT EXISTS (SELECT 1 FROM sys.foreign_keys WHERE name = 'FK_CollectorRoutes_Municipalities')
+BEGIN
+    ALTER TABLE dbo.CollectorRoutes
+    ADD CONSTRAINT FK_CollectorRoutes_Municipalities FOREIGN KEY (MunicipalityId) REFERENCES Municipalities(MunicipalityId);
+END
+IF NOT EXISTS (SELECT 1 FROM sys.foreign_keys WHERE name = 'FK_CollectorLocations_Municipalities')
+BEGIN
+    ALTER TABLE dbo.CollectorLocations
+    ADD CONSTRAINT FK_CollectorLocations_Municipalities FOREIGN KEY (MunicipalityId) REFERENCES Municipalities(MunicipalityId);
+END
+IF NOT EXISTS (SELECT 1 FROM sys.foreign_keys WHERE name = 'FK_RewardPoints_Municipalities')
+BEGIN
+    ALTER TABLE dbo.RewardPoints
+    ADD CONSTRAINT FK_RewardPoints_Municipalities FOREIGN KEY (MunicipalityId) REFERENCES Municipalities(MunicipalityId);
+END
+
+-- Add soft-delete & audit fields to other tables that will benefit
+EXEC dbo.__AddColumnIfNotExists 'dbo','Vehicles','IsDeleted BIT DEFAULT 0';
+EXEC dbo.__AddColumnIfNotExists 'dbo','Vehicles','MunicipalityId CHAR(4) NULL';
+IF NOT EXISTS (SELECT 1 FROM sys.foreign_keys WHERE name = 'FK_Vehicles_Municipalities')
+BEGIN
+    ALTER TABLE dbo.Vehicles
+    ADD CONSTRAINT FK_Vehicles_Municipalities FOREIGN KEY (MunicipalityId) REFERENCES Municipalities(MunicipalityId);
+END
+
+-- Add IsDeleted to UserActivities and ErrorLogs
+EXEC dbo.__AddColumnIfNotExists 'dbo','UserActivities','IsDeleted BIT DEFAULT 0';
+EXEC dbo.__AddColumnIfNotExists 'dbo','ErrorLogs','IsDeleted BIT DEFAULT 0';
+
+-------------------------------------------------------------------
+-- 3) AI Tables: Raw data, FeatureStore, ModelRegistry, Predictions, Feedback, Insights
+-------------------------------------------------------------------
+IF NOT EXISTS (SELECT 1 FROM sys.tables WHERE name = 'AI_RawData')
+BEGIN
+CREATE TABLE AI_RawData (
+    DataId BIGINT IDENTITY(1,1) PRIMARY KEY,
+    SourceTable NVARCHAR(128),
+    SourceId NVARCHAR(128) NULL,
+    JsonPayload NVARCHAR(MAX) NULL, -- snapshot for training
+    CapturedAt DATETIME DEFAULT GETDATE()
+);
+END
+
+IF NOT EXISTS (SELECT 1 FROM sys.tables WHERE name = 'AI_FeatureStore')
+BEGIN
+CREATE TABLE AI_FeatureStore (
+    FeatureId BIGINT IDENTITY(1,1) PRIMARY KEY,
+    RelatedEntity NVARCHAR(128) NULL,
+    RelatedEntityId NVARCHAR(128) NULL,
+    FeatureName NVARCHAR(200),
+    FeatureValue NVARCHAR(MAX),
+    CreatedAt DATETIME DEFAULT GETDATE()
+);
+END
+
+IF NOT EXISTS (SELECT 1 FROM sys.tables WHERE name = 'AI_ModelRegistry')
+BEGIN
+CREATE TABLE AI_ModelRegistry (
+    ModelId INT IDENTITY(1,1) PRIMARY KEY,
+    ModelName NVARCHAR(200) NOT NULL,
+    Version NVARCHAR(50) NOT NULL,
+    Framework NVARCHAR(50) NULL,
+    FilePath NVARCHAR(500) NULL,
+    Description NVARCHAR(MAX) NULL,
+    Deployed BIT DEFAULT 0,
+    CreatedAt DATETIME DEFAULT GETDATE()
+);
+END
+
+IF NOT EXISTS (SELECT 1 FROM sys.tables WHERE name = 'AI_Predictions')
+BEGIN
+CREATE TABLE AI_Predictions (
+    PredictionId BIGINT IDENTITY(1,1) PRIMARY KEY,
+    ReportId CHAR(4) NULL,
+    ModelId INT NULL,
+    PredictedWasteType NVARCHAR(100) NULL,
+    Confidence FLOAT NULL,
+    Severity INT NULL,
+    BoundingBoxes NVARCHAR(MAX) NULL, -- JSON array of bboxes if any
+    PredictionTimestamp DATETIME DEFAULT GETDATE(),
+    CONSTRAINT FK_AIPreds_Model FOREIGN KEY(ModelId) REFERENCES AI_ModelRegistry(ModelId),
+    CONSTRAINT FK_AIPreds_Report FOREIGN KEY(ReportId) REFERENCES WasteReports(ReportId)
+);
+END
+
+IF NOT EXISTS (SELECT 1 FROM sys.tables WHERE name = 'AI_FeedbackLoop')
+BEGIN
+CREATE TABLE AI_FeedbackLoop (
+    FeedbackId BIGINT IDENTITY(1,1) PRIMARY KEY,
+    PredictionId BIGINT NOT NULL,
+    ReviewerId CHAR(4) NULL,
+    CorrectLabel NVARCHAR(100) NULL,
+    Comments NVARCHAR(MAX) NULL,
+    ReviewedAt DATETIME DEFAULT GETDATE(),
+    CONSTRAINT FK_AIFeed_Pred FOREIGN KEY(PredictionId) REFERENCES AI_Predictions(PredictionId)
+);
+END
+
+IF NOT EXISTS (SELECT 1 FROM sys.tables WHERE name = 'AI_Insights')
+BEGIN
+CREATE TABLE AI_Insights (
+    InsightId BIGINT IDENTITY(1,1) PRIMARY KEY,
+    Category NVARCHAR(200) NULL,
+    Data NVARCHAR(MAX) NULL,
+    GeneratedAt DATETIME DEFAULT GETDATE()
+);
+END
+
+-------------------------------------------------------------------
+-- 4) MediaFiles table (store URIs to blob storage) and EventLog
+-------------------------------------------------------------------
+IF NOT EXISTS (SELECT 1 FROM sys.tables WHERE name = 'MediaFiles')
+BEGIN
+CREATE TABLE MediaFiles (
+    FileId NVARCHAR(100) PRIMARY KEY,
+    UserId CHAR(4) NULL,
+    EntityType NVARCHAR(100) NULL, -- e.g., 'WasteReport','Pickup','User'
+    EntityId NVARCHAR(100) NULL,
+    FileUrl NVARCHAR(1000) NOT NULL,
+    FileType NVARCHAR(50) NULL,
+    SizeBytes BIGINT NULL,
+    CreatedAt DATETIME DEFAULT GETDATE(),
+    CONSTRAINT FK_MediaFiles_Users FOREIGN KEY (UserId) REFERENCES Users(UserId)
+);
+END
+
+IF NOT EXISTS (SELECT 1 FROM sys.tables WHERE name = 'EventLog')
+BEGIN
+CREATE TABLE EventLog (
+    EventId BIGINT IDENTITY(1,1) PRIMARY KEY,
+    EventType NVARCHAR(200) NOT NULL,
+    Payload NVARCHAR(MAX) NULL,
+    Source NVARCHAR(200) NULL,
+    CreatedAt DATETIME DEFAULT GETDATE()
+);
+END
+
+-------------------------------------------------------------------
+-- 5) Validation Rules & ValidationErrors
+-------------------------------------------------------------------
+IF NOT EXISTS (SELECT 1 FROM sys.tables WHERE name = 'ValidationRules')
+BEGIN
+CREATE TABLE ValidationRules (
+    RuleId INT IDENTITY(1,1) PRIMARY KEY,
+    EntityName NVARCHAR(200) NOT NULL,
+    FieldName NVARCHAR(200) NOT NULL,
+    RuleType NVARCHAR(50) NOT NULL, -- Regex, Range, Required, Enum
+    RuleValue NVARCHAR(1000) NULL,
+    CreatedAt DATETIME DEFAULT GETDATE()
+);
+END
+
+IF NOT EXISTS (SELECT 1 FROM sys.tables WHERE name = 'ValidationErrors')
+BEGIN
+CREATE TABLE ValidationErrors (
+    ErrorId BIGINT IDENTITY(1,1) PRIMARY KEY,
+    EntityName NVARCHAR(200),
+    FieldName NVARCHAR(200),
+    ErrorMessage NVARCHAR(1000),
+    RowSnapshot NVARCHAR(MAX) NULL, -- JSON of the offending row
+    CreatedAt DATETIME DEFAULT GETDATE()
+);
+END
+
+-------------------------------------------------------------------
+-- 6) Enhance AuditLogs: add IP, DeviceInfo, ChangedFields JSON, ActionSeverity
+-------------------------------------------------------------------
+EXEC dbo.__AddColumnIfNotExists 'dbo','AuditLogs','IPAddress NVARCHAR(50) NULL';
+EXEC dbo.__AddColumnIfNotExists 'dbo','AuditLogs','DeviceInfo NVARCHAR(500) NULL';
+EXEC dbo.__AddColumnIfNotExists 'dbo','AuditLogs','ChangedFields NVARCHAR(MAX) NULL';
+EXEC dbo.__AddColumnIfNotExists 'dbo','AuditLogs','ActionSeverity NVARCHAR(20) NULL';
+
+-------------------------------------------------------------------
+-- 7) Row-Level Security (RLS) - predicate functions & security policies
+-- NOTE: Requires SQL Server Enterprise/Standard features. If your instance
+-- doesn't allow creating security policies, you can omit these or run later.
+-------------------------------------------------------------------
+
+/* 7.a) Predicate function for Users: allow user to select only their own row (for applications that use EXECUTE AS or application roles) */
+IF OBJECT_ID('dbo.fn_securitypredicate_UserAccess','IF') IS NULL
+BEGIN
+    EXEC('
+    CREATE FUNCTION dbo.fn_securitypredicate_UserAccess(@UserId CHAR(4))
+    RETURNS TABLE
+    WITH SCHEMABINDING
+    AS
+    RETURN SELECT 1 AS fn_securitypredicate_UserAccessResult WHERE @UserId = SUSER_NAME() OR EXISTS(SELECT 1 FROM dbo.Users u WHERE u.UserId = SUSER_SNAME() AND u.RoleId IN (SELECT RoleId FROM Roles WHERE RoleName = ''Admin'')) 
+    ');
+END
+-- Note: SUSER_NAME / SUSER_SNAME usage above is placeholder. In many setups you map application user context to DB user or use session context. We'll provide a safer, pragmatic policy below that uses SESSION_CONTEXT key.
+
+-- 7.b) Helper: session enforcement function using SESSION_CONTEXT('app_user')
+-- This function checks if current row's UserId equals SESSION_CONTEXT('app_user') OR user has admin role.
+IF OBJECT_ID('dbo.fn_rls_userpredicate','IF') IS NULL
+BEGIN
+EXEC('
+CREATE FUNCTION dbo.fn_rls_userpredicate(@UserId CHAR(4))
+RETURNS TABLE
+WITH SCHEMABINDING
+AS
+RETURN
+(
+    SELECT 1 AS accessResult
+    WHERE
+    (
+        -- allow if session context app_user matches @UserId
+        ISNULL(SESSION_CONTEXT(N''app_user''), N'''') = @UserId
+        OR
+        -- OR session context app_roles has ADMIN (simple text check)
+        CHARINDEX(N''ADMIN'', ISNULL(SESSION_CONTEXT(N''app_roles''), N'''')) > 0
+    )
+)
+');
+END
+
+-- 7.c) Create RLS policy for WasteReports (read access)
+IF NOT EXISTS (SELECT 1 FROM sys.security_policies WHERE name = 'policy_RLS_WasteReports')
+BEGIN
+    EXEC('
+    CREATE SECURITY POLICY policy_RLS_WasteReports
+    ADD FILTER PREDICATE dbo.fn_rls_userpredicate(UserId) ON dbo.WasteReports
+    WITH (STATE = ON)
+    ');
+END
+
+-- 7.d) Create RLS policy for PickupRequests: allow collectors to see assigned, citizens to see own
+IF NOT EXISTS (SELECT 1 FROM sys.security_policies WHERE name = 'policy_RLS_PickupRequests')
+BEGIN
+    EXEC('
+    CREATE FUNCTION dbo.fn_rls_pickuppredicate(@CollectorId CHAR(4))
+    RETURNS TABLE
+    WITH SCHEMABINDING
+    AS
+    RETURN
+    (
+        SELECT 1 AS rp
+        WHERE
+            -- session user equals the collector assigned
+            ISNULL(SESSION_CONTEXT(N''app_user''), N'''') = @CollectorId
+            OR CHARINDEX(N''ADMIN'', ISNULL(SESSION_CONTEXT(N''app_roles''), N'''')) > 0
+    );
+
+    CREATE SECURITY POLICY policy_RLS_PickupRequests
+    ADD FILTER PREDICATE dbo.fn_rls_pickuppredicate(CollectorId) ON dbo.PickupRequests
+    WITH (STATE = ON)
+    ');
+END
+
+-- Note: RLS setup above assumes the application will set SESSION_CONTEXT('app_user') and SESSION_CONTEXT('app_roles')
+-- Example: EXEC sp_set_session_context 'app_user', 'U002';
+
+-------------------------------------------------------------------
+-- 8) Partitioning   placeholders (create function & scheme only if needed)
+-- This creates a year-based partition function and scheme. Adjust filegroups manually for production.
+-------------------------------------------------------------------
+IF NOT EXISTS (SELECT 1 FROM sys.partition_functions WHERE name = 'pf_WasteReports_ByYear')
+BEGIN
+    -- boundaries: 2023, 2024, 2025, 2026 ... adjust as required for production
+    CREATE PARTITION FUNCTION pf_WasteReports_ByYear (DATETIME)
+    AS RANGE RIGHT FOR VALUES ('2023-01-01','2024-01-01','2025-01-01','2026-01-01');
+END
+
+IF NOT EXISTS (SELECT 1 FROM sys.partition_schemes WHERE name = 'ps_WasteReports_ByYear')
+BEGIN
+    -- This will map all partitions to PRIMARY. In production, map to filegroups.
+    CREATE PARTITION SCHEME ps_WasteReports_ByYear
+    AS PARTITION pf_WasteReports_ByYear ALL TO ([PRIMARY]);
+END
+
+-- You can later switch WasteReports to partition scheme using SWITCH or creating a new table with scheme and migrating data.
+
+-------------------------------------------------------------------
+-- 9) Useful Indexes for new columns
+-------------------------------------------------------------------
+IF NOT EXISTS (SELECT 1 FROM sys.indexes WHERE name = 'IX_WasteReports_Municipality')
+BEGIN
+    CREATE INDEX IX_WasteReports_Municipality ON dbo.WasteReports(MunicipalityId);
+END
+IF NOT EXISTS (SELECT 1 FROM sys.indexes WHERE name = 'IX_WasteReports_PredictedType')
+BEGIN
+    CREATE INDEX IX_WasteReports_PredictedType ON dbo.WasteReports(PredictedWasteType);
+END
+IF NOT EXISTS (SELECT 1 FROM sys.indexes WHERE name = 'IX_PickupRequests_Municipality')
+BEGIN
+    CREATE INDEX IX_PickupRequests_Municipality ON dbo.PickupRequests(MunicipalityId);
+END
+IF NOT EXISTS (SELECT 1 FROM sys.indexes WHERE name = 'IX_AIPredictions_ReportId')
+BEGIN
+    CREATE INDEX IX_AIPredictions_ReportId ON dbo.AI_Predictions(ReportId);
+END
+IF NOT EXISTS (SELECT 1 FROM sys.indexes WHERE name = 'IX_AI_FeatureStore_RelatedEntity')
+BEGIN
+    CREATE INDEX IX_AI_FeatureStore_RelatedEntity ON dbo.AI_FeatureStore(RelatedEntity, RelatedEntityId);
+END
+IF NOT EXISTS (SELECT 1 FROM sys.indexes WHERE name = 'IX_MediaFiles_Entity')
+BEGIN
+    CREATE INDEX IX_MediaFiles_Entity ON dbo.MediaFiles(EntityType, EntityId);
+END
+
+-------------------------------------------------------------------
+-- 10) Sample stored proc to set session context for RLS (to be called by app after connection)
+-------------------------------------------------------------------
+IF NOT EXISTS (SELECT 1 FROM sys.procedures WHERE name = 'sp_SetSessionUserContext')
+BEGIN
+EXEC('
+CREATE PROCEDURE sp_SetSessionUserContext
+    @AppUserId NVARCHAR(50),
+    @AppRoles NVARCHAR(500)
+AS
+BEGIN
+    -- set application user and roles for RLS
+    EXEC sp_set_session_context ''app_user'', @AppUserId;
+    EXEC sp_set_session_context ''app_roles'', @AppRoles;
+END
+');
+END
+
+-------------------------------------------------------------------
+-- 12) Sample data safety: ensure existing triggers/procs referencing columns continue to work
+-- (We didn't drop or rename existing columns   all additions are additive)
+-------------------------------------------------------------------
+
+PRINT 'Phase 2 enhancement script executed. Review messages above for any warnings.';
+GO
+
+-- Cleanup helper procedure (optionally drop) - keep it for re-runs
+-- To drop helper (uncomment if desired)
+-- DROP PROCEDURE dbo.__AddColumnIfNotExists;
+
+-- ========================================
+-- 9. SEED DATA (SEED FILE)
+-- ========================================
+
+and project pages 
+
+Copyright (C) Microsoft Corporation. All rights reserved.
+
+Install the latest PowerShell for new features and improvements! https://aka.ms/PSWindows
+
+PS Z:\ZAKI\Sem 1\Asp.net\MAIN\SoorGreen.Admin> dir -s
+
+
+    Directory: Z:\ZAKI\Sem 1\Asp.net\MAIN\SoorGreen.Admin
+
+
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+d-----        10/28/2025   9:43 AM                App_Data
+d-----        12/23/2025  11:03 AM                App_Start
+d-----        12/27/2025   2:22 PM                bin
+d-----         12/1/2025   6:24 PM                Content
+d-----         12/9/2025  12:38 PM                css
+d-----        12/27/2025   2:28 PM                obj
+d-----         12/6/2025   1:22 PM                Pages
+d-----        12/26/2025   8:41 PM                Properties
+d-----         12/1/2025   6:24 PM                Scripts
+d-----        10/28/2025   6:03 PM                Styles
+d-----        12/26/2025  11:41 AM                Uploads
+d-----        12/29/2025   6:58 PM                Videos
+-a----        10/28/2025   9:43 AM             46 .dockerignore
+-a----        12/27/2025   2:13 PM          11874 404.aspx
+-a----        12/26/2025   9:38 PM           1494 404.aspx.cs
+-a----         12/7/2025  10:29 AM          34397 About.aspx
+-a----         11/1/2025   6:36 AM            212 About.aspx.cs
+-a----        12/26/2025   9:16 PM           1245 Admin Dashboard.aspx
+-a----        12/26/2025   9:30 PM            214 Admin Dashboard.aspx.cs
+-a----        12/26/2025   9:16 PM            464 Admin Dashboard.aspx.designer.cs
+-a----        10/28/2025   9:43 AM            226 Bundle.config
+-a----        11/30/2025   8:55 AM          31369 Contact.aspx
+-a----         11/1/2025   6:36 AM            214 Contact.aspx.cs
+-a----        12/26/2025   9:16 PM          16354 Dashboard.aspx
+-a----         12/6/2025   3:47 PM          12063 Dashboard.aspx.cs
+-a----        12/26/2025   9:16 PM           1906 Dashboard.aspx.designer.cs
+-a----        12/29/2025   7:00 PM          95403 Default.aspx
+-a----         11/1/2025   6:36 AM            215 Default.aspx.cs
+-a----        10/28/2025   9:43 AM            390 Dockerfile
+-a----          8/9/2025   8:46 AM           4286 favicon.ico
+-a----        12/26/2025   9:17 PM          24212 ForgotPassword.aspx
+-a----        11/11/2025  10:51 AM          27163 ForgotPassword.aspx.cs
+-a----        12/26/2025   9:17 PM           6537 ForgotPassword.aspx.designer.cs
+-a----        10/31/2025   4:29 PM             36 Global.asax
+-a----         12/2/2025   8:40 AM            875 Global.asax.cs
+-a----        11/25/2025   3:58 AM          23945 HowITWorks.aspx
+-a----        11/25/2025   3:13 AM            339 HowITWorks.aspx.cs
+-a----        12/26/2025   9:18 PM          26628 Login.aspx
+-a----         12/6/2025   2:54 PM          10999 Login.aspx.cs
+-a----        12/26/2025   9:18 PM           1575 Login.aspx.designer.cs
+-a----        10/28/2025   9:43 AM           1383 packages.config
+-a----        11/30/2025   8:41 AM          60952 qllnewrb.whv~
+-a----        12/26/2025   9:18 PM          23959 Register.aspx
+-a----         11/1/2025   7:34 AM           1437 Register.aspx.cs
+-a----        12/26/2025   9:18 PM           1003 Register.aspx.designer.cs
+-a----        12/26/2025   9:18 PM          34116 RegistrationForm.aspx
+-a----         12/6/2025   2:53 PM          13288 RegistrationForm.aspx.cs
+-a----        12/26/2025   9:18 PM           4829 RegistrationForm.aspx.designer.cs
+-a----        10/28/2025   7:11 PM          38438 Services.aspx
+-a----         11/1/2025   6:36 AM            207 Services.aspx.cs
+-a----        12/29/2025   7:31 PM          81890 Site.Master
+-a----        12/26/2025   8:45 PM           2991 Site.Master.cs
+-a----        12/26/2025   9:19 PM           3096 Site.Master.designer.cs
+-a----         11/1/2025   6:36 AM            213 Site.Mobile.Master.cs
+-a----        10/28/2025   9:43 AM           1822 Site.Mobile.Master.designer.cs
+-a----        12/29/2025   6:58 PM          44241 SoorGreen.Admin.csproj
+-a----        12/27/2025   2:28 PM           1736 SoorGreen.Admin.csproj.user
+-a----        10/28/2025   9:43 AM            269 ViewSwitcher.ascx
+-a----         11/1/2025   6:36 AM           1520 ViewSwitcher.ascx.cs
+-a----        10/28/2025   9:43 AM            460 ViewSwitcher.ascx.designer.cs
+-a----        10/31/2025   5:13 PM          38504 WasteCollection.aspx
+-a----         11/1/2025   6:36 AM            214 WasteCollection.aspx.cs
+-a----        10/31/2025   4:51 PM            778 WasteCollection.aspx.designer.cs
+-a----        12/27/2025   2:21 PM           4157 Web.config
+-a----        10/28/2025   9:43 AM           1300 Web.Debug.config
+-a----        10/28/2025   9:43 AM           1361 Web.Release.config
+
+
+    Directory: Z:\ZAKI\Sem 1\Asp.net\MAIN\SoorGreen.Admin\App_Start
+
+
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+-a----        12/23/2025  11:03 AM          18156 BundleConfig.cs
+-a----         12/2/2025   8:08 AM            410 RouteConfig.cs
+
+
+    Directory: Z:\ZAKI\Sem 1\Asp.net\MAIN\SoorGreen.Admin\bin
+
+
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+d-----        12/27/2025   2:22 PM                roslyn
+-a----         9/10/2013   4:29 PM         103424 Antlr3.Runtime.dll
+-a----         9/10/2013   4:29 PM         435712 Antlr3.Runtime.pdb
+-a----         12/1/2022   5:44 PM         373248 CrystalDecisions.CrystalReports.Engine.dll
+-a----         12/1/2022   5:44 PM          55296 CrystalDecisions.ReportAppServer.ClientDoc.dll
+-a----         12/1/2022   5:44 PM          37376 CrystalDecisions.ReportAppServer.CommLayer.dll
+-a----         12/1/2022   5:44 PM         124416 CrystalDecisions.ReportAppServer.CommonControls.dll
+-a----         12/1/2022   5:44 PM          25600 CrystalDecisions.ReportAppServer.CommonObjectModel.dll
+-a----         12/1/2022   5:44 PM         165376 CrystalDecisions.ReportAppServer.Controllers.dll
+-a----         12/1/2022   5:44 PM          26112 CrystalDecisions.ReportAppServer.CubeDefModel.dll
+-a----         12/1/2022   5:44 PM         249344 CrystalDecisions.ReportAppServer.DataDefModel.dll
+-a----         12/1/2022   5:44 PM          44032 CrystalDecisions.ReportAppServer.DataSetConversion.dll
+-a----         12/1/2022   5:44 PM           5120 CrystalDecisions.ReportAppServer.ObjectFactory.dll
+-a----         12/1/2022   5:44 PM         142336 CrystalDecisions.ReportAppServer.Prompting.dll
+-a----         12/1/2022   5:44 PM         359424 CrystalDecisions.ReportAppServer.ReportDefModel.dll
+-a----         12/1/2022   5:44 PM          16384 CrystalDecisions.ReportAppServer.XmlSerialize.dll
+-a----         12/1/2022   5:44 PM          74752 CrystalDecisions.ReportSource.dll
+-a----         12/1/2022   5:44 PM         880128 CrystalDecisions.Shared.dll
+-a----         12/1/2022   5:44 PM         446464 CrystalDecisions.Web.dll
+-a----         12/1/2022   5:44 PM         540160 CrystalDecisions.Windows.Forms.dll
+-a----          8/9/2025   8:46 AM           4286 favicon.ico
+-a----         7/30/2013   4:57 PM          45752 Microsoft.AspNet.FriendlyUrls.dll
+-a----         7/30/2013   4:57 PM          16435 Microsoft.AspNet.FriendlyUrls.xml
+-a----         2/11/2014   3:26 PM          15056 Microsoft.AspNet.Web.Optimization.WebForms.dll
+-a----          9/5/2018   4:10 PM          40168 Microsoft.CodeDom.Providers.DotNetCompilerPlatform.dll
+-a----          9/5/2018   4:05 PM           3187 Microsoft.CodeDom.Providers.DotNetCompilerPlatform.xml
+-a----          9/6/2013  11:20 AM          15056 Microsoft.ScriptManager.MSAjax.dll
+-a----          9/6/2013  11:20 AM          13008 Microsoft.ScriptManager.WebForms.dll
+-a----         4/11/2022   7:09 PM          50648 Microsoft.Web.Infrastructure.dll
+-a----          3/8/2023   7:09 AM         711952 Newtonsoft.Json.dll
+-a----          3/8/2023   7:05 AM         713541 Newtonsoft.Json.xml
+-a----        12/27/2025   2:22 PM         850944 SoorGreen.Admin.dll
+-a----        12/27/2025   2:21 PM           4157 SoorGreen.Admin.dll.config
+-a----        12/27/2025   2:22 PM         910848 SoorGreen.Admin.pdb
+-a----         5/25/2021   6:42 PM          16384 stdole.dll
+-a----         2/11/2014   3:26 PM          70864 System.Web.Optimization.dll
+-a----         2/11/2014   3:26 PM          50585 System.Web.Optimization.xml
+-a----         1/23/2014   1:57 PM        1274520 WebGrease.dll
+
+
+    Directory: Z:\ZAKI\Sem 1\Asp.net\MAIN\SoorGreen.Admin\bin\roslyn
+
+
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+-a----          8/8/2018   5:38 AM          49584 csc.exe
+-a----          8/8/2018  12:18 PM           7880 csc.exe.config
+-a----          8/8/2018  12:09 PM           1496 csc.rsp
+-a----          8/8/2018   5:38 AM          15272 csi.exe
+-a----          8/8/2018  12:18 PM           8476 csi.exe.config
+-a----          8/8/2018  12:09 PM            279 csi.rsp
+-a----          8/8/2018   5:38 AM         122288 Microsoft.Build.Tasks.CodeAnalysis.dll
+-a----          8/8/2018   5:38 AM        4896176 Microsoft.CodeAnalysis.CSharp.dll
+-a----          8/8/2018   5:38 AM          28592 Microsoft.CodeAnalysis.CSharp.Scripting.dll
+-a----          8/8/2018   5:38 AM        2721712 Microsoft.CodeAnalysis.dll
+-a----          8/8/2018   5:38 AM         127920 Microsoft.CodeAnalysis.Scripting.dll
+-a----          8/8/2018   5:38 AM        5425584 Microsoft.CodeAnalysis.VisualBasic.dll
+-a----          8/8/2018  12:09 PM           6818 Microsoft.CSharp.Core.targets
+-a----         12/5/2017   9:36 AM        1495800 Microsoft.DiaSymReader.Native.amd64.dll
+-a----         12/5/2017   9:36 AM        1188080 Microsoft.DiaSymReader.Native.x86.dll
+-a----          8/8/2018  12:09 PM           7517 Microsoft.Managed.Core.targets
+-a----          8/8/2018  12:09 PM           6236 Microsoft.VisualBasic.Core.targets
+-a----         11/5/2016   6:55 PM          22768 Microsoft.Win32.Primitives.dll
+-a----         11/5/2016   6:55 PM          20168 System.AppContext.dll
+-a----         5/16/2018   3:29 AM         358536 System.Collections.Immutable.dll
+-a----         11/5/2016   6:55 PM          34496 System.Console.dll
+-a----         11/5/2016   6:55 PM          35760 System.Diagnostics.DiagnosticSource.dll
+-a----         11/5/2016   6:55 PM          23464 System.Diagnostics.FileVersionInfo.dll
+-a----         11/5/2016   6:55 PM          23288 System.Diagnostics.StackTrace.dll
+-a----         11/5/2016   6:56 PM          23296 System.Globalization.Calendars.dll
+-a----         11/5/2016   6:56 PM         111984 System.IO.Compression.dll
+-a----         11/5/2016   6:56 PM          24824 System.IO.Compression.ZipFile.dll
+-a----         11/5/2016   6:56 PM          22736 System.IO.FileSystem.dll
+-a----         11/5/2016   6:56 PM          22784 System.IO.FileSystem.Primitives.dll
+-a----         11/5/2016   6:56 PM         265048 System.Net.Http.dll
+-a----         11/5/2016   6:56 PM          46280 System.Net.Sockets.dll
+-a----         5/16/2018   3:29 AM         584848 System.Reflection.Metadata.dll
+-a----         11/5/2016   6:57 PM          33256 System.Runtime.InteropServices.RuntimeInformation.dll
+-a----         11/5/2016   6:57 PM          39872 System.Security.Cryptography.Algorithms.dll
+-a----         11/5/2016   6:57 PM          23480 System.Security.Cryptography.Encoding.dll
+-a----         11/5/2016   6:57 PM          22816 System.Security.Cryptography.Primitives.dll
+-a----         11/5/2016   6:57 PM          38872 System.Security.Cryptography.X509Certificates.dll
+-a----         11/5/2016   6:57 PM         766872 System.Text.Encoding.CodePages.dll
+-a----         11/5/2016   6:57 PM          25864 System.Threading.Tasks.Extensions.dll
+-a----         11/5/2016   6:57 PM          77672 System.ValueTuple.dll
+-a----         11/5/2016   6:57 PM          23264 System.Xml.ReaderWriter.dll
+-a----         11/5/2016   6:57 PM          23256 System.Xml.XmlDocument.dll
+-a----         11/5/2016   6:57 PM          22720 System.Xml.XPath.dll
+-a----         11/5/2016   6:57 PM          25320 System.Xml.XPath.XDocument.dll
+-a----          8/8/2018   5:38 AM          49584 vbc.exe
+-a----          8/8/2018  12:18 PM           7880 vbc.exe.config
+-a----          8/8/2018  12:09 PM           1634 vbc.rsp
+-a----          8/8/2018   5:38 AM          87472 VBCSCompiler.exe
+-a----          8/8/2018  12:18 PM           8097 VBCSCompiler.exe.config
+
+
+    Directory: Z:\ZAKI\Sem 1\Asp.net\MAIN\SoorGreen.Admin\Content
+
+
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+d-----         12/9/2025   9:10 PM                Pages
+-a----        10/28/2025   9:43 AM          71861 bootstrap-grid.css
+-a----        10/28/2025   9:43 AM         210357 bootstrap-grid.css.map
+-a----        10/28/2025   9:43 AM          53265 bootstrap-grid.min.css
+-a----        10/28/2025   9:43 AM         131395 bootstrap-grid.min.css.map
+-a----        10/28/2025   9:43 AM          71935 bootstrap-grid.rtl.css
+-a----        10/28/2025   9:43 AM         210361 bootstrap-grid.rtl.css.map
+-a----        10/28/2025   9:43 AM          53340 bootstrap-grid.rtl.min.css
+-a----        10/28/2025   9:43 AM         131472 bootstrap-grid.rtl.min.css.map
+-a----        10/28/2025   9:43 AM           7965 bootstrap-reboot.css
+-a----        10/28/2025   9:43 AM         110875 bootstrap-reboot.css.map
+-a----        10/28/2025   9:43 AM           6490 bootstrap-reboot.min.css
+-a----        10/28/2025   9:43 AM          40331 bootstrap-reboot.min.css.map
+-a----        10/28/2025   9:43 AM           7958 bootstrap-reboot.rtl.css
+-a----        10/28/2025   9:43 AM         110888 bootstrap-reboot.rtl.css.map
+-a----        10/28/2025   9:43 AM           6562 bootstrap-reboot.rtl.min.css
+-a----        10/28/2025   9:43 AM          48693 bootstrap-reboot.rtl.min.css.map
+-a----        10/28/2025   9:43 AM          76347 bootstrap-utilities.css
+-a----        10/28/2025   9:43 AM         212450 bootstrap-utilities.css.map
+-a----        10/28/2025   9:43 AM          58266 bootstrap-utilities.min.css
+-a----        10/28/2025   9:43 AM         131956 bootstrap-utilities.min.css.map
+-a----        10/28/2025   9:43 AM          76214 bootstrap-utilities.rtl.css
+-a----        10/28/2025   9:43 AM         212393 bootstrap-utilities.rtl.css.map
+-a----        10/28/2025   9:43 AM          58194 bootstrap-utilities.rtl.min.css
+-a----        10/28/2025   9:43 AM         131791 bootstrap-utilities.rtl.min.css.map
+-a----        10/28/2025   9:43 AM         237950 bootstrap.css
+-a----        10/28/2025   9:43 AM         608300 bootstrap.css.map
+-a----        10/28/2025   9:43 AM         194901 bootstrap.min.css
+-a----        10/28/2025   9:43 AM         522639 bootstrap.min.css.map
+-a----        10/28/2025   9:43 AM         237528 bootstrap.rtl.css
+-a----        10/28/2025   9:43 AM         608144 bootstrap.rtl.css.map
+-a----        10/28/2025   9:43 AM         195007 bootstrap.rtl.min.css
+-a----        10/28/2025   9:43 AM         767483 bootstrap.rtl.min.css.map
+-a----        10/28/2025   9:43 AM            455 Site.css
+
+
+    Directory: Z:\ZAKI\Sem 1\Asp.net\MAIN\SoorGreen.Admin\Content\Pages
+
+
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+d-----         12/6/2025   5:49 AM                Admin
+d-----         12/9/2025   5:34 PM                Citizen
+d-----        12/25/2025   6:05 PM                Collectors
+-a----         12/1/2025   6:25 PM          10629 about.css
+
+
+    Directory: Z:\ZAKI\Sem 1\Asp.net\MAIN\SoorGreen.Admin\Content\Pages\Admin
+
+
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+-a----         12/6/2025   5:01 AM           2887 adminauditlogs.css
+-a----         12/5/2025   4:04 PM          34161 admincitizens.css
+-a----         12/5/2025   5:54 PM           3548 admincollections.css
+-a----         12/5/2025   4:57 PM          11556 admincollectors.css
+-a----         12/5/2025   7:05 PM           4631 admincredits.css
+-a----         12/6/2025   5:28 AM           3078 adminfeedbacks.css
+-a----         12/1/2025   4:57 PM           8874 adminmunicipalities.css
+-a----         12/6/2025   5:49 AM           5757 adminnotificationsmgmt.css
+-a----         12/5/2025   5:26 PM          11246 adminpickups.css
+-a----         12/1/2025   5:04 PM           9275 adminprofile.css
+-a----         12/5/2025   6:30 PM           1904 adminredemptions.css
+-a----         12/1/2025   5:09 PM           5348 adminreports.css
+-a----         12/5/2025   6:22 PM           4659 adminrewards.css
+-a----         12/1/2025   5:17 PM           9941 adminsettings.css
+-a----         12/5/2025   6:54 PM           5905 admintransactions.css
+-a----         12/5/2025  10:26 AM          39032 adminusers.css
+-a----         12/5/2025   5:37 PM           1254 adminwastereports.css
+-a----         12/5/2025   5:45 PM           1085 adminwastetypes.css
+-a----         12/1/2025   2:54 PM           5114 Analytics.css
+-a----         12/1/2025   3:22 PM           3546 Dashboard.css
+
+
+    Directory: Z:\ZAKI\Sem 1\Asp.net\MAIN\SoorGreen.Admin\Content\Pages\Citizen
+
+
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+-a----         12/3/2025   6:28 PM          46789 citizencommunity.css
+-a----         12/8/2025   5:08 PM          14792 citizendashboard.css
+-a----         12/1/2025   5:32 PM           7670 citizenfeedback.css
+-a----         12/1/2025   5:36 PM          10309 citizenhelp.css
+-a----         12/9/2025   5:34 PM          27428 citizenleaderboard.css
+-a----         12/9/2025   2:55 PM          35445 citizenmyreports.css
+-a----         12/9/2025   4:40 PM          27041 citizenmyrewards.css
+-a----         12/1/2025   5:51 PM          10285 citizennotifications.css
+-a----         12/9/2025   3:37 PM          21280 citizenpickupstatus.css
+-a----         12/9/2025   4:49 PM          23404 citizenredemptionhistory.css
+-a----         12/9/2025  12:44 PM          24604 citizenreportwaste.css
+-a----         12/9/2025   2:25 PM          35067 citizenschedulepickup.css
+-a----         12/1/2025   6:19 PM           8933 citizenuserprofile.css
+
+
+    Directory: Z:\ZAKI\Sem 1\Asp.net\MAIN\SoorGreen.Admin\Content\Pages\Collectors
+
+
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+-a----        12/22/2025   4:42 PM          14316 CollectorPerformance.css
+-a----        12/23/2025  11:16 AM          15821 CollectorReports.css
+-a----         12/9/2025   9:10 PM          28601 collectorsroute.css
+-a----        12/25/2025   6:05 PM          19488 MyRewards.css
+-a----        12/23/2025   4:23 PM          19036 PickupStatus.css
+
+
+    Directory: Z:\ZAKI\Sem 1\Asp.net\MAIN\SoorGreen.Admin\css
+
+
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+-a----         12/9/2025  12:38 PM          32312 site-master.css
+-a----         12/9/2025   5:21 AM          19463 universal.css
+
+
+    Directory: Z:\ZAKI\Sem 1\Asp.net\MAIN\SoorGreen.Admin\obj
+
+
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+d-----        12/27/2025   2:28 PM                Container
+d-----        12/27/2025   2:22 PM                Debug
+d-----        12/27/2025   2:22 PM                Release
+
+
+    Directory: Z:\ZAKI\Sem 1\Asp.net\MAIN\SoorGreen.Admin\obj\Container
+
+
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+-a----        12/31/2025   8:02 AM              0 ContainerDevelopmentMode.cache
+-a----        12/31/2025   8:02 AM              0 ContainerId.cache
+-a----        12/31/2025   8:02 AM              0 ContainerName.cache
+-a----        12/31/2025   8:02 AM              0 ContainerRunContext.cache
+
+
+    Directory: Z:\ZAKI\Sem 1\Asp.net\MAIN\SoorGreen.Admin\obj\Debug
+
+
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+d-----         11/1/2025   6:30 AM                TempPE
+-a----         12/7/2025   6:53 PM            210 .NETFramework,Version=v4.8.AssemblyAttributes.cs
+-a----         11/1/2025   6:35 PM            203 DesignTimeResolveAssemblyReferences.cache
+-a----        12/30/2025   8:12 AM          34552 DesignTimeResolveAssemblyReferencesInput.cache
+-a----        12/27/2025   2:22 PM              0 SoorGree.743171DA.Up2Date
+-a----        12/27/2025   2:22 PM          38637 SoorGreen.Admin.csproj.AssemblyReference.cache
+-a----        12/27/2025   2:22 PM             66 SoorGreen.Admin.csproj.CoreCompileInputs.cache
+-a----        12/27/2025   2:22 PM           7651 SoorGreen.Admin.csproj.FileListAbsolute.txt
+-a----        12/27/2025   2:22 PM         889344 SoorGreen.Admin.dll
+-a----        12/27/2025   2:22 PM        1021440 SoorGreen.Admin.pdb
+
+
+    Directory: Z:\ZAKI\Sem 1\Asp.net\MAIN\SoorGreen.Admin\obj\Release
+
+
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+d-----        12/26/2025  10:12 PM                CSAutoParameterize
+d-----        12/26/2025  10:12 PM                Package
+d-----        12/26/2025  10:12 PM                ProfileTransformWebConfig
+d-----        12/26/2025   8:40 PM                TempPE
+d-----        12/26/2025  10:12 PM                TransformWebConfig
+-a----        12/26/2025   8:40 PM            210 .NETFramework,Version=v4.8.AssemblyAttributes.cs
+-a----        12/27/2025   2:22 PM            665 CSAutoParameterize.parameters.xml
+-a----        12/27/2025   2:22 PM          53652 SoorGreen.Admin.csproj.AssemblyReference.cache
+-a----        12/26/2025   9:30 PM             66 SoorGreen.Admin.csproj.CoreCompileInputs.cache
+-a----        12/26/2025   9:45 PM           7661 SoorGreen.Admin.csproj.FileListAbsolute.txt
+-a----        12/27/2025   2:22 PM         850944 SoorGreen.Admin.dll
+-a----        12/27/2025   2:22 PM         910848 SoorGreen.Admin.pdb
+-a----        12/27/2025   2:22 PM            556 _WPPLastBuildInfo.txt
+
+
+    Directory: Z:\ZAKI\Sem 1\Asp.net\MAIN\SoorGreen.Admin\obj\Release\CSAutoParameterize
+
+
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+d-----        12/26/2025  10:12 PM                original
+d-----        12/27/2025   2:22 PM                transformed
+
+
+    Directory: Z:\ZAKI\Sem 1\Asp.net\MAIN\SoorGreen.Admin\obj\Release\CSAutoParameterize\original
+
+
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+------        12/27/2025   2:22 PM           4151 Web.config
+
+
+    Directory: Z:\ZAKI\Sem 1\Asp.net\MAIN\SoorGreen.Admin\obj\Release\CSAutoParameterize\transformed
+
+
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+-a----        12/27/2025   2:22 PM           4109 Web.config
+
+
+    Directory: Z:\ZAKI\Sem 1\Asp.net\MAIN\SoorGreen.Admin\obj\Release\Package
+
+
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+d-----        12/26/2025  10:12 PM                PackageTmp
+-a----        12/27/2025   2:22 PM            491 SoorGreen.Admin.SourceManifest.xml
+
+
+    Directory: Z:\ZAKI\Sem 1\Asp.net\MAIN\SoorGreen.Admin\obj\Release\Package\PackageTmp
+
+
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+d-----        12/26/2025  10:12 PM                bin
+d-----        12/26/2025  10:12 PM                Content
+d-----        12/26/2025  10:12 PM                css
+d-----        12/26/2025  10:12 PM                Pages
+d-----        12/26/2025  10:12 PM                Scripts
+d-----        12/26/2025  10:12 PM                Styles
+------        12/27/2025   2:13 PM          11874 404.aspx
+------         12/7/2025  10:29 AM          34397 About.aspx
+------        12/26/2025   9:16 PM           1245 Admin Dashboard.aspx
+------        10/28/2025   9:43 AM            226 Bundle.config
+------        11/30/2025   8:55 AM          31369 Contact.aspx
+------        12/26/2025   9:16 PM          16354 Dashboard.aspx
+------        11/30/2025   8:18 AM          86412 Default.aspx
+------          8/9/2025   8:46 AM           4286 favicon.ico
+------        12/26/2025   9:17 PM          24212 ForgotPassword.aspx
+------        10/31/2025   4:29 PM             36 Global.asax
+------        11/25/2025   3:58 AM          23945 HowITWorks.aspx
+------        12/26/2025   9:18 PM          26628 Login.aspx
+------        12/26/2025   9:18 PM          23959 Register.aspx
+------        12/26/2025   9:18 PM          34116 RegistrationForm.aspx
+------        10/28/2025   7:11 PM          38438 Services.aspx
+------        12/26/2025   9:19 PM          60254 Site.Master
+------        10/28/2025   9:43 AM            269 ViewSwitcher.ascx
+------        10/31/2025   5:13 PM          38504 WasteCollection.aspx
+------        12/27/2025   2:22 PM           4109 Web.config
+
+
+    Directory: Z:\ZAKI\Sem 1\Asp.net\MAIN\SoorGreen.Admin\obj\Release\Package\PackageTmp\bin
+
+
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+d-----        12/26/2025  10:12 PM                roslyn
+------         9/10/2013   4:29 PM         103424 Antlr3.Runtime.dll
+------         9/10/2013   4:29 PM         435712 Antlr3.Runtime.pdb
+------         12/1/2022   5:44 PM         373248 CrystalDecisions.CrystalReports.Engine.dll
+------         12/1/2022   5:44 PM          55296 CrystalDecisions.ReportAppServer.ClientDoc.dll
+------         12/1/2022   5:44 PM          37376 CrystalDecisions.ReportAppServer.CommLayer.dll
+------         12/1/2022   5:44 PM         124416 CrystalDecisions.ReportAppServer.CommonControls.dll
+------         12/1/2022   5:44 PM          25600 CrystalDecisions.ReportAppServer.CommonObjectModel.dll
+------         12/1/2022   5:44 PM         165376 CrystalDecisions.ReportAppServer.Controllers.dll
+------         12/1/2022   5:44 PM          26112 CrystalDecisions.ReportAppServer.CubeDefModel.dll
+------         12/1/2022   5:44 PM         249344 CrystalDecisions.ReportAppServer.DataDefModel.dll
+------         12/1/2022   5:44 PM          44032 CrystalDecisions.ReportAppServer.DataSetConversion.dll
+------         12/1/2022   5:44 PM           5120 CrystalDecisions.ReportAppServer.ObjectFactory.dll
+------         12/1/2022   5:44 PM         142336 CrystalDecisions.ReportAppServer.Prompting.dll
+------         12/1/2022   5:44 PM         359424 CrystalDecisions.ReportAppServer.ReportDefModel.dll
+------         12/1/2022   5:44 PM          16384 CrystalDecisions.ReportAppServer.XmlSerialize.dll
+------         12/1/2022   5:44 PM          74752 CrystalDecisions.ReportSource.dll
+------         12/1/2022   5:44 PM         880128 CrystalDecisions.Shared.dll
+------         12/1/2022   5:44 PM         446464 CrystalDecisions.Web.dll
+------         12/1/2022   5:44 PM         540160 CrystalDecisions.Windows.Forms.dll
+------          8/9/2025   8:46 AM           4286 favicon.ico
+------         7/30/2013   4:57 PM          45752 Microsoft.AspNet.FriendlyUrls.dll
+------         2/11/2014   3:26 PM          15056 Microsoft.AspNet.Web.Optimization.WebForms.dll
+------          9/5/2018   4:10 PM          40168 Microsoft.CodeDom.Providers.DotNetCompilerPlatform.dll
+------          9/6/2013  11:20 AM          15056 Microsoft.ScriptManager.MSAjax.dll
+------          9/6/2013  11:20 AM          13008 Microsoft.ScriptManager.WebForms.dll
+------         4/11/2022   7:09 PM          50648 Microsoft.Web.Infrastructure.dll
+------          3/8/2023   7:09 AM         711952 Newtonsoft.Json.dll
+------        12/27/2025   2:22 PM         850944 SoorGreen.Admin.dll
+------        12/27/2025   2:22 PM         910848 SoorGreen.Admin.pdb
+------         5/25/2021   6:42 PM          16384 stdole.dll
+------         2/11/2014   3:26 PM          70864 System.Web.Optimization.dll
+------         1/23/2014   1:57 PM        1274520 WebGrease.dll
+
+
+    Directory: Z:\ZAKI\Sem 1\Asp.net\MAIN\SoorGreen.Admin\obj\Release\Package\PackageTmp\bin\roslyn
+
+
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+------          8/8/2018   5:38 AM          49584 csc.exe
+------          8/8/2018  12:18 PM           7880 csc.exe.config
+------          8/8/2018  12:09 PM           1496 csc.rsp
+------          8/8/2018   5:38 AM          15272 csi.exe
+------          8/8/2018  12:18 PM           8476 csi.exe.config
+------          8/8/2018  12:09 PM            279 csi.rsp
+------          8/8/2018   5:38 AM         122288 Microsoft.Build.Tasks.CodeAnalysis.dll
+------          8/8/2018   5:38 AM        4896176 Microsoft.CodeAnalysis.CSharp.dll
+------          8/8/2018   5:38 AM          28592 Microsoft.CodeAnalysis.CSharp.Scripting.dll
+------          8/8/2018   5:38 AM        2721712 Microsoft.CodeAnalysis.dll
+------          8/8/2018   5:38 AM         127920 Microsoft.CodeAnalysis.Scripting.dll
+------          8/8/2018   5:38 AM        5425584 Microsoft.CodeAnalysis.VisualBasic.dll
+------          8/8/2018  12:09 PM           6818 Microsoft.CSharp.Core.targets
+------         12/5/2017   9:36 AM        1495800 Microsoft.DiaSymReader.Native.amd64.dll
+------         12/5/2017   9:36 AM        1188080 Microsoft.DiaSymReader.Native.x86.dll
+------          8/8/2018  12:09 PM           7517 Microsoft.Managed.Core.targets
+------          8/8/2018  12:09 PM           6236 Microsoft.VisualBasic.Core.targets
+------         11/5/2016   6:55 PM          22768 Microsoft.Win32.Primitives.dll
+------         11/5/2016   6:55 PM          20168 System.AppContext.dll
+------         5/16/2018   3:29 AM         358536 System.Collections.Immutable.dll
+------         11/5/2016   6:55 PM          34496 System.Console.dll
+------         11/5/2016   6:55 PM          35760 System.Diagnostics.DiagnosticSource.dll
+------         11/5/2016   6:55 PM          23464 System.Diagnostics.FileVersionInfo.dll
+------         11/5/2016   6:55 PM          23288 System.Diagnostics.StackTrace.dll
+------         11/5/2016   6:56 PM          23296 System.Globalization.Calendars.dll
+------         11/5/2016   6:56 PM         111984 System.IO.Compression.dll
+------         11/5/2016   6:56 PM          24824 System.IO.Compression.ZipFile.dll
+------         11/5/2016   6:56 PM          22736 System.IO.FileSystem.dll
+------         11/5/2016   6:56 PM          22784 System.IO.FileSystem.Primitives.dll
+------         11/5/2016   6:56 PM         265048 System.Net.Http.dll
+------         11/5/2016   6:56 PM          46280 System.Net.Sockets.dll
+------         5/16/2018   3:29 AM         584848 System.Reflection.Metadata.dll
+------         11/5/2016   6:57 PM          33256 System.Runtime.InteropServices.RuntimeInformation.dll
+------         11/5/2016   6:57 PM          39872 System.Security.Cryptography.Algorithms.dll
+------         11/5/2016   6:57 PM          23480 System.Security.Cryptography.Encoding.dll
+------         11/5/2016   6:57 PM          22816 System.Security.Cryptography.Primitives.dll
+------         11/5/2016   6:57 PM          38872 System.Security.Cryptography.X509Certificates.dll
+------         11/5/2016   6:57 PM         766872 System.Text.Encoding.CodePages.dll
+------         11/5/2016   6:57 PM          25864 System.Threading.Tasks.Extensions.dll
+------         11/5/2016   6:57 PM          77672 System.ValueTuple.dll
+------         11/5/2016   6:57 PM          23264 System.Xml.ReaderWriter.dll
+------         11/5/2016   6:57 PM          23256 System.Xml.XmlDocument.dll
+------         11/5/2016   6:57 PM          22720 System.Xml.XPath.dll
+------         11/5/2016   6:57 PM          25320 System.Xml.XPath.XDocument.dll
+------          8/8/2018   5:38 AM          49584 vbc.exe
+------          8/8/2018  12:18 PM           7880 vbc.exe.config
+------          8/8/2018  12:09 PM           1634 vbc.rsp
+------          8/8/2018   5:38 AM          87472 VBCSCompiler.exe
+------          8/8/2018  12:18 PM           8097 VBCSCompiler.exe.config
+
+
+    Directory: Z:\ZAKI\Sem 1\Asp.net\MAIN\SoorGreen.Admin\obj\Release\Package\PackageTmp\Content
+
+
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+d-----        12/26/2025  10:12 PM                Pages
+------        10/28/2025   9:43 AM          71861 bootstrap-grid.css
+------        10/28/2025   9:43 AM         210357 bootstrap-grid.css.map
+------        10/28/2025   9:43 AM          53265 bootstrap-grid.min.css
+------        10/28/2025   9:43 AM         131395 bootstrap-grid.min.css.map
+------        10/28/2025   9:43 AM          71935 bootstrap-grid.rtl.css
+------        10/28/2025   9:43 AM         210361 bootstrap-grid.rtl.css.map
+------        10/28/2025   9:43 AM          53340 bootstrap-grid.rtl.min.css
+------        10/28/2025   9:43 AM         131472 bootstrap-grid.rtl.min.css.map
+------        10/28/2025   9:43 AM           7965 bootstrap-reboot.css
+------        10/28/2025   9:43 AM         110875 bootstrap-reboot.css.map
+------        10/28/2025   9:43 AM           6490 bootstrap-reboot.min.css
+------        10/28/2025   9:43 AM          40331 bootstrap-reboot.min.css.map
+------        10/28/2025   9:43 AM           7958 bootstrap-reboot.rtl.css
+------        10/28/2025   9:43 AM         110888 bootstrap-reboot.rtl.css.map
+------        10/28/2025   9:43 AM           6562 bootstrap-reboot.rtl.min.css
+------        10/28/2025   9:43 AM          48693 bootstrap-reboot.rtl.min.css.map
+------        10/28/2025   9:43 AM          76347 bootstrap-utilities.css
+------        10/28/2025   9:43 AM         212450 bootstrap-utilities.css.map
+------        10/28/2025   9:43 AM          58266 bootstrap-utilities.min.css
+------        10/28/2025   9:43 AM         131956 bootstrap-utilities.min.css.map
+------        10/28/2025   9:43 AM          76214 bootstrap-utilities.rtl.css
+------        10/28/2025   9:43 AM         212393 bootstrap-utilities.rtl.css.map
+------        10/28/2025   9:43 AM          58194 bootstrap-utilities.rtl.min.css
+------        10/28/2025   9:43 AM         131791 bootstrap-utilities.rtl.min.css.map
+------        10/28/2025   9:43 AM         237950 bootstrap.css
+------        10/28/2025   9:43 AM         608300 bootstrap.css.map
+------        10/28/2025   9:43 AM         194901 bootstrap.min.css
+------        10/28/2025   9:43 AM         522639 bootstrap.min.css.map
+------        10/28/2025   9:43 AM         237528 bootstrap.rtl.css
+------        10/28/2025   9:43 AM         608144 bootstrap.rtl.css.map
+------        10/28/2025   9:43 AM         195007 bootstrap.rtl.min.css
+------        10/28/2025   9:43 AM         767483 bootstrap.rtl.min.css.map
+------        10/28/2025   9:43 AM            455 Site.css
+
+
+    Directory: Z:\ZAKI\Sem 1\Asp.net\MAIN\SoorGreen.Admin\obj\Release\Package\PackageTmp\Content\Pages
+
+
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+d-----        12/26/2025  10:12 PM                Admin
+d-----        12/26/2025  10:12 PM                Citizen
+d-----        12/26/2025  10:12 PM                Collectors
+------         12/1/2025   6:25 PM          10629 about.css
+
+
+    Directory: Z:\ZAKI\Sem 1\Asp.net\MAIN\SoorGreen.Admin\obj\Release\Package\PackageTmp\Content\Pages\Admin
+
+
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+------         12/6/2025   5:01 AM           2887 adminauditlogs.css
+------         12/5/2025   4:04 PM          34161 admincitizens.css
+------         12/5/2025   5:54 PM           3548 admincollections.css
+------         12/5/2025   4:57 PM          11556 admincollectors.css
+------         12/5/2025   7:05 PM           4631 admincredits.css
+------         12/6/2025   5:28 AM           3078 adminfeedbacks.css
+------         12/1/2025   4:57 PM           8874 adminmunicipalities.css
+------         12/6/2025   5:49 AM           5757 adminnotificationsmgmt.css
+------         12/5/2025   5:26 PM          11246 adminpickups.css
+------         12/1/2025   5:04 PM           9275 adminprofile.css
+------         12/5/2025   6:30 PM           1904 adminredemptions.css
+------         12/1/2025   5:09 PM           5348 adminreports.css
+------         12/5/2025   6:22 PM           4659 adminrewards.css
+------         12/1/2025   5:17 PM           9941 adminsettings.css
+------         12/5/2025   6:54 PM           5905 admintransactions.css
+------         12/5/2025  10:26 AM          39032 adminusers.css
+------         12/5/2025   5:37 PM           1254 adminwastereports.css
+------         12/5/2025   5:45 PM           1085 adminwastetypes.css
+------         12/1/2025   2:54 PM           5114 Analytics.css
+------         12/1/2025   3:22 PM           3546 Dashboard.css
+
+
+    Directory: Z:\ZAKI\Sem 1\Asp.net\MAIN\SoorGreen.Admin\obj\Release\Package\PackageTmp\Content\Pages\Citizen
+
+
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+------         12/3/2025   6:28 PM          46789 citizencommunity.css
+------         12/8/2025   5:08 PM          14792 citizendashboard.css
+------         12/1/2025   5:32 PM           7670 citizenfeedback.css
+------         12/1/2025   5:36 PM          10309 citizenhelp.css
+------         12/9/2025   5:34 PM          27428 citizenleaderboard.css
+------         12/9/2025   2:55 PM          35445 citizenmyreports.css
+------         12/9/2025   4:40 PM          27041 citizenmyrewards.css
+------         12/1/2025   5:51 PM          10285 citizennotifications.css
+------         12/9/2025   3:37 PM          21280 citizenpickupstatus.css
+------         12/9/2025   4:49 PM          23404 citizenredemptionhistory.css
+------         12/9/2025  12:44 PM          24604 citizenreportwaste.css
+------         12/9/2025   2:25 PM          35067 citizenschedulepickup.css
+------         12/1/2025   6:19 PM           8933 citizenuserprofile.css
+
+
+    Directory: Z:\ZAKI\Sem 1\Asp.net\MAIN\SoorGreen.Admin\obj\Release\Package\PackageTmp\Content\Pages\Collectors
+
+
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+------        12/22/2025   4:42 PM          14316 CollectorPerformance.css
+------        12/23/2025  11:16 AM          15821 CollectorReports.css
+------         12/9/2025   9:10 PM          28601 collectorsroute.css
+------        12/25/2025   6:05 PM          19488 MyRewards.css
+------        12/23/2025   4:23 PM          19036 PickupStatus.css
+
+
+    Directory: Z:\ZAKI\Sem 1\Asp.net\MAIN\SoorGreen.Admin\obj\Release\Package\PackageTmp\css
+
+
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+------         12/9/2025  12:38 PM          32312 site-master.css
+------         12/9/2025   5:21 AM          19463 universal.css
+
+
+    Directory: Z:\ZAKI\Sem 1\Asp.net\MAIN\SoorGreen.Admin\obj\Release\Package\PackageTmp\Pages
+
+
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+d-----        12/26/2025  10:12 PM                Admin
+d-----        12/26/2025  10:12 PM                Citizen
+d-----        12/26/2025  10:12 PM                Collectors
+
+
+    Directory: Z:\ZAKI\Sem 1\Asp.net\MAIN\SoorGreen.Admin\obj\Release\Package\PackageTmp\Pages\Admin
+
+
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+------        12/26/2025   9:20 PM          11392 Analytics.aspx
+------        12/26/2025   9:20 PM          33964 AuditLogs.aspx
+------        12/26/2025   9:20 PM          23932 Citizens.aspx
+------        12/26/2025   9:21 PM          31322 Collections.aspx
+------        12/26/2025   9:21 PM          17351 Collectors.aspx
+------        12/26/2025   9:21 PM          34411 Credits.aspx
+------        12/26/2025   9:21 PM           9013 Dashboard.aspx
+------        12/26/2025   9:21 PM          31126 Feedbacks.aspx
+------        12/26/2025   9:22 PM          33834 Municipalities.aspx
+------        12/26/2025   9:22 PM          37830 NotificationsMgmt.aspx
+------        12/26/2025   9:23 PM          17788 Pickups.aspx
+------        12/26/2025   9:23 PM          13199 Profile.aspx
+------        12/26/2025   9:23 PM          27976 Redemptions.aspx
+------        12/26/2025   9:23 PM          12992 Reports.aspx
+------        12/26/2025   9:23 PM          50576 Rewards.aspx
+------        12/26/2025   9:24 PM          19467 Settings.aspx
+------        12/26/2025   9:24 PM          42676 Site.Master
+------        12/26/2025   9:24 PM          33744 Transactions.aspx
+------        12/26/2025   9:24 PM          25031 Users.aspx
+------        12/26/2025   9:24 PM          24018 WasteReports.aspx
+------        12/26/2025   9:25 PM          22035 WasteTypes.aspx
+
+
+    Directory: Z:\ZAKI\Sem 1\Asp.net\MAIN\SoorGreen.Admin\obj\Release\Package\PackageTmp\Pages\Citizen
+
+
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+------        12/26/2025   9:35 PM          18485 Community.aspx
+------        12/26/2025   9:26 PM          24188 Dashboard.aspx
+------        12/26/2025   9:26 PM           5675 Feedback.aspx
+------        12/26/2025   9:26 PM          15326 Help.aspx
+------        12/26/2025   9:27 PM          27517 Leaderboard.aspx
+------        12/26/2025   9:27 PM          35105 MyReports.aspx
+------        12/26/2025   9:28 PM          27444 MyRewards.aspx
+------        12/26/2025   9:28 PM           4518 Notifications.aspx
+------        12/26/2025   9:28 PM          24279 PickupStatus.aspx
+------        12/26/2025   9:28 PM          24343 RedemptionHistory.aspx
+------        12/26/2025   9:29 PM          43973 ReportWaste.aspx
+------        12/26/2025   9:29 PM          26934 SchedulePickup.aspx
+------        12/26/2025   9:30 PM          33283 Site.Master
+------        12/26/2025   9:30 PM           7426 UserProfile.aspx
+
+
+    Directory: Z:\ZAKI\Sem 1\Asp.net\MAIN\SoorGreen.Admin\obj\Release\Package\PackageTmp\Pages\Collectors
+
+
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+------        12/26/2025   9:05 PM          26598 Achievements.aspx
+------        12/26/2025   9:05 PM          37329 ActivePickups.aspx
+------        12/26/2025   9:09 PM          27866 CollectorPerformance.aspx
+------        12/26/2025   9:44 PM          14483 Community.aspx
+------        12/26/2025   9:09 PM          42037 DailyReport.aspx
+------        12/26/2025   9:10 PM          23776 Dashboard.aspx
+------        12/26/2025   9:11 PM          32818 Leaderboard.aspx
+------        12/26/2025   9:12 PM          38440 MyReports.aspx
+------        12/26/2025   9:12 PM          35725 MyRewards.aspx
+------        12/26/2025   9:12 PM          60475 MyRoute.aspx
+------        12/26/2025   9:13 PM           7648 PickupDetails.aspx
+------        12/26/2025   9:13 PM          42224 PickupStatus.aspx
+------        12/26/2025   9:14 PM          39193 PickupVerification.aspx
+------        12/26/2025   9:14 PM          45724 RedemptionHistory.aspx
+------        12/26/2025   9:14 PM          82022 Site.Master
+
+
+    Directory: Z:\ZAKI\Sem 1\Asp.net\MAIN\SoorGreen.Admin\obj\Release\Package\PackageTmp\Scripts
+
+
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+d-----        12/26/2025  10:12 PM                Pages
+d-----        12/26/2025  10:12 PM                WebForms
+------        10/28/2025   9:43 AM         207989 bootstrap.bundle.js
+------        10/28/2025   9:43 AM         451770 bootstrap.bundle.js.map
+------        10/28/2025   9:43 AM          80420 bootstrap.bundle.min.js
+------        10/28/2025   9:43 AM         333078 bootstrap.bundle.min.js.map
+------        10/28/2025   9:43 AM         136215 bootstrap.esm.js
+------        10/28/2025   9:43 AM         308207 bootstrap.esm.js.map
+------        10/28/2025   9:43 AM          73978 bootstrap.esm.min.js
+------        10/28/2025   9:43 AM         221179 bootstrap.esm.min.js.map
+------        10/28/2025   9:43 AM         145543 bootstrap.js
+------        10/28/2025   9:43 AM         309348 bootstrap.js.map
+------        10/28/2025   9:43 AM          60404 bootstrap.min.js
+------        10/28/2025   9:43 AM         216913 bootstrap.min.js.map
+------        10/28/2025   9:43 AM         284996 jquery-3.7.0.js
+------        10/28/2025   9:43 AM          87462 jquery-3.7.0.min.js
+------        10/28/2025   9:43 AM         134726 jquery-3.7.0.min.map
+------        10/28/2025   9:43 AM         231697 jquery-3.7.0.slim.js
+------        10/28/2025   9:43 AM          70193 jquery-3.7.0.slim.min.js
+------        10/28/2025   9:43 AM         107117 jquery-3.7.0.slim.min.map
+------        10/28/2025   9:43 AM          51351 modernizr-2.8.3.js
+
+
+    Directory: Z:\ZAKI\Sem 1\Asp.net\MAIN\SoorGreen.Admin\obj\Release\Package\PackageTmp\Scripts\Pages
+
+
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+d-----        12/26/2025  10:12 PM                Admin
+d-----        12/26/2025  10:12 PM                Citizen
+------         12/1/2025   6:26 PM           1380 about.js
+
+
+    Directory: Z:\ZAKI\Sem 1\Asp.net\MAIN\SoorGreen.Admin\obj\Release\Package\PackageTmp\Scripts\Pages\Admin
+
+
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+------         12/1/2025   4:36 PM          17148 adminauditlogs.js
+------         12/1/2025   3:27 PM          21139 admincitizens.js
+------         12/1/2025   4:41 PM          24817 admincollections.js
+------         12/1/2025   4:49 PM          22223 admincollectors.js
+------         12/1/2025   4:51 PM          15757 admincredits.js
+------         12/1/2025   4:55 PM          33711 adminfeedbacks.js
+------         12/1/2025   4:58 PM          17728 adminmunicipalities.js
+------         12/1/2025   5:00 PM          35643 adminnotificationsmgmt.js
+------         12/1/2025   5:02 PM          35835 adminpickups.js
+------         12/1/2025   5:04 PM          14204 adminprofile.js
+------         12/1/2025   5:07 PM          19286 adminredemptions.js
+------         12/1/2025   5:11 PM          12160 adminreports.js
+------         12/1/2025   5:15 PM          19286 adminrewards.js
+------         12/1/2025   5:18 PM          16054 adminsettings.js
+------         12/1/2025   5:20 PM          16783 admintransactions.js
+------         12/4/2025   7:12 PM           3047 adminusers.js
+------         12/1/2025   5:23 PM          25975 adminwastereports.js
+------         12/1/2025   5:25 PM          26475 adminwastetypes.js
+------         12/1/2025   2:54 PM           9909 Analytics.js
+------         12/1/2025   6:52 PM           3489 Dashboard.js
+
+
+    Directory: Z:\ZAKI\Sem 1\Asp.net\MAIN\SoorGreen.Admin\obj\Release\Package\PackageTmp\Scripts\Pages\Citizen
+
+
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+------         12/3/2025   7:54 PM           9717 citizencommunity.js
+------         12/1/2025   5:28 PM              3 citizendashboard.js
+------         12/1/2025   5:33 PM           4382 citizenfeedback.js
+------         12/1/2025   5:37 PM           5211 citizenhelp.js
+------         12/3/2025   6:00 PM           9397 citizenleaderboard.js
+------         12/2/2025  11:18 AM          24567 citizenmyreports.js
+------         12/2/2025   6:07 PM          24258 citizenmyrewards.js
+------         12/1/2025   5:52 PM           3587 citizennotifications.js
+------         12/2/2025   2:40 PM          42921 citizenpickupstatus.js
+------         12/2/2025   6:33 PM          23806 citizenredemptionhistory.js
+------         12/2/2025  10:43 AM          27285 citizenreportwaste.js
+------         12/2/2025  11:00 AM          25586 citizenschedulepickup.js
+------         12/1/2025   6:19 PM           4493 citizenuserprofile.js
+
+
+    Directory: Z:\ZAKI\Sem 1\Asp.net\MAIN\SoorGreen.Admin\obj\Release\Package\PackageTmp\Scripts\WebForms
+
+
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+d-----        12/26/2025  10:12 PM                MSAjax
+------        10/28/2025   9:43 AM           1343 DetailsView.js
+------        10/28/2025   9:43 AM           3067 Focus.js
+------        10/28/2025   9:43 AM           1503 GridView.js
+------        10/28/2025   9:43 AM          33311 Menu.js
+------        10/28/2025   9:43 AM          27802 MenuStandards.js
+------        10/28/2025   9:43 AM          10819 SmartNav.js
+------        10/28/2025   9:43 AM           9410 TreeView.js
+------        10/28/2025   9:43 AM          22408 WebForms.js
+------        10/28/2025   9:43 AM          27246 WebParts.js
+------        10/28/2025   9:43 AM          27020 WebUIValidation.js
+
+
+    Directory: Z:\ZAKI\Sem 1\Asp.net\MAIN\SoorGreen.Admin\obj\Release\Package\PackageTmp\Scripts\WebForms\MSAjax
+
+
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+------        10/28/2025   9:43 AM          99269 MicrosoftAjax.js
+------        10/28/2025   9:43 AM           8971 MicrosoftAjaxApplicationServices.js
+------        10/28/2025   9:43 AM          24214 MicrosoftAjaxComponentModel.js
+------        10/28/2025   9:43 AM          26944 MicrosoftAjaxCore.js
+------        10/28/2025   9:43 AM          20033 MicrosoftAjaxGlobalization.js
+------        10/28/2025   9:43 AM           6726 MicrosoftAjaxHistory.js
+------        10/28/2025   9:43 AM          12830 MicrosoftAjaxNetwork.js
+------        10/28/2025   9:43 AM           5792 MicrosoftAjaxSerialization.js
+------        10/28/2025   9:43 AM           2621 MicrosoftAjaxTimer.js
+------        10/28/2025   9:43 AM          39547 MicrosoftAjaxWebForms.js
+------        10/28/2025   9:43 AM           4803 MicrosoftAjaxWebServices.js
+
+
+    Directory: Z:\ZAKI\Sem 1\Asp.net\MAIN\SoorGreen.Admin\obj\Release\Package\PackageTmp\Styles
+
+
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+------        10/28/2025   2:14 PM           4504 About.css
+------        10/28/2025   6:03 PM           2474 main.css
+------        10/28/2025   2:05 PM           4490 Style.css
+
+
+    Directory: Z:\ZAKI\Sem 1\Asp.net\MAIN\SoorGreen.Admin\obj\Release\ProfileTransformWebConfig
+
+
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+d-----        12/26/2025  10:12 PM                transformed
+
+
+    Directory: Z:\ZAKI\Sem 1\Asp.net\MAIN\SoorGreen.Admin\obj\Release\TransformWebConfig
+
+
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+d-----        12/26/2025  10:12 PM                assist
+d-----        12/26/2025  10:12 PM                original
+d-----        12/27/2025   2:22 PM                transformed
+
+
+    Directory: Z:\ZAKI\Sem 1\Asp.net\MAIN\SoorGreen.Admin\obj\Release\TransformWebConfig\assist
+
+
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+------        10/28/2025   9:43 AM           1361 Web.config
+
+
+    Directory: Z:\ZAKI\Sem 1\Asp.net\MAIN\SoorGreen.Admin\obj\Release\TransformWebConfig\original
+
+
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+------        12/27/2025   2:21 PM           4157 Web.config
+
+
+    Directory: Z:\ZAKI\Sem 1\Asp.net\MAIN\SoorGreen.Admin\obj\Release\TransformWebConfig\transformed
+
+
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+-a----        12/27/2025   2:22 PM           4151 Web.config
+
+
+    Directory: Z:\ZAKI\Sem 1\Asp.net\MAIN\SoorGreen.Admin\Pages
+
+
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+d-----        12/26/2025   9:25 PM                Admin
+d-----        12/26/2025   9:35 PM                Citizen
+d-----        12/31/2025   7:44 AM                Collectors
+
+
+    Directory: Z:\ZAKI\Sem 1\Asp.net\MAIN\SoorGreen.Admin\Pages\Admin
+
+
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+-a----        12/26/2025   9:20 PM          11392 Analytics.aspx
+-a----        12/11/2025   2:18 PM           5815 Analytics.aspx.cs
+-a----        12/26/2025   9:20 PM           2138 Analytics.aspx.designer.cs
+-a----         12/5/2025   8:19 AM          27435 ath1rsrk.yma~
+-a----        12/26/2025   9:20 PM          33964 AuditLogs.aspx
+-a----         12/6/2025   5:16 AM          24091 AuditLogs.aspx.cs
+-a----        12/26/2025   9:20 PM          13641 AuditLogs.aspx.designer.cs
+-a----        12/26/2025   9:20 PM          23932 Citizens.aspx
+-a----         12/5/2025   4:32 PM          24708 Citizens.aspx.cs
+-a----        12/26/2025   9:20 PM          13714 Citizens.aspx.designer.cs
+-a----        12/26/2025   9:21 PM          31322 Collections.aspx
+-a----         12/5/2025   6:07 PM          37579 Collections.aspx.cs
+-a----        12/26/2025   9:21 PM          13737 Collections.aspx.designer.cs
+-a----        12/26/2025   9:21 PM          17351 Collectors.aspx
+-a----         12/5/2025   5:07 PM          13636 Collectors.aspx.cs
+-a----        12/26/2025   9:21 PM           8060 Collectors.aspx.designer.cs
+-a----        12/26/2025   9:21 PM          34411 Credits.aspx
+-a----         12/5/2025   7:13 PM          29244 Credits.aspx.cs
+-a----        12/26/2025   9:21 PM          13755 Credits.aspx.designer.cs
+-a----        12/26/2025   9:21 PM           9013 Dashboard.aspx
+-a----        12/11/2025   2:19 PM           3356 Dashboard.aspx.cs
+-a----        12/26/2025   9:21 PM           1653 Dashboard.aspx.designer.cs
+-a----         12/6/2025   5:57 AM          37828 e45ihkri.uhe~
+-a----        12/26/2025   9:21 PM          31126 Feedbacks.aspx
+-a----         12/6/2025   5:37 AM          29776 Feedbacks.aspx.cs
+-a----        12/26/2025   9:21 PM          13716 Feedbacks.aspx.designer.cs
+-a----         12/6/2025   6:07 AM          42667 k1hrn4rk.dwj~
+-a----        12/26/2025   9:22 PM          33834 Municipalities.aspx
+-a----         12/6/2025   4:45 AM          27943 Municipalities.aspx.cs
+-a----        12/26/2025   9:22 PM          13492 Municipalities.aspx.designer.cs
+-a----        12/26/2025   9:22 PM          37830 NotificationsMgmt.aspx
+-a----         12/6/2025   6:01 AM          42812 NotificationsMgmt.aspx.cs
+-a----        12/26/2025   9:22 PM          18252 NotificationsMgmt.aspx.designer.cs
+-a----        12/26/2025   9:23 PM          17788 Pickups.aspx
+-a----         12/5/2025   5:19 PM          13106 Pickups.aspx.cs
+-a----        12/26/2025   9:23 PM           8045 Pickups.aspx.designer.cs
+-a----        12/26/2025   9:23 PM          13199 Profile.aspx
+-a----        11/10/2025   8:25 PM          17241 Profile.aspx.cs
+-a----        12/26/2025   9:23 PM           1789 Profile.aspx.designer.cs
+-a----        12/26/2025   9:23 PM          27976 Redemptions.aspx
+-a----         12/5/2025   6:34 PM          25311 Redemptions.aspx.cs
+-a----        12/26/2025   9:23 PM          11413 Redemptions.aspx.designer.cs
+-a----        12/26/2025   9:23 PM          12992 Reports.aspx
+-a----         11/1/2025   7:32 PM          14119 Reports.aspx.cs
+-a----        12/26/2025   9:23 PM           1129 Reports.aspx.designer.cs
+-a----        12/26/2025   9:23 PM          50576 Rewards.aspx
+-a----         12/5/2025   6:22 PM          42201 Rewards.aspx.cs
+-a----        12/26/2025   9:23 PM          18487 Rewards.aspx.designer.cs
+-a----        12/26/2025   9:24 PM          19467 Settings.aspx
+-a----        11/10/2025   8:01 PM           7805 Settings.aspx.cs
+-a----        12/26/2025   9:24 PM           1786 Settings.aspx.designer.cs
+-a----        12/26/2025   9:24 PM          42676 Site.Master
+-a----         11/1/2025   4:48 PM           4578 Site.Master.cs
+-a----        12/26/2025   9:24 PM           6396 Site.Master.designer.cs
+-a----        12/26/2025   9:24 PM          33744 Transactions.aspx
+-a----         12/5/2025   6:57 PM          34915 Transactions.aspx.cs
+-a----        12/26/2025   9:24 PM          15439 Transactions.aspx.designer.cs
+-a----         12/5/2025   6:28 PM          32623 udtt31iu.epv~
+-a----        12/26/2025   9:24 PM          25031 Users.aspx
+-a----         12/5/2025  10:27 AM          20435 Users.aspx.cs
+-a----        12/26/2025   9:24 PM          14667 Users.aspx.designer.cs
+-a----         12/5/2025   5:19 PM          17842 utyf2s3k.sz1~
+-a----        12/26/2025   9:24 PM          24018 WasteReports.aspx
+-a----         12/5/2025   5:37 PM          25901 WasteReports.aspx.cs
+-a----        12/26/2025   9:24 PM          11667 WasteReports.aspx.designer.cs
+-a----        12/26/2025   9:25 PM          22035 WasteTypes.aspx
+-a----         12/5/2025   5:43 PM          23736 WasteTypes.aspx.cs
+-a----        12/26/2025   9:25 PM          10730 WasteTypes.aspx.designer.cs
+
+
+    Directory: Z:\ZAKI\Sem 1\Asp.net\MAIN\SoorGreen.Admin\Pages\Citizen
+
+
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+-a----         12/2/2025   8:13 AM          17296 1qwaoq3m.puq~
+-a----        11/30/2025  10:54 AM          14751 2omlmwug.0zo~
+-a----         12/2/2025   8:07 AM          17476 4oflyfvh.yqd~
+-a----         12/2/2025   9:54 AM          20342 5lz4vsxo.fcw~
+-a----         12/2/2025   8:07 AM          17476 b35u5mvq.ks3~
+-a----         12/3/2025   7:39 PM          28085 ciqm1pva.aay~
+-a----        12/26/2025   9:35 PM          18485 Community.aspx
+-a----        12/26/2025   9:35 PM          24118 Community.aspx.cs
+-a----        12/26/2025   9:35 PM           3439 Community.aspx.designer.cs
+-a----        12/26/2025   9:26 PM          24188 Dashboard.aspx
+-a----         12/8/2025   5:19 PM          17946 Dashboard.aspx.cs
+-a----        12/26/2025   9:26 PM          11438 Dashboard.aspx.designer.cs
+-a----         12/2/2025   8:13 AM          17296 e0hyhyq0.cud~
+-a----        11/29/2025   8:33 PM          19559 e3e0yf5l.s3h~
+-a----         12/3/2025   7:12 PM          28266 e515fsqj.nln~
+-a----         12/2/2025   8:13 AM          17296 ekthr4hi.w0y~
+-a----        12/26/2025   9:26 PM           5675 Feedback.aspx
+-a----        11/30/2025  10:54 AM           7881 Feedback.aspx.cs
+-a----        12/26/2025   9:26 PM           3073 Feedback.aspx.designer.cs
+-a----         12/2/2025   8:28 AM          17339 fpul5dor.gns~
+-a----        12/26/2025   9:26 PM          15326 Help.aspx
+-a----        11/30/2025  11:52 AM          15039 Help.aspx.cs
+-a----        12/26/2025   9:27 PM           2764 Help.aspx.designer.cs
+-a----         12/2/2025   8:28 AM          17339 ibvmnjmc.g4l~
+-a----         12/2/2025   8:14 AM          17296 iccapf0j.5zf~
+-a----        11/28/2025   8:54 PM          30812 jpzntouh.sav~
+-a----         12/2/2025   8:14 AM          17296 kepzd31t.qrj~
+-a----         12/2/2025   8:07 AM          17476 kja11obz.gig~
+-a----        11/29/2025   7:35 PM          30006 kt3y1kdd.tcn~
+-a----         12/1/2025   7:16 PM          24186 l0nzh1o5.454~
+-a----        12/26/2025   9:27 PM          27517 Leaderboard.aspx
+-a----         12/9/2025   6:17 PM          33382 Leaderboard.aspx.cs
+-a----        12/26/2025   9:27 PM          15514 Leaderboard.aspx.designer.cs
+-a----         12/2/2025   8:28 AM          17339 mlw22adz.g0o~
+-a----         12/2/2025   8:13 AM          17296 mqeonnkc.wpz~
+-a----         12/2/2025   8:13 AM          17296 mua2250k.hxi~
+-a----        12/26/2025   9:27 PM          35105 MyReports.aspx
+-a----         12/9/2025   3:19 PM          41670 MyReports.aspx.cs
+-a----        12/26/2025   9:27 PM          10401 MyReports.aspx.designer.cs
+-a----        12/26/2025   9:28 PM          27444 MyRewards.aspx
+-a----         12/9/2025   4:31 PM          25103 MyRewards.aspx.cs
+-a----        12/26/2025   9:28 PM          10799 MyRewards.aspx.designer.cs
+-a----        12/26/2025   9:28 PM           4518 Notifications.aspx
+-a----        11/30/2025  11:30 AM          17785 Notifications.aspx.cs
+-a----        12/26/2025   9:28 PM           3427 Notifications.aspx.designer.cs
+-a----         12/2/2025   8:13 AM          17296 oi4hnmi5.kwd~
+-a----        12/26/2025   9:28 PM          24279 PickupStatus.aspx
+-a----         12/9/2025   4:04 PM          29033 PickupStatus.aspx.cs
+-a----        12/26/2025   9:28 PM           7748 PickupStatus.aspx.designer.cs
+-a----        11/29/2025   8:12 PM          28287 q1poeg4g.kcw~
+-a----         12/2/2025   4:26 PM           6294 r5dhoyxl.mnv~
+-a----        12/26/2025   9:28 PM          24343 RedemptionHistory.aspx
+-a----         12/9/2025   5:02 PM          19337 RedemptionHistory.aspx.cs
+-a----        12/26/2025   9:28 PM           8777 RedemptionHistory.aspx.designer.cs
+-a----        12/26/2025   9:29 PM          43973 ReportWaste.aspx
+-a----         12/9/2025  12:05 PM          33890 ReportWaste.aspx.cs
+-a----        12/26/2025   9:29 PM          18907 ReportWaste.aspx.designer.cs
+-a----         12/2/2025   8:14 AM          17296 ri2wogxo.nbs~
+-a----        12/26/2025   9:29 PM          26934 SchedulePickup.aspx
+-a----         12/9/2025   1:38 PM          40085 SchedulePickup.aspx.cs
+-a----        12/26/2025   9:29 PM          13404 SchedulePickup.aspx.designer.cs
+-a----        12/26/2025   9:30 PM          33283 Site.Master
+-a----        11/20/2025  12:28 PM           6293 Site.Master.cs
+-a----        12/26/2025   9:30 PM           6187 Site.Master.designer.cs
+-a----         12/2/2025   2:14 PM          23766 tl1eiqnk.idx~
+-a----         12/2/2025   8:28 AM          17339 tn0kdx3d.dqs~
+-a----         12/2/2025   8:28 AM          17339 tpdnaxc5.jr5~
+-a----         12/2/2025   8:07 AM          17476 tu2l43qx.jdh~
+-a----        12/26/2025   9:30 PM           7426 UserProfile.aspx
+-a----        11/30/2025  11:24 AM          21856 UserProfile.aspx.cs
+-a----        12/26/2025   9:30 PM           8100 UserProfile.aspx.designer.cs
+-a----         12/2/2025   8:13 AM          17296 vc14r30r.b0s~
+-a----         12/2/2025   4:26 PM           6280 vol3kd1i.33f~
+-a----        11/29/2025   9:15 PM          24080 vungqfls.wtc~
+-a----        11/29/2025   7:35 PM          30006 vyw3icmf.0ux~
+-a----         12/2/2025   8:13 AM          17296 w5s5zmgj.lej~
+-a----         12/2/2025   8:07 AM          17476 y13ws5u4.j5h~
+-a----         12/2/2025   3:40 PM          24426 yipyigps.ktw~
+-a----        11/28/2025   9:01 PM          30812 zguvpugx.0qd~
+
+
+    Directory: Z:\ZAKI\Sem 1\Asp.net\MAIN\SoorGreen.Admin\Pages\Collectors
+
+
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+-a----        12/26/2025   9:05 PM          26598 Achievements.aspx
+-a----        12/26/2025  10:01 AM          24183 Achievements.aspx.cs
+-a----        12/26/2025   9:05 PM           8762 Achievements.aspx.designer.cs
+-a----        12/26/2025   9:05 PM          37329 ActivePickups.aspx
+-a----        12/23/2025  11:08 AM          24294 ActivePickups.aspx.cs
+-a----        12/26/2025   9:05 PM           7485 ActivePickups.aspx.designer.cs
+-a----        12/26/2025   9:09 PM          27866 CollectorPerformance.aspx
+-a----        12/22/2025   4:57 PM          31888 CollectorPerformance.aspx.cs
+-a----        12/26/2025   9:09 PM          13071 CollectorPerformance.aspx.designer.cs
+-a----        12/26/2025   9:44 PM          14483 Community.aspx
+-a----        12/26/2025   9:44 PM          16852 Community.aspx.cs
+-a----        12/26/2025   9:39 PM           7058 Community.aspx.designer.cs
+-a----        12/26/2025   9:09 PM          42037 DailyReport.aspx
+-a----        12/14/2025   5:13 PM          22304 DailyReport.aspx.cs
+-a----        12/26/2025   9:09 PM           8373 DailyReport.aspx.designer.cs
+-a----        12/26/2025   9:10 PM          23776 Dashboard.aspx
+-a----         12/6/2025   4:25 PM          17269 Dashboard.aspx.cs
+-a----        12/26/2025   9:10 PM           7377 Dashboard.aspx.designer.cs
+-a----        12/26/2025   9:11 PM          32818 Leaderboard.aspx
+-a----        12/26/2025  10:24 AM          21835 Leaderboard.aspx.cs
+-a----        12/26/2025   9:11 PM          12725 Leaderboard.aspx.designer.cs
+-a----        12/26/2025   9:12 PM          38440 MyReports.aspx
+-a----        12/23/2025  12:04 PM          26238 MyReports.aspx.cs
+-a----        12/26/2025   9:12 PM           9778 MyReports.aspx.designer.cs
+-a----        12/26/2025   9:12 PM          35725 MyRewards.aspx
+-a----        12/25/2025   6:02 PM          37710 MyRewards.aspx.cs
+-a----        12/26/2025   9:12 PM           9831 MyRewards.aspx.designer.cs
+-a----        12/26/2025   9:12 PM          60475 MyRoute.aspx
+-a----        12/13/2025   3:42 PM          64541 MyRoute.aspx.cs
+-a----        12/26/2025   9:12 PM          18973 MyRoute.aspx.designer.cs
+-a----        12/26/2025   9:13 PM           7648 PickupDetails.aspx
+-a----        12/13/2025   7:10 PM            627 PickupDetails.aspx.cs
+-a----        12/26/2025   9:13 PM           4083 PickupDetails.aspx.designer.cs
+-a----        12/26/2025   9:13 PM          42224 PickupStatus.aspx
+-a----        12/23/2025   5:32 PM          32041 PickupStatus.aspx.cs
+-a----        12/26/2025   9:13 PM           9399 PickupStatus.aspx.designer.cs
+-a----        12/26/2025   9:14 PM          39193 PickupVerification.aspx
+-a----        12/13/2025   6:56 PM          45995 PickupVerification.aspx.cs
+-a----        12/26/2025   9:14 PM          15241 PickupVerification.aspx.designer.cs
+-a----        12/26/2025   9:14 PM          45724 RedemptionHistory.aspx
+-a----        12/26/2025   9:07 PM          32094 RedemptionHistory.aspx.cs
+-a----        12/26/2025   9:14 PM           7825 RedemptionHistory.aspx.designer.cs
+-a----        12/31/2025   7:44 AM          82204 Site.Master
+-a----         12/7/2025  10:13 AM          11842 Site.Master.cs
+-a----        12/26/2025   9:14 PM           9166 Site.Master.designer.cs
+
+
+    Directory: Z:\ZAKI\Sem 1\Asp.net\MAIN\SoorGreen.Admin\Properties
+
+
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+d-----        12/26/2025  10:12 PM                PublishProfiles
+-a----         11/1/2025   6:36 AM           1361 AssemblyInfo.cs
+
+
+    Directory: Z:\ZAKI\Sem 1\Asp.net\MAIN\SoorGreen.Admin\Properties\PublishProfiles
+
+
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+-a----        12/26/2025   8:41 PM            626 FolderProfile.pubxml
+-a----        12/26/2025   9:45 PM          37876 FolderProfile.pubxml.user
+-a----        12/26/2025  10:12 PM           1001 zakiomer-001-site1 - FTP.pubxml
+-a----        12/26/2025  10:12 PM            434 zakiomer-001-site1 - FTP.pubxml.user
+-a----        12/26/2025  10:12 PM           1253 zakiomer-001-site1 - Web Deploy.pubxml
+-a----        12/27/2025   2:22 PM            605 zakiomer-001-site1 - Web Deploy.pubxml.user
+
+
+    Directory: Z:\ZAKI\Sem 1\Asp.net\MAIN\SoorGreen.Admin\Scripts
+
+
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+d-----         12/1/2025   6:26 PM                Pages
+d-----        10/28/2025   9:43 AM                WebForms
+-a----        10/28/2025   9:43 AM         207989 bootstrap.bundle.js
+-a----        10/28/2025   9:43 AM         451770 bootstrap.bundle.js.map
+-a----        10/28/2025   9:43 AM          80420 bootstrap.bundle.min.js
+-a----        10/28/2025   9:43 AM         333078 bootstrap.bundle.min.js.map
+-a----        10/28/2025   9:43 AM         136215 bootstrap.esm.js
+-a----        10/28/2025   9:43 AM         308207 bootstrap.esm.js.map
+-a----        10/28/2025   9:43 AM          73978 bootstrap.esm.min.js
+-a----        10/28/2025   9:43 AM         221179 bootstrap.esm.min.js.map
+-a----        10/28/2025   9:43 AM         145543 bootstrap.js
+-a----        10/28/2025   9:43 AM         309348 bootstrap.js.map
+-a----        10/28/2025   9:43 AM          60404 bootstrap.min.js
+-a----        10/28/2025   9:43 AM         216913 bootstrap.min.js.map
+-a----        10/28/2025   9:43 AM         162316 jquery-3.7.0.intellisense.js
+-a----        10/28/2025   9:43 AM         284996 jquery-3.7.0.js
+-a----        10/28/2025   9:43 AM          87462 jquery-3.7.0.min.js
+-a----        10/28/2025   9:43 AM         134726 jquery-3.7.0.min.map
+-a----        10/28/2025   9:43 AM         231697 jquery-3.7.0.slim.js
+-a----        10/28/2025   9:43 AM          70193 jquery-3.7.0.slim.min.js
+-a----        10/28/2025   9:43 AM         107117 jquery-3.7.0.slim.min.map
+-a----        10/28/2025   9:43 AM          51351 modernizr-2.8.3.js
+
+
+    Directory: Z:\ZAKI\Sem 1\Asp.net\MAIN\SoorGreen.Admin\Scripts\Pages
+
+
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+d-----         12/4/2025   7:12 PM                Admin
+d-----         12/3/2025   7:54 PM                Citizen
+-a----         12/1/2025   6:26 PM           1380 about.js
+
+
+    Directory: Z:\ZAKI\Sem 1\Asp.net\MAIN\SoorGreen.Admin\Scripts\Pages\Admin
+
+
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+-a----         12/1/2025   4:49 PM          22265 4s2kjfmx.ll2~
+-a----         12/1/2025   4:36 PM          17148 adminauditlogs.js
+-a----         12/1/2025   3:27 PM          21139 admincitizens.js
+-a----         12/1/2025   4:41 PM          24817 admincollections.js
+-a----         12/1/2025   4:49 PM          22223 admincollectors.js
+-a----         12/1/2025   4:51 PM          15757 admincredits.js
+-a----         12/1/2025   4:55 PM          33711 adminfeedbacks.js
+-a----         12/1/2025   4:58 PM          17728 adminmunicipalities.js
+-a----         12/1/2025   5:00 PM          35643 adminnotificationsmgmt.js
+-a----         12/1/2025   5:02 PM          35835 adminpickups.js
+-a----         12/1/2025   5:04 PM          14204 adminprofile.js
+-a----         12/1/2025   5:07 PM          19286 adminredemptions.js
+-a----         12/1/2025   5:11 PM          12160 adminreports.js
+-a----         12/1/2025   5:15 PM          19286 adminrewards.js
+-a----         12/1/2025   5:18 PM          16054 adminsettings.js
+-a----         12/1/2025   5:20 PM          16783 admintransactions.js
+-a----         12/4/2025   7:12 PM           3047 adminusers.js
+-a----         12/1/2025   5:23 PM          25975 adminwastereports.js
+-a----         12/1/2025   5:25 PM          26475 adminwastetypes.js
+-a----         12/1/2025   2:54 PM           9909 Analytics.js
+-a----         12/1/2025   6:52 PM           3489 Dashboard.js
+
+
+    Directory: Z:\ZAKI\Sem 1\Asp.net\MAIN\SoorGreen.Admin\Scripts\Pages\Citizen
+
+
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+-a----         12/3/2025   7:54 PM           9717 citizencommunity.js
+-a----         12/1/2025   5:28 PM              3 citizendashboard.js
+-a----         12/1/2025   5:33 PM           4382 citizenfeedback.js
+-a----         12/1/2025   5:37 PM           5211 citizenhelp.js
+-a----         12/3/2025   6:00 PM           9397 citizenleaderboard.js
+-a----         12/2/2025  11:18 AM          24567 citizenmyreports.js
+-a----         12/2/2025   6:07 PM          24258 citizenmyrewards.js
+-a----         12/1/2025   5:52 PM           3587 citizennotifications.js
+-a----         12/2/2025   2:40 PM          42921 citizenpickupstatus.js
+-a----         12/2/2025   6:33 PM          23806 citizenredemptionhistory.js
+-a----         12/2/2025  10:43 AM          27285 citizenreportwaste.js
+-a----         12/2/2025  11:00 AM          25586 citizenschedulepickup.js
+-a----         12/1/2025   6:19 PM           4493 citizenuserprofile.js
+-a----         12/2/2025   8:58 AM           8312 obfdw2v3.3qp~
+
+
+    Directory: Z:\ZAKI\Sem 1\Asp.net\MAIN\SoorGreen.Admin\Scripts\WebForms
+
+
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+d-----        10/28/2025   9:43 AM                MSAjax
+-a----        10/28/2025   9:43 AM           1343 DetailsView.js
+-a----        10/28/2025   9:43 AM           3067 Focus.js
+-a----        10/28/2025   9:43 AM           1503 GridView.js
+-a----        10/28/2025   9:43 AM          33311 Menu.js
+-a----        10/28/2025   9:43 AM          27802 MenuStandards.js
+-a----        10/28/2025   9:43 AM          10819 SmartNav.js
+-a----        10/28/2025   9:43 AM           9410 TreeView.js
+-a----        10/28/2025   9:43 AM          22408 WebForms.js
+-a----        10/28/2025   9:43 AM          27246 WebParts.js
+-a----        10/28/2025   9:43 AM          27020 WebUIValidation.js
+
+
+    Directory: Z:\ZAKI\Sem 1\Asp.net\MAIN\SoorGreen.Admin\Scripts\WebForms\MSAjax
+
+
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+-a----        10/28/2025   9:43 AM          99269 MicrosoftAjax.js
+-a----        10/28/2025   9:43 AM           8971 MicrosoftAjaxApplicationServices.js
+-a----        10/28/2025   9:43 AM          24214 MicrosoftAjaxComponentModel.js
+-a----        10/28/2025   9:43 AM          26944 MicrosoftAjaxCore.js
+-a----        10/28/2025   9:43 AM          20033 MicrosoftAjaxGlobalization.js
+-a----        10/28/2025   9:43 AM           6726 MicrosoftAjaxHistory.js
+-a----        10/28/2025   9:43 AM          12830 MicrosoftAjaxNetwork.js
+-a----        10/28/2025   9:43 AM           5792 MicrosoftAjaxSerialization.js
+-a----        10/28/2025   9:43 AM           2621 MicrosoftAjaxTimer.js
+-a----        10/28/2025   9:43 AM          39547 MicrosoftAjaxWebForms.js
+-a----        10/28/2025   9:43 AM           4803 MicrosoftAjaxWebServices.js
+
+
+    Directory: Z:\ZAKI\Sem 1\Asp.net\MAIN\SoorGreen.Admin\Styles
+
+
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+-a----        10/28/2025   2:14 PM           4504 About.css
+-a----        10/28/2025   6:03 PM           2474 main.css
+-a----        10/28/2025   2:05 PM           4490 Style.css
+
+
+    Directory: Z:\ZAKI\Sem 1\Asp.net\MAIN\SoorGreen.Admin\Uploads
+
+
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+d-----        12/26/2025  11:41 AM                Community
+d-----         12/9/2025   3:19 PM                ReportPhotos
+d-----         12/1/2025   9:17 AM                WastePhotos
+
+
+    Directory: Z:\ZAKI\Sem 1\Asp.net\MAIN\SoorGreen.Admin\Uploads\Community
+
+
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+-a----        12/26/2025  11:41 AM        2059048 6834ef56-c441-4321-a10f-c40c1994b15d.jpg
+
+
+    Directory: Z:\ZAKI\Sem 1\Asp.net\MAIN\SoorGreen.Admin\Uploads\ReportPhotos
+
+
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+-a----         12/9/2025   3:19 PM        2059048 47248273-8560-460f-ac48-10e1a8eea482.jpg
+
+
+    Directory: Z:\ZAKI\Sem 1\Asp.net\MAIN\SoorGreen.Admin\Uploads\WastePhotos
+
+
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+-a----        11/28/2025   9:45 PM        2059048 03d5d9cf-d0dc-4ac7-8162-bfbf4de548c7.jpg
+-a----        11/21/2025   9:49 PM        2059048 130717d7-1ffb-4ea0-aa81-f6cf547ccb48.jpg
+-a----         12/1/2025   9:17 AM        2059048 3537151b-a612-45e0-a7b9-59954e83888c.jpg
+-a----        11/28/2025   9:24 PM        2042437 56ff31eb-7cff-4bba-a72b-3bf5e157cb8c.jpg
+-a----        11/21/2025  10:36 PM        2059048 60b478e5-177a-469b-9ebc-bec4e4b489ad.jpg
+-a----        11/30/2025   1:02 PM        2059048 6202991f-3071-442d-a549-b7e904e8b59b.jpg
+-a----        11/21/2025  10:05 PM        2042437 6879b323-e75f-47a3-8786-6166a6a5358a.jpg
+-a----        11/23/2025   3:22 PM        2042437 6c3ee9b7-7631-4eaa-b883-a5028026f37c.jpg
+
+
+    Directory: Z:\ZAKI\Sem 1\Asp.net\MAIN\SoorGreen.Admin\Videos
+
+
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+-a----        12/29/2025   6:58 PM       20401985 demo.mp4
+-a----        12/29/2025   6:58 PM       11886947 Soongreen.mp4
+
+
+PS Z:\ZAKI\Sem 1\Asp.net\MAIN\SoorGreen.Admin>
+
+for ai engine how about using acoanda

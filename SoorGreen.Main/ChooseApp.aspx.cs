@@ -66,28 +66,42 @@ namespace SoorGreen.Main
                 </script>";
             ScriptManager.RegisterStartupScript(this, GetType(), "OpenMVC", script, false);
         }
-
+        protected void btnCustomModal_Click(object sender, EventArgs e)
+        {
+            string script = @"
+                <script>
+                    try {
+                        // Open FIRST
+                        var newWindow = window.open('http://localhost:44306/', '_blank');
+                        
+                        // Check if popup was blocked
+                        if (!newWindow || newWindow.closed || typeof newWindow.closed == 'undefined') {
+                            alert('Popup blocked! Please allow popups for this site and try again.');
+                        } else {
+                            // Show alert AFTER opening
+                            setTimeout(function() {
+                                alert('Opening Custom SOlution Portal...\\n\\nURL: http://localhost:44306/\\nTeam: ZACKI ABDULKADIR OMER (Lead)');
+                            }, 300);
+                        }
+                    } catch (error) {
+                        console.error('Error:', error);
+                        alert('Error opening portal. Please check if the URL is accessible.');
+                    }
+                </script>";
+            ScriptManager.RegisterStartupScript(this, GetType(), "OpenMVC", script, false);
+        }
         protected void btnAPI_Click(object sender, EventArgs e)
         {
             string script = @"
                 <script>
-                    alert('Web API Service - NOT CREATED YET\\n\\nThis project will be created next.\\n\\nPort: 5000 or 5001\\n\\nTeam: To be assigned');
+                    alert('Web API Service - NOT FOUND In Your Files\\n\\nCheck if in the correct git Branch.\\n\\nPort: 5000 or 5001\\n\\nPlease Try Again Later');
                 </script>";
             ScriptManager.RegisterStartupScript(this, GetType(), "OpenAPI", script, false);
         }
 
-        protected void btnCustom_Click(object sender, EventArgs e)
-        {
-            string script = @"
-                <script>
-                    alert('Custom Solution - NOT CREATED YET\\n\\nThis project will be created after API.\\n\\nTeam: To be assigned');
-                </script>";
-            ScriptManager.RegisterStartupScript(this, GetType(), "OpenCustom", script, false);
-        }
-
+        protected void btnCustom_Click(object sender, EventArgs e) => btnCustomModal_Click(sender, e);
         protected void btnWebFormsModal_Click(object sender, EventArgs e) => btnWebForms_Click(sender, e);
         protected void btnMVCModal_Click(object sender, EventArgs e) => btnMVC_Click(sender, e);
         protected void btnAPIModal_Click(object sender, EventArgs e) => btnAPI_Click(sender, e);
-        protected void btnCustomModal_Click(object sender, EventArgs e) => btnCustom_Click(sender, e);
     }
 }

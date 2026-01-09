@@ -91,8 +91,8 @@ namespace SoorGreen
                                 {
                                     if (roleId == "COLL" || roleId == "R002")
                                     {
-                                        lnkDashboard.NavigateUrl = "CollectorDashboard.aspx";
-                                        lnkMainDashboard.NavigateUrl = "CollectorDashboard.aspx";
+                                        lnkDashboard.NavigateUrl = "Dashboard.aspx";
+                                        lnkMainDashboard.NavigateUrl = "Dashboard.aspx";
                                     }
                                     else
                                     {

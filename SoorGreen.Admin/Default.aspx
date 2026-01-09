@@ -13,298 +13,297 @@
             --light-overlay: rgba(255, 255, 255, 0.8);
         }
 
-        /* Hero Section Light Mode */
-        [data-theme="light"] .hero-section {
-            background: radial-gradient(ellipse at center, rgba(0, 212, 170, 0.08) 0%, transparent 70%);
-        }
+            /* Hero Section Light Mode */
+            [data-theme="light"] .hero-section {
+                background: radial-gradient(ellipse at center, rgba(0, 212, 170, 0.08) 0%, transparent 70%);
+            }
 
-        [data-theme="light"] .hero-bg {
-            background: radial-gradient(circle at 20% 80%, rgba(0, 212, 170, 0.1) 0%, transparent 50%), 
-                        radial-gradient(circle at 80% 20%, rgba(9, 132, 227, 0.1) 0%, transparent 50%);
-        }
+            [data-theme="light"] .hero-bg {
+                background: radial-gradient(circle at 20% 80%, rgba(0, 212, 170, 0.1) 0%, transparent 50%), radial-gradient(circle at 80% 20%, rgba(9, 132, 227, 0.1) 0%, transparent 50%);
+            }
 
-        [data-theme="light"] .hero-badge .badge {
-            background: rgba(255, 255, 255, 0.9) !important;
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(0, 212, 170, 0.3);
-            color: var(--primary) !important;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-        }
+            [data-theme="light"] .hero-badge .badge {
+                background: rgba(255, 255, 255, 0.9) !important;
+                backdrop-filter: blur(10px);
+                border: 1px solid rgba(0, 212, 170, 0.3);
+                color: var(--primary) !important;
+                box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            }
 
-        [data-theme="light"] .hero-title {
-            background: linear-gradient(45deg, var(--light-text), var(--primary), var(--secondary));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            text-shadow: 0 0 30px rgba(0, 212, 170, 0.2);
-        }
+            [data-theme="light"] .hero-title {
+                background: linear-gradient(45deg, var(--light-text), var(--primary), var(--secondary));
+                -webkit-background-clip: text;
+                -webkit-text-fill-color: transparent;
+                text-shadow: 0 0 30px rgba(0, 212, 170, 0.2);
+            }
 
-        [data-theme="light"] .hero-subtitle {
-            color: var(--light-muted);
-            opacity: 0.9;
-        }
+            [data-theme="light"] .hero-subtitle {
+                color: var(--light-muted);
+                opacity: 0.9;
+            }
 
-        [data-theme="light"] .floating-card {
-            background: var(--light-card);
-            border: 1px solid var(--light-border);
-            color: var(--light-text);
-            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
-        }
+            [data-theme="light"] .floating-card {
+                background: var(--light-card);
+                border: 1px solid var(--light-border);
+                color: var(--light-text);
+                box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+            }
 
-        /* Section Backgrounds Light Mode */
-        [data-theme="light"] .stats-section,
-        [data-theme="light"] .features-section,
-        [data-theme="light"] .how-it-works-section,
-        [data-theme="light"] .platform-section,
-        [data-theme="light"] .testimonials-section,
-        [data-theme="light"] .mobile-app-section,
-        [data-theme="light"] .pricing-section,
-        [data-theme="light"] .partners-section,
-        [data-theme="light"] .faq-section,
-        [data-theme="light"] .tech-stack-section,
-        [data-theme="light"] .impact-section,
-        [data-theme="light"] .case-studies-section,
-        [data-theme="light"] .team-section,
-        [data-theme="light"] .awards-section,
-        [data-theme="light"] .integration-section {
-            background: var(--light-bg) !important;
-        }
+            /* Section Backgrounds Light Mode */
+            [data-theme="light"] .stats-section,
+            [data-theme="light"] .features-section,
+            [data-theme="light"] .how-it-works-section,
+            [data-theme="light"] .platform-section,
+            [data-theme="light"] .testimonials-section,
+            [data-theme="light"] .mobile-app-section,
+            [data-theme="light"] .pricing-section,
+            [data-theme="light"] .partners-section,
+            [data-theme="light"] .faq-section,
+            [data-theme="light"] .tech-stack-section,
+            [data-theme="light"] .impact-section,
+            [data-theme="light"] .case-studies-section,
+            [data-theme="light"] .team-section,
+            [data-theme="light"] .awards-section,
+            [data-theme="light"] .integration-section {
+                background: var(--light-bg) !important;
+            }
 
-        /* Card Styles Light Mode */
-        [data-theme="light"] .stat-card,
-        [data-theme="light"] .feature-card,
-        [data-theme="light"] .step-card,
-        [data-theme="light"] .feature-item,
-        [data-theme="light"] .testimonial-card,
-        [data-theme="light"] .pricing-card,
-        [data-theme="light"] .partner-logo,
-        [data-theme="light"] .tech-card,
-        [data-theme="light"] .impact-card,
-        [data-theme="light"] .case-study-card,
-        [data-theme="light"] .team-card,
-        [data-theme="light"] .award-card {
-            background: var(--light-card) !important;
-            border: 1px solid var(--light-border) !important;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
-        }
+            /* Card Styles Light Mode */
+            [data-theme="light"] .stat-card,
+            [data-theme="light"] .feature-card,
+            [data-theme="light"] .step-card,
+            [data-theme="light"] .feature-item,
+            [data-theme="light"] .testimonial-card,
+            [data-theme="light"] .pricing-card,
+            [data-theme="light"] .partner-logo,
+            [data-theme="light"] .tech-card,
+            [data-theme="light"] .impact-card,
+            [data-theme="light"] .case-study-card,
+            [data-theme="light"] .team-card,
+            [data-theme="light"] .award-card {
+                background: var(--light-card) !important;
+                border: 1px solid var(--light-border) !important;
+                box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+            }
 
-        [data-theme="light"] .stat-card:hover,
-        [data-theme="light"] .feature-card:hover,
-        [data-theme="light"] .step-card:hover,
-        [data-theme="light"] .testimonial-card:hover,
-        [data-theme="light"] .pricing-card:hover,
-        [data-theme="light"] .tech-card:hover {
-            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.15);
-            transform: translateY(-5px);
-        }
+                [data-theme="light"] .stat-card:hover,
+                [data-theme="light"] .feature-card:hover,
+                [data-theme="light"] .step-card:hover,
+                [data-theme="light"] .testimonial-card:hover,
+                [data-theme="light"] .pricing-card:hover,
+                [data-theme="light"] .tech-card:hover {
+                    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.15);
+                    transform: translateY(-5px);
+                }
 
-        /* Text Colors Light Mode */
-        [data-theme="light"] .text-white {
-            color: var(--light-text) !important;
-        }
+            /* Text Colors Light Mode */
+            [data-theme="light"] .text-white {
+                color: var(--light-text) !important;
+            }
 
-        [data-theme="light"] .text-muted {
-            color: var(--light-muted) !important;
-        }
+            [data-theme="light"] .text-muted {
+                color: var(--light-muted) !important;
+            }
 
-        [data-theme="light"] .text-white-50 {
-            color: var(--light-muted) !important;
-        }
+            [data-theme="light"] .text-white-50 {
+                color: var(--light-muted) !important;
+            }
 
-        [data-theme="light"] .text-light {
-            color: var(--light-text) !important;
-        }
+            [data-theme="light"] .text-light {
+                color: var(--light-text) !important;
+            }
 
-        [data-theme="light"] .lead {
-            color: var(--light-muted) !important;
-        }
+            [data-theme="light"] .lead {
+                color: var(--light-muted) !important;
+            }
 
-        /* Section Badges Light Mode */
-        [data-theme="light"] .section-badge {
-            background: rgba(0, 212, 170, 0.15) !important;
-            border: 1px solid rgba(0, 212, 170, 0.3);
-            color: var(--primary) !important;
-            backdrop-filter: blur(10px);
-        }
+            /* Section Badges Light Mode */
+            [data-theme="light"] .section-badge {
+                background: rgba(0, 212, 170, 0.15) !important;
+                border: 1px solid rgba(0, 212, 170, 0.3);
+                color: var(--primary) !important;
+                backdrop-filter: blur(10px);
+            }
 
-        /* Accordion Light Mode */
-        [data-theme="light"] .accordion-item {
-            background: var(--light-card) !important;
-            border: 1px solid var(--light-border) !important;
-        }
+            /* Accordion Light Mode */
+            [data-theme="light"] .accordion-item {
+                background: var(--light-card) !important;
+                border: 1px solid var(--light-border) !important;
+            }
 
-        [data-theme="light"] .accordion-button {
-            background: var(--light-card) !important;
-            color: var(--light-text) !important;
-        }
+            [data-theme="light"] .accordion-button {
+                background: var(--light-card) !important;
+                color: var(--light-text) !important;
+            }
 
-        [data-theme="light"] .accordion-button:not(.collapsed) {
-            background: rgba(0, 212, 170, 0.1) !important;
-            color: var(--primary) !important;
-        }
+                [data-theme="light"] .accordion-button:not(.collapsed) {
+                    background: rgba(0, 212, 170, 0.1) !important;
+                    color: var(--primary) !important;
+                }
 
-        [data-theme="light"] .accordion-body {
-            color: var(--light-muted);
-        }
+            [data-theme="light"] .accordion-body {
+                color: var(--light-muted);
+            }
 
-        /* Buttons Light Mode */
-        [data-theme="light"] .btn-light {
-            background: rgba(255, 255, 255, 0.9);
-            border: 1px solid var(--light-border);
-            color: var(--light-text);
-            backdrop-filter: blur(10px);
-        }
+            /* Buttons Light Mode */
+            [data-theme="light"] .btn-light {
+                background: rgba(255, 255, 255, 0.9);
+                border: 1px solid var(--light-border);
+                color: var(--light-text);
+                backdrop-filter: blur(10px);
+            }
 
-        [data-theme="light"] .btn-light:hover {
-            background: var(--light-card);
-            color: var(--light-text);
-        }
+                [data-theme="light"] .btn-light:hover {
+                    background: var(--light-card);
+                    color: var(--light-text);
+                }
 
-        [data-theme="light"] .btn-dark {
-            background: rgba(33, 37, 41, 0.9);
-            border: 1px solid rgba(33, 37, 41, 0.2);
-            color: white;
-        }
+            [data-theme="light"] .btn-dark {
+                background: rgba(33, 37, 41, 0.9);
+                border: 1px solid rgba(33, 37, 41, 0.2);
+                color: white;
+            }
 
-        [data-theme="light"] .btn-dark:hover {
-            background: rgba(33, 37, 41, 1);
-            color: white;
-        }
+                [data-theme="light"] .btn-dark:hover {
+                    background: rgba(33, 37, 41, 1);
+                    color: white;
+                }
 
-        [data-theme="light"] .btn-outline-light {
-            border: 2px solid var(--light-border);
-            color: var(--light-text);
-        }
+            [data-theme="light"] .btn-outline-light {
+                border: 2px solid var(--light-border);
+                color: var(--light-text);
+            }
 
-        [data-theme="light"] .btn-outline-light:hover {
-            background: var(--light-text);
-            color: var(--light-bg);
-        }
+                [data-theme="light"] .btn-outline-light:hover {
+                    background: var(--light-text);
+                    color: var(--light-bg);
+                }
 
-        /* Social Links Light Mode */
-        [data-theme="light"] .social-link {
-            background: rgba(33, 37, 41, 0.1);
-            color: var(--light-text);
-        }
+            /* Social Links Light Mode */
+            [data-theme="light"] .social-link {
+                background: rgba(33, 37, 41, 0.1);
+                color: var(--light-text);
+            }
 
-        [data-theme="light"] .social-link:hover {
-            background: var(--primary);
-            color: white;
-            transform: translateY(-2px);
-        }
+                [data-theme="light"] .social-link:hover {
+                    background: var(--primary);
+                    color: white;
+                    transform: translateY(-2px);
+                }
 
-        /* App Features Light Mode */
-        [data-theme="light"] .app-features .d-flex {
-            background: var(--light-card);
-            border: 1px solid var(--light-border);
-        }
+            /* App Features Light Mode */
+            [data-theme="light"] .app-features .d-flex {
+                background: var(--light-card);
+                border: 1px solid var(--light-border);
+            }
 
-        /* Feature Icon Wrapper Light Mode */
-        [data-theme="light"] .feature-icon-wrapper {
-            background: rgba(0, 212, 170, 0.15);
-        }
+            /* Feature Icon Wrapper Light Mode */
+            [data-theme="light"] .feature-icon-wrapper {
+                background: rgba(0, 212, 170, 0.15);
+            }
 
-        /* Popular Pricing Card Light Mode */
-        [data-theme="light"] .popular-pricing-card {
-            background: linear-gradient(135deg, var(--primary), var(--secondary)) !important;
-            border: none !important;
-        }
+            /* Popular Pricing Card Light Mode */
+            [data-theme="light"] .popular-pricing-card {
+                background: linear-gradient(135deg, var(--primary), var(--secondary)) !important;
+                border: none !important;
+            }
 
-        /* Grayscale Logos Light Mode */
-        [data-theme="light"] .grayscale {
-            background: linear-gradient(45deg, #e9ecef, #dee2e6);
-            opacity: 0.8;
-        }
+            /* Grayscale Logos Light Mode */
+            [data-theme="light"] .grayscale {
+                background: linear-gradient(45deg, #e9ecef, #dee2e6);
+                opacity: 0.8;
+            }
 
-        /* Floating Cards in Integration Light Mode */
-        [data-theme="light"] .floating-api-card,
-        [data-theme="light"] .floating-webhook-card {
-            background: var(--light-card);
-            border: 1px solid var(--light-border);
-            color: var(--light-text);
-        }
+            /* Floating Cards in Integration Light Mode */
+            [data-theme="light"] .floating-api-card,
+            [data-theme="light"] .floating-webhook-card {
+                background: var(--light-card);
+                border: 1px solid var(--light-border);
+                color: var(--light-text);
+            }
 
-        /* CTA Section Light Mode */
-        [data-theme="light"] .cta-section {
-            background: linear-gradient(135deg, var(--primary), var(--secondary)) !important;
-        }
+            /* CTA Section Light Mode */
+            [data-theme="light"] .cta-section {
+                background: linear-gradient(135deg, var(--primary), var(--secondary)) !important;
+            }
 
-        /* Badges Light Mode */
-        [data-theme="light"] .badge.bg-primary {
-            background: rgba(0, 212, 170, 0.15) !important;
-            color: var(--primary) !important;
-            border: 1px solid rgba(0, 212, 170, 0.3);
-        }
+            /* Badges Light Mode */
+            [data-theme="light"] .badge.bg-primary {
+                background: rgba(0, 212, 170, 0.15) !important;
+                color: var(--primary) !important;
+                border: 1px solid rgba(0, 212, 170, 0.3);
+            }
 
-        [data-theme="light"] .badge.bg-success {
-            background: rgba(40, 167, 69, 0.15) !important;
-            color: #28a745 !important;
-            border: 1px solid rgba(40, 167, 69, 0.3);
-        }
+            [data-theme="light"] .badge.bg-success {
+                background: rgba(40, 167, 69, 0.15) !important;
+                color: #28a745 !important;
+                border: 1px solid rgba(40, 167, 69, 0.3);
+            }
 
-        [data-theme="light"] .badge.bg-warning {
-            background: rgba(255, 193, 7, 0.15) !important;
-            color: #ffc107 !important;
-            border: 1px solid rgba(255, 193, 7, 0.3);
-        }
+            [data-theme="light"] .badge.bg-warning {
+                background: rgba(255, 193, 7, 0.15) !important;
+                color: #ffc107 !important;
+                border: 1px solid rgba(255, 193, 7, 0.3);
+            }
 
-        [data-theme="light"] .badge.bg-info {
-            background: rgba(23, 162, 184, 0.15) !important;
-            color: #17a2b8 !important;
-            border: 1px solid rgba(23, 162, 184, 0.3);
-        }
+            [data-theme="light"] .badge.bg-info {
+                background: rgba(23, 162, 184, 0.15) !important;
+                color: #17a2b8 !important;
+                border: 1px solid rgba(23, 162, 184, 0.3);
+            }
 
-        /* Integration Partners Badges Light Mode */
-        [data-theme="light"] .integration-partners .badge {
-            background: rgba(0, 212, 170, 0.1) !important;
-            border: 1px solid rgba(0, 212, 170, 0.2);
-        }
+            /* Integration Partners Badges Light Mode */
+            [data-theme="light"] .integration-partners .badge {
+                background: rgba(0, 212, 170, 0.1) !important;
+                border: 1px solid rgba(0, 212, 170, 0.2);
+            }
 
-        /* Hero visual elements light mode */
-        [data-theme="light"] .hero-image::before {
-            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><circle cx="50" cy="50" r="2" fill="%23000" opacity="0.05"/></svg>') repeat;
-        }
+            /* Hero visual elements light mode */
+            [data-theme="light"] .hero-image::before {
+                background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><circle cx="50" cy="50" r="2" fill="%23000" opacity="0.05"/></svg>') repeat;
+            }
 
-        /* Testimonial author light mode */
-        [data-theme="light"] .testimonial-author h6 {
-            color: var(--light-text) !important;
-        }
+            /* Testimonial author light mode */
+            [data-theme="light"] .testimonial-author h6 {
+                color: var(--light-text) !important;
+            }
 
-        [data-theme="light"] .testimonial-author p {
-            color: var(--light-muted) !important;
-        }
+            [data-theme="light"] .testimonial-author p {
+                color: var(--light-muted) !important;
+            }
 
-        /* Platform features light mode */
-        [data-theme="light"] .platform-features h5 {
-            color: var(--light-text) !important;
-        }
+            /* Platform features light mode */
+            [data-theme="light"] .platform-features h5 {
+                color: var(--light-text) !important;
+            }
 
-        [data-theme="light"] .platform-features p {
-            color: var(--light-muted) !important;
-        }
+            [data-theme="light"] .platform-features p {
+                color: var(--light-muted) !important;
+            }
 
-        /* Results in case studies light mode */
-        [data-theme="light"] .results .text-white {
-            color: var(--light-text) !important;
-        }
+            /* Results in case studies light mode */
+            [data-theme="light"] .results .text-white {
+                color: var(--light-text) !important;
+            }
 
-        /* Team section light mode */
-        [data-theme="light"] .team-card h4 {
-            color: var(--light-text) !important;
-        }
+            /* Team section light mode */
+            [data-theme="light"] .team-card h4 {
+                color: var(--light-text) !important;
+            }
 
-        [data-theme="light"] .impact-label {
-            color: var(--light-text) !important;
-        }
+            [data-theme="light"] .impact-label {
+                color: var(--light-text) !important;
+            }
 
-        /* Integration features light mode */
-        [data-theme="light"] .integration-features h5 {
-            color: var(--light-text) !important;
-        }
+            /* Integration features light mode */
+            [data-theme="light"] .integration-features h5 {
+                color: var(--light-text) !important;
+            }
 
-        /* Mobile app features light mode */
-        [data-theme="light"] .app-features .text-white {
-            color: var(--light-text) !important;
-        }
+            /* Mobile app features light mode */
+            [data-theme="light"] .app-features .text-white {
+                color: var(--light-text) !important;
+            }
 
         /* Remove the old minimal light mode adjustments */
         /* All new comprehensive light mode styles above */
@@ -965,6 +964,142 @@
                 transform: translateY(-10px);
             }
         }
+        /* === HERO VIDEO STYLES === */
+        .hero-video-container {
+            position: relative;
+            width: 100%;
+            height: 400px;
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+            margin-bottom: 20px;
+        }
+
+        .hero-video {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 20px;
+        }
+
+        .hero-fallback-image {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 20px;
+        }
+
+        .video-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, rgba(16, 185, 129, 0.1) 0%, rgba(15, 23, 42, 0.4) 50%, rgba(15, 23, 42, 0.8) 100%);
+            border-radius: 20px;
+            pointer-events: none;
+        }
+
+        /* Keep floating cards on top of video */
+        .floating-card {
+            position: absolute;
+            z-index: 10; /* Ensure cards are above video */
+            /* Your existing floating card styles remain */
+        }
+
+        /* Adjust existing floating card positions for video */
+        .card-1 {
+            top: 20px;
+            right: 20px;
+        }
+
+        .card-2 {
+            bottom: 60px;
+            left: 20px;
+        }
+
+        .card-3 {
+            top: 50%;
+            right: 30%;
+            transform: translateY(-50%);
+        }
+
+        /* Video controls */
+        .video-controls-bottom {
+            position: absolute;
+            bottom: 15px;
+            right: 15px;
+            display: flex;
+            align-items: center;
+            z-index: 10;
+        }
+
+            .video-controls-bottom .btn {
+                width: 36px;
+                height: 36px;
+                padding: 0;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                border-radius: 50%;
+                border: 2px solid rgba(255, 255, 255, 0.5);
+                background: rgba(0, 0, 0, 0.3);
+                transition: all 0.3s ease;
+            }
+
+                .video-controls-bottom .btn:hover {
+                    background: rgba(16, 185, 129, 0.3);
+                    border-color: var(--green);
+                    transform: scale(1.1);
+                }
+
+        /* Ensure hero content is still visible */
+        .hero-title {
+            position: relative;
+            z-index: 5;
+        }
+
+        .hero-subtitle {
+            position: relative;
+            z-index: 5;
+        }
+
+        /* Responsive adjustments for video */
+        @media (max-width: 768px) {
+            .hero-video-container {
+                height: 300px;
+                margin-top: 20px;
+            }
+
+            .card-1, .card-2, .card-3 {
+                transform: scale(0.8);
+            }
+
+            .card-1 {
+                top: 10px;
+                right: 10px;
+            }
+
+            .card-2 {
+                bottom: 50px;
+                left: 10px;
+            }
+
+            .card-3 {
+                top: 50%;
+                right: 20%;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .hero-video-container {
+                height: 250px;
+            }
+
+            .floating-card {
+                transform: scale(0.7);
+            }
+        }
     </style>
 
     <!-- Hero Section -->
@@ -1001,19 +1136,17 @@
                 </div>
                 <div class="col-lg-6 text-center">
                     <div class="hero-visual position-relative">
-                        <div class="floating-card card-1">
-                            <i class="fas fa-recycle text-success"></i>
-                            <span>Recycling</span>
+                        <div class="hero-visual position-relative">
+                            <!-- Video Background -->
+                            <div class="hero-video-container">
+                                <video id="heroVideo" class="hero-video" muted autoplay loop playsinline>
+                                    <source src="Videos/demo.mp4" type="video/mp4">
+                                    <!-- Fallback image if video doesn't load -->
+                                    <img src="Images/hero-fallback.jpg" alt="Smart Waste Management" class="hero-fallback-image">
+                                </video>
+                                <div class="video-overlay"></div>
+                            </div>
                         </div>
-                        <div class="floating-card card-2">
-                            <i class="fas fa-chart-bar text-info"></i>
-                            <span>Analytics</span>
-                        </div>
-                        <div class="floating-card card-3">
-                            <i class="fas fa-users text-warning"></i>
-                            <span>Community</span>
-                        </div>
-                        <div class="hero-image img-fluid rounded-3 shadow-lg"></div>
                     </div>
                 </div>
             </div>
@@ -1925,5 +2058,129 @@
                 observer.observe(el);
             });
         });
+
+        // Hero Video Controls
+        function toggleHeroVideo() {
+            const heroVideo = document.getElementById('heroVideo');
+            const muteIcon = document.getElementById('videoMuteIcon');
+
+            if (heroVideo) {
+                if (heroVideo.muted) {
+                    heroVideo.muted = false;
+                    muteIcon.className = 'fas fa-volume-up';
+                    // Show temporary notification
+                    showVideoNotification('Video unmuted');
+                } else {
+                    heroVideo.muted = true;
+                    muteIcon.className = 'fas fa-volume-mute';
+                    showVideoNotification('Video muted');
+                }
+            }
+        }
+
+        // Optional: Show notification when toggling volume
+        function showVideoNotification(message) {
+            // Remove existing notification if any
+            const existingNotification = document.querySelector('.video-notification');
+            if (existingNotification) {
+                existingNotification.remove();
+            }
+
+            // Create notification
+            const notification = document.createElement('div');
+            notification.className = 'video-notification';
+            notification.textContent = message;
+            notification.style.cssText = `
+        position: fixed;
+        top: 80px;
+        right: 20px;
+        background: rgba(16, 185, 129, 0.9);
+        color: white;
+        padding: 10px 20px;
+        border-radius: 10px;
+        font-size: 0.9rem;
+        font-weight: 500;
+        z-index: 9999;
+        animation: slideIn 0.3s ease, fadeOut 0.3s ease 1.7s forwards;
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+    `;
+
+            document.body.appendChild(notification);
+
+            // Remove after animation
+            setTimeout(() => {
+                if (notification.parentNode) {
+                    notification.remove();
+                }
+            }, 2000);
+        }
+
+        // Add notification animation styles
+        const notificationStyle = document.createElement('style');
+        notificationStyle.textContent = `
+    @keyframes slideIn {
+        from {
+            transform: translateX(100%);
+            opacity: 0;
+        }
+        to {
+            transform: translateX(0);
+            opacity: 1;
+        }
+    }
+    
+    @keyframes fadeOut {
+        from {
+            opacity: 1;
+            transform: translateX(0);
+        }
+        to {
+            opacity: 0;
+            transform: translateX(100%);
+        }
+    }
+`;
+        document.head.appendChild(notificationStyle);
+
+        // Ensure video plays properly
+        document.addEventListener('DOMContentLoaded', function () {
+            const heroVideo = document.getElementById('heroVideo');
+
+            if (heroVideo) {
+                // Try to play the video
+                const playPromise = heroVideo.play();
+
+                if (playPromise !== undefined) {
+                    playPromise.catch(error => {
+                        console.log('Auto-play prevented:', error);
+                        // Fallback: Show play button if autoplay is blocked
+                        showVideoFallback();
+                    });
+                }
+
+                // Add loaded event
+                heroVideo.addEventListener('loadeddata', function () {
+                    console.log('Hero video loaded successfully');
+                });
+
+                // Add error handling
+                heroVideo.addEventListener('error', function () {
+                    console.error('Hero video failed to load');
+                    showVideoFallback();
+                });
+            }
+        });
+
+        function showVideoFallback() {
+            const heroVideo = document.getElementById('heroVideo');
+            const fallbackImg = document.querySelector('.hero-fallback-image');
+
+            if (heroVideo && fallbackImg) {
+                // Hide video and show fallback image
+                heroVideo.style.display = 'none';
+                fallbackImg.style.display = 'block';
+            }
+        }
     </script>
 </asp:Content>
