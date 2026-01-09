@@ -1,4 +1,4 @@
-# 🌿 **SoorGreen — Smart Waste Recycling & City Cleanliness System**
+# 🌿 **GARAB — Smart Waste Recycling & City Cleanliness System**
 
 *A Modern AI-Powered Full-Stack Environmental Management Platform for Somaliland*
 
