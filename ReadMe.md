@@ -1,6 +1,13 @@
-# 🌿 **GARAB — Smart Waste Recycling & City Cleanliness System**
+#  **GARAB — Codkaaga waa la garab taagan yahay.**
 
-*A Modern AI-Powered Full-Stack Environmental Management Platform for Somaliland*
+<div align="center">
+  A Modern AI-Powered Full-Stack Environmental Management Platform for Somaliland
+</div>
+<div align="center">
+  <img src="./SoorGreen.Main/icon.png" width="60" style="margin: 0 15px;"/>
+  <img src="./SoorGreen.Main/wadajir.png" width="60" style="margin: 0 15px;"/>
+  <img src="./SoorGreen.Main/uoh.png" width="60" style="margin: 0 15px;"/>
+</div>
 
 ---
 ### 👨‍💻 **Meet The Team**
